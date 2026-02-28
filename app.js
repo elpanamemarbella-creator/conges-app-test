@@ -43,12 +43,12 @@ clearAllBtn.addEventListener("click", () => {
 
 function validatePayload(payload) {
   if (payload.endDate < payload.startDate) {
-    alert("End date must be on or after the start date.");
+    alert("La date de fin doit être postérieure ou égale à la date de début.");
     return false;
   }
 
   if (payload.requestedDays > payload.allowance) {
-    alert("Requested days cannot exceed annual allowance.");
+    alert("Les jours demandés ne peuvent pas dépasser l'allocation annuelle.");
     return false;
   }
 
@@ -72,19 +72,19 @@ function removeRequest(id) {
 
 function statusFromRemaining(remaining) {
   if (remaining > 10) {
-    return ["Healthy", "ok"];
+    return ["Confortable", "ok"];
   }
 
   if (remaining > 5) {
-    return ["Watch", "warn"];
+    return ["À surveiller", "warn"];
   }
 
-  return ["Low", "alert"];
+  return ["Faible", "alert"];
 }
 
 function renderRequests() {
   if (!requests.length) {
-    requestList.innerHTML = '<tr><td colspan="7" class="empty">No vacation requests yet.</td></tr>';
+    requestList.innerHTML = '<tr><td colspan="7" class="empty">Aucune demande de congé pour le moment.</td></tr>';
     return;
   }
 
@@ -95,13 +95,13 @@ function renderRequests() {
 
       return `
         <tr>
-          <td data-label="Employee">${escapeHtml(request.name)}</td>
-          <td data-label="Team">${escapeHtml(request.team)}</td>
+          <td data-label="Nom de l'employé">${escapeHtml(request.name)}</td>
+          <td data-label="Équipe">${escapeHtml(request.team)}</td>
           <td data-label="Dates">${formatDate(request.startDate)} → ${formatDate(request.endDate)}</td>
-          <td data-label="Requested">${request.requestedDays} days</td>
-          <td data-label="Remaining">${remaining} days</td>
-          <td data-label="Status"><span class="badge ${statusClass}">${statusLabel}</span></td>
-          <td data-label="Action"><button class="delete-btn" data-remove-id="${request.id}">Delete</button></td>
+          <td data-label="Demandé">${request.requestedDays} jours</td>
+          <td data-label="Jours restants">${remaining} jours</td>
+          <td data-label="Statut"><span class="badge ${statusClass}">${statusLabel}</span></td>
+          <td data-label="Action"><button class="delete-btn" data-remove-id="${request.id}">Supprimer</button></td>
         </tr>
       `;
     })
@@ -114,7 +114,7 @@ function renderRequests() {
 
 function formatDate(rawDate) {
   const date = new Date(`${rawDate}T00:00:00`);
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("fr-FR", {
     month: "short",
     day: "numeric",
     year: "numeric",
