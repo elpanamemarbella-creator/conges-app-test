@@ -1,69 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vacation Tracker</title>
+  <title>Gestion des congés employés</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="container">
     <header>
-      <h1>Employee Vacation Tracker</h1>
-      <p>Manage employee vacation balances and upcoming time off.</p>
+      <h1>Gestion des congés employés</h1>
+      <p>Gérez les soldes de congés des employés et les absences à venir.</p>
     </header>
 
     <section class="card">
-      <h2>Add Vacation Request</h2>
+      <h2>Ajouter un congé</h2>
       <form id="vacation-form" class="grid-form">
         <label>
-          Employee Name
-          <input type="text" id="employee-name" required placeholder="e.g. Alex Martin" />
+          Nom de l'employé
+          <input type="text" id="employee-name" required placeholder="ex. Alex Martin" />
         </label>
         <label>
-          Team
-          <input type="text" id="employee-team" required placeholder="e.g. Engineering" />
+          Équipe
+          <input type="text" id="employee-team" required placeholder="ex. Ingénierie" />
         </label>
         <label>
-          Annual Allowance (days)
+          Allocation annuelle (jours)
           <input type="number" id="annual-allowance" min="1" required value="25" />
         </label>
         <label>
-          Days Requested
+          Jours demandés
           <input type="number" id="days-requested" min="1" required />
         </label>
         <label>
-          Start Date
+          Date début
           <input type="date" id="start-date" required />
         </label>
         <label>
-          End Date
+          Date fin
           <input type="date" id="end-date" required />
         </label>
-        <button type="submit">Save Request</button>
+        <button type="submit">Enregistrer la demande</button>
       </form>
     </section>
 
     <section class="card">
       <div class="table-header">
-        <h2>Vacation Requests</h2>
-        <button id="clear-all" class="ghost">Clear All</button>
+        <h2>Demandes de congés</h2>
+        <button id="clear-all" class="ghost">Tout supprimer</button>
       </div>
       <table>
         <thead>
           <tr>
-            <th>Employee</th>
-            <th>Team</th>
+            <th>Employé</th>
+            <th>Équipe</th>
             <th>Dates</th>
-            <th>Requested</th>
-            <th>Remaining</th>
-            <th>Status</th>
+            <th>Demandé</th>
+            <th>Jours restants</th>
+            <th>Statut</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody id="request-list">
           <tr>
-            <td colspan="7" class="empty">No vacation requests yet.</td>
+            <td colspan="7" class="empty">Aucune demande de congé pour le moment.</td>
           </tr>
         </tbody>
       </table>
