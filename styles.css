@@ -1,14 +1,14 @@
 :root {
-  --bg: #f4f7fb;
-  --card: #ffffff;
-  --text: #17212f;
-  --muted: #5c6978;
-  --primary: #2668f6;
-  --primary-dark: #1b50c5;
-  --ok: #127a45;
-  --warn: #9b6a09;
+  --fond: #f4f7fb;
+  --carte: #ffffff;
+  --texte: #17212f;
+  --discret: #5c6978;
+  --primaire: #2668f6;
+  --primaire-fonce: #1b50c5;
+  --bon: #127a45;
+  --vigilance: #9b6a09;
   --danger: #c53131;
-  --border: #d8e0eb;
+  --bordure: #d8e0eb;
 }
 
 * {
@@ -18,11 +18,11 @@
 body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--fond);
+  color: var(--texte);
 }
 
-.container {
+.conteneur {
   width: min(1050px, 92vw);
   margin: 2rem auto;
   display: grid;
@@ -35,18 +35,18 @@ header h1 {
 
 header p {
   margin: 0;
-  color: var(--muted);
+  color: var(--discret);
 }
 
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
+.carte {
+  background: var(--carte);
+  border: 1px solid var(--bordure);
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(20, 33, 52, 0.05);
 }
 
-.grid-form {
+.grille-formulaire {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 0.9rem;
@@ -55,12 +55,12 @@ header p {
 label {
   display: grid;
   gap: 0.25rem;
-  color: var(--muted);
+  color: var(--discret);
   font-size: 0.9rem;
 }
 
 input {
-  border: 1px solid var(--border);
+  border: 1px solid var(--bordure);
   border-radius: 8px;
   padding: 0.55rem 0.65rem;
   font-size: 0.95rem;
@@ -68,14 +68,14 @@ input {
 
 input:focus {
   outline: 2px solid #a8c0ff;
-  border-color: var(--primary);
+  border-color: var(--primaire);
 }
 
 button {
   align-self: end;
   border: 0;
   border-radius: 8px;
-  background: var(--primary);
+  background: var(--primaire);
   color: white;
   padding: 0.65rem 0.9rem;
   font-weight: 600;
@@ -83,20 +83,20 @@ button {
 }
 
 button:hover {
-  background: var(--primary-dark);
+  background: var(--primaire-fonce);
 }
 
-button.ghost {
+button.secondaire {
   background: transparent;
-  color: var(--muted);
-  border: 1px solid var(--border);
+  color: var(--discret);
+  border: 1px solid var(--bordure);
 }
 
-button.ghost:hover {
+button.secondaire:hover {
   background: #eef2f8;
 }
 
-.table-header {
+.entete-tableau {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -112,22 +112,22 @@ th,
 td {
   text-align: left;
   padding: 0.65rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--bordure);
   font-size: 0.92rem;
 }
 
 th {
-  color: var(--muted);
+  color: var(--discret);
   font-weight: 600;
 }
 
-.empty {
+.vide {
   text-align: center;
-  color: var(--muted);
+  color: var(--discret);
   padding: 1rem;
 }
 
-.badge {
+.pastille {
   display: inline-flex;
   align-items: center;
   padding: 0.18rem 0.5rem;
@@ -136,22 +136,22 @@ th {
   font-weight: 700;
 }
 
-.badge.ok {
-  color: var(--ok);
+.pastille.bon {
+  color: var(--bon);
   background: #dff5ea;
 }
 
-.badge.warn {
-  color: var(--warn);
+.pastille.vigilance {
+  color: var(--vigilance);
   background: #fff3d7;
 }
 
-.badge.alert {
+.pastille.critique {
   color: var(--danger);
   background: #ffe2e2;
 }
 
-.delete-btn {
+.bouton-supprimer {
   background: transparent;
   color: var(--danger);
   padding: 0;
@@ -172,7 +172,7 @@ th {
   }
 
   tr {
-    border: 1px solid var(--border);
+    border: 1px solid var(--bordure);
     border-radius: 10px;
     margin: 0.5rem 0;
     padding: 0.3rem 0.5rem;
@@ -187,7 +187,7 @@ th {
 
   td::before {
     content: attr(data-label);
-    color: var(--muted);
+    color: var(--discret);
     font-weight: 600;
   }
 }
