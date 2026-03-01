@@ -37,7 +37,7 @@ let employes = chargerEmployes();
 afficherEmployes();
 afficherBlocDemandeConge();
 
-formulaireEmploye.addEventListener("submit", (event) => {
+formulaireEmploye.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const nouvelEmploye = {
