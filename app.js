@@ -43,10 +43,14 @@ async function initApp() {
 
 initApp();
 
-formulaireDemandeConge.addEventListener("submit", async (e) => {
-  e.preventDefault();
+window.addEventListener("load", () => {
 
-  console.log("Demande de congé envoyée");
+  const formulaireDemandeConge = document.getElementById("formulaire-demande-conge");
+
+  formulaireDemandeConge.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    console.log("Demande de congé envoyée");
+  });
 
 });
 
