@@ -110,29 +110,6 @@ formulaireDemandeConge.addEventListener("submit", (event) => {
   employeDemandeSelect.value = idEmploye;
 });
 
-function chargerEmployes() {
-  const donneesV4 = localStorage.getItem(CLE_STOCKAGE_V4);
-  if (donneesV4) {
-    return normaliserEmployes(donneesV4);
-  }
-
-  const donneesV3 = localStorage.getItem(CLE_STOCKAGE_V3);
-  if (donneesV3) {
-    const employesV3 = normaliserEmployes(donneesV3);
-    localStorage.setItem(CLE_STOCKAGE_V4, JSON.stringify(employesV3));
-    return employesV3;
-  }
-
-  const donneesV2 = localStorage.getItem(CLE_STOCKAGE_V2);
-  if (donneesV2) {
-    const employesV2 = normaliserEmployes(donneesV2);
-    localStorage.setItem(CLE_STOCKAGE_V4, JSON.stringify(employesV2));
-    return employesV2;
-  }
-
-  return [];
-}
-
 function normaliserEmployes(donnees) {
   try {
     const employesCharges = JSON.parse(donnees);
