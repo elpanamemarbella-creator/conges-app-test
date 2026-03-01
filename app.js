@@ -59,8 +59,8 @@ window.addEventListener("load", () => {
   e.preventDefault();
 
   const employeId = document.getElementById("employe-demande").value;
-  const dateDebut = document.getElementById("date-debut").value;
-  const dateFin = document.getElementById("date-fin").value;
+const dateDebut = document.getElementById("demande-date-debut").value;
+const dateFin = document.getElementById("demande-date-fin").value;
 
   if (!employeId || !dateDebut || !dateFin) {
     alert("Remplis tous les champs");
