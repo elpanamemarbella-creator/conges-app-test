@@ -23,7 +23,15 @@
 
         <label>
           Equipe
-          <input type="text" id="equipe-employe" required placeholder="ex. Marketing" />
+          <select id="equipe-employe" required>
+            <option value="">Sélectionner une équipe</option>
+            <option value="Bar matin">Bar matin</option>
+            <option value="Salle matin">Salle matin</option>
+            <option value="Bar soir">Bar soir</option>
+            <option value="Salle soir">Salle soir</option>
+            <option value="Cuisine">Cuisine</option>
+            <option value="Extras">Extras</option>
+          </select>
         </label>
 
         <label>
@@ -65,7 +73,7 @@
     </section>
 
     <section class="carte">
-      <h2>Demander un congé</h2>
+      <h2>Nouvelle demande de congé</h2>
       <div id="bloc-demande-vide" class="message-vide" hidden>Aucun employé disponible</div>
       <form id="formulaire-demande-conge" class="grille-formulaire" hidden>
         <label>
