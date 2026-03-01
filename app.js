@@ -48,9 +48,29 @@ window.addEventListener("load", () => {
   const formulaireDemandeConge = document.getElementById("formulaire-demande-conge");
 
   formulaireDemandeConge.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    console.log("Demande de congé envoyée");
+  e.preventDefault();
+
+  const employeId = document.getElementById("employe-demande").value;
+  const dateDebut = document.getElementById("date-debut").value;
+  const dateFin = document.getElementById("date-fin").value;
+
+  if (!employeId || !dateDebut || !dateFin) {
+    alert("Remplis tous les champs");
+    return;
+  }
+
+  await addDoc(collection(db, "conges"), {
+    employeId: employeId,
+    dateDebut: dateDebut,
+    dateFin: dateFin,
+    timestamp: Date.now()
   });
+
+  console.log("Congé enregistré");
+
+  formulaireDemandeConge.reset();
+
+});
 
 });
 
@@ -101,7 +121,7 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
 
   const idEmploye = employeDemandeSelect.value;
   const dateDebut = document.getElementById("demande-date-debut").value;
-  const dateFin = document.getElementById("demande-date-fin").value;
+const dateFin = document.getElementById("demande-date-fin").value;
 
   if (!idEmploye) {
     alert("Veuillez choisir un employé.");
