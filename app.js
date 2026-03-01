@@ -1,6 +1,14 @@
 // version 2
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, addDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+import { 
+getFirestore, 
+collection, 
+doc, 
+setDoc, 
+addDoc, 
+deleteDoc,
+getDocs
+} from "https://www.gstatic.com/firebasejs/12.x.x/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyAEtBkoWO_vfn_MgINrumqCqhBmwKU-Sl4",
   authDomain: "conges-paname.firebaseapp.com",
