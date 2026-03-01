@@ -59,7 +59,7 @@ formulaireEmploye.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const nouvelEmploye = {
-    id: crypto.randomUUID(),
+    id: "",
     nom: document.getElementById("nom-employe").value.trim(),
     equipe: document.getElementById("equipe-employe").value,
     dateEmbauche: document.getElementById("date-embauche").value,
@@ -71,12 +71,15 @@ formulaireEmploye.addEventListener("submit", async (event) => {
     return;
   }
 
-  await addDoc(collection(db, "employes"), nouvelEmploye);
+  const ref = await addDoc(collection(db, "employes"), nouvelEmploye);
+
+nouvelEmploye.id = ref.id;
 
 employes = await chargerEmployes();
 
 afficherEmployes();
 afficherBlocDemandeConge();
+
   formulaireEmploye.reset();
   document.getElementById("conges-pris").value = "0";
 });
