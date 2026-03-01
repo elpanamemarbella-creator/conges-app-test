@@ -54,7 +54,6 @@ formulaireEmploye.addEventListener("submit", async (event) => {
   }
 
   await addDoc(collection(db, "employes"), nouvelEmploye);
-  sauvegarderEmployes();
   afficherEmployes();
   afficherBlocDemandeConge();
   formulaireEmploye.reset();
