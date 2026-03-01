@@ -60,11 +60,13 @@ label {
 }
 
 input,
+select,
 button {
   font: inherit;
 }
 
-input {
+input,
+select {
   border: 1px solid var(--bordure);
   border-radius: 8px;
   padding: 0.55rem 0.65rem;
@@ -202,6 +204,11 @@ th {
 
 .historique-vide {
   color: var(--discret);
+}
+
+.message-vide {
+  color: var(--discret);
+  font-weight: 600;
 }
 
 @media (max-width: 940px) {

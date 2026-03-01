@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestion des congés employés - V3</title>
+  <title>Gestion des congés employés - V4</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="conteneur">
     <header>
       <h1>Gestion des congés employés</h1>
-      <p>Version 3 - Demandes de congés par employé avec historique.</p>
+      <p>Version 4 - Demandes de congés par dates avec calcul automatique.</p>
     </header>
 
     <section class="carte">
@@ -62,6 +62,29 @@
           </tr>
         </tbody>
       </table>
+    </section>
+
+    <section class="carte">
+      <h2>Demander un congé</h2>
+      <div id="bloc-demande-vide" class="message-vide" hidden>Aucun employé disponible</div>
+      <form id="formulaire-demande-conge" class="grille-formulaire" hidden>
+        <label>
+          Employé
+          <select id="employe-demande" required></select>
+        </label>
+
+        <label>
+          Date de début
+          <input type="date" id="demande-date-debut" required />
+        </label>
+
+        <label>
+          Date de fin
+          <input type="date" id="demande-date-fin" required />
+        </label>
+
+        <button type="submit">Ajouter la demande</button>
+      </form>
     </section>
   </main>
 
