@@ -202,13 +202,21 @@ function determinerStatut(congesRestants) {
   return ["Faible", "critique"];
 }
 
-function supprimerEmploye(id) {
-  employes = employes.filter((employe) => employe.id !== id);
-  sauvegarderEmployes();
+async function supprimerEmploye(id) {
+
+  const querySnapshot = await getDocs(collection(db, "employes"));
+
+  querySnapshot.forEach(async (docu) => {
+    if (docu.data().id === id) {
+      await deleteDoc(doc(db, "employes", docu.id));
+    }
+  });
+
+  employes = await chargerEmployes();
+
   afficherEmployes();
   afficherBlocDemandeConge();
 }
-
 function calculerJoursOuvresInclus(dateDebut, dateFin) {
   const debut = new Date(`${dateDebut}T00:00:00`);
   const fin = new Date(`${dateFin}T00:00:00`);
