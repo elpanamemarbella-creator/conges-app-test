@@ -2,6 +2,17 @@ const CLE_STOCKAGE_V4 = "conges-employes-v4";
 const CLE_STOCKAGE_V3 = "conges-employes-v3";
 const CLE_STOCKAGE_V2 = "conges-employes-v2";
 
+const ORDRE_EQUIPES = ["Bar matin", "Salle matin", "Bar soir", "Salle soir", "Cuisine", "Extras"];
+
+const CLASSES_EQUIPE = {
+  "Bar matin": "bar-matin",
+  "Salle matin": "salle-matin",
+  "Bar soir": "bar-soir",
+  "Salle soir": "salle-soir",
+  Cuisine: "cuisine",
+  Extras: "extras",
+};
+
 const formulaireEmploye = document.getElementById("formulaire-employe");
 const formulaireDemandeConge = document.getElementById("formulaire-demande-conge");
 const listeEmployes = document.getElementById("liste-employes");
@@ -18,7 +29,7 @@ formulaireEmploye.addEventListener("submit", (event) => {
   const nouvelEmploye = {
     id: crypto.randomUUID(),
     nom: document.getElementById("nom-employe").value.trim(),
-    equipe: document.getElementById("equipe-employe").value.trim(),
+    equipe: document.getElementById("equipe-employe").value,
     dateEmbauche: document.getElementById("date-embauche").value,
     congesPris: Number(document.getElementById("conges-pris").value),
     historiqueConges: [],
@@ -118,6 +129,7 @@ function normaliserEmployes(donnees) {
 
     return employesCharges.map((employe) => ({
       ...employe,
+      equipe: ORDRE_EQUIPES.includes(employe.equipe) ? employe.equipe : "Extras",
       historiqueConges: Array.isArray(employe.historiqueConges) ? employe.historiqueConges : [],
       congesPris: Number(employe.congesPris) || 0,
     }));
@@ -133,6 +145,11 @@ function sauvegarderEmployes() {
 function validerEmploye(employe) {
   if (!employe.nom || !employe.equipe || !employe.dateEmbauche) {
     alert("Veuillez remplir tous les champs.");
+    return false;
+  }
+
+  if (!ORDRE_EQUIPES.includes(employe.equipe)) {
+    alert("Veuillez sélectionner une équipe valide.");
     return false;
   }
 
@@ -218,23 +235,50 @@ function calculerJoursOuvresInclus(dateDebut, dateFin) {
   return compteur;
 }
 
+function trierEmployesParEquipe() {
+  return [...employes].sort((a, b) => {
+    const indexA = ORDRE_EQUIPES.indexOf(a.equipe);
+    const indexB = ORDRE_EQUIPES.indexOf(b.equipe);
+
+    if (indexA !== indexB) {
+      return indexA - indexB;
+    }
+
+    return a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" });
+  });
+}
+
 function afficherEmployes() {
   if (!employes.length) {
     listeEmployes.innerHTML = '<tr><td colspan="9" class="vide">Aucun employé enregistré</td></tr>';
     return;
   }
 
-  listeEmployes.innerHTML = employes
+  const employesTries = trierEmployesParEquipe();
+  let equipeEnCours = "";
+
+  listeEmployes.innerHTML = employesTries
     .map((employe) => {
       const congesAcquis = calculerCongesAcquis(employe.dateEmbauche);
       const congesPris = arrondir1Decimale(Number(employe.congesPris) || 0);
       const congesRestants = arrondir1Decimale(congesAcquis - congesPris);
       const [libelleStatut, classeStatut] = determinerStatut(congesRestants);
+      const classeEquipe = CLASSES_EQUIPE[employe.equipe] || "extras";
+      const ajouterTitre = equipeEnCours !== employe.equipe;
+
+      if (ajouterTitre) {
+        equipeEnCours = employe.equipe;
+      }
 
       return `
-        <tr>
+        ${
+          ajouterTitre
+            ? `<tr class="ligne-groupe"><td colspan="9">=== ${echapperHtml(employe.equipe.toUpperCase())} ===</td></tr>`
+            : ""
+        }
+        <tr class="ligne-employe equipe-${classeEquipe}">
           <td data-label="Employé">${echapperHtml(employe.nom)}</td>
-          <td data-label="Equipe">${echapperHtml(employe.equipe)}</td>
+          <td data-label="Equipe"><span class="badge-equipe equipe-${classeEquipe}">${echapperHtml(employe.equipe)}</span></td>
           <td data-label="Date embauche">${formaterDateFr(employe.dateEmbauche)}</td>
           <td data-label="Congés acquis">${congesAcquis.toFixed(1)}</td>
           <td data-label="Congés pris">${congesPris.toFixed(1)}</td>
@@ -265,7 +309,7 @@ function afficherBlocDemandeConge() {
   blocDemandeVide.hidden = true;
   formulaireDemandeConge.hidden = false;
 
-  const options = employes
+  const options = trierEmployesParEquipe()
     .map(
       (employe) =>
         `<option value="${employe.id}">${echapperHtml(employe.nom)} (${echapperHtml(employe.equipe)})</option>`,

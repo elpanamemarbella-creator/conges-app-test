@@ -73,7 +73,8 @@ select {
   font-size: 0.95rem;
 }
 
-input:focus {
+input:focus,
+select:focus {
   outline: 2px solid #a8c0ff;
   border-color: var(--primaire);
 }
@@ -119,6 +120,68 @@ th {
   padding: 1rem;
 }
 
+.ligne-groupe td {
+  font-weight: 700;
+  color: #344353;
+  background: #f0f4fb;
+  letter-spacing: 0.02em;
+}
+
+.ligne-employe.equipe-bar-matin {
+  background: #eef6ff;
+}
+
+.ligne-employe.equipe-salle-matin {
+  background: #f0fbf3;
+}
+
+.ligne-employe.equipe-bar-soir {
+  background: #f6f1ff;
+}
+
+.ligne-employe.equipe-salle-soir {
+  background: #fff5ea;
+}
+
+.ligne-employe.equipe-cuisine {
+  background: #f2f2f2;
+}
+
+.ligne-employe.equipe-extras {
+  background: #fffdeb;
+}
+
+.badge-equipe {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.badge-equipe.equipe-bar-matin {
+  background: #cfe6ff;
+}
+
+.badge-equipe.equipe-salle-matin {
+  background: #d6f6de;
+}
+
+.badge-equipe.equipe-bar-soir {
+  background: #e4d7ff;
+}
+
+.badge-equipe.equipe-salle-soir {
+  background: #ffe3be;
+}
+
+.badge-equipe.equipe-cuisine {
+  background: #e1e1e1;
+}
+
+.badge-equipe.equipe-extras {
+  background: #fff3ad;
+}
+
 .pastille {
   display: inline-flex;
   align-items: center;
@@ -146,16 +209,7 @@ th {
 .cellule-actions {
   display: grid;
   gap: 0.5rem;
-  min-width: 230px;
-}
-
-.bouton-action-secondaire {
-  background: #e9f0ff;
-  color: #1849b2;
-}
-
-.bouton-action-secondaire:hover {
-  background: #dbe7ff;
+  min-width: 120px;
 }
 
 .bouton-supprimer {
@@ -168,29 +222,6 @@ th {
 .bouton-supprimer:hover {
   background: transparent;
   color: #a51f1f;
-}
-
-.boite-conge {
-  border: 1px solid var(--bordure);
-  border-radius: 10px;
-  padding: 0.6rem;
-  display: grid;
-  gap: 0.45rem;
-  background: #fafcff;
-}
-
-.boite-conge label {
-  font-size: 0.8rem;
-}
-
-.boite-conge input {
-  padding: 0.4rem 0.5rem;
-  font-size: 0.85rem;
-}
-
-.bouton-enregistrer-conge {
-  padding: 0.45rem 0.6rem;
-  font-size: 0.85rem;
 }
 
 .ligne-historique {
@@ -232,6 +263,12 @@ th {
     padding: 0.35rem 0.55rem;
   }
 
+  .ligne-groupe {
+    border: none;
+    margin: 0.4rem 0;
+    padding: 0;
+  }
+
   td {
     border: none;
     display: flex;
@@ -245,6 +282,14 @@ th {
     color: var(--discret);
     font-weight: 600;
     min-width: 140px;
+  }
+
+  .ligne-groupe td {
+    display: block;
+  }
+
+  .ligne-groupe td::before {
+    content: none;
   }
 
   .cellule-actions {
