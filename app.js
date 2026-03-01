@@ -72,8 +72,11 @@ formulaireEmploye.addEventListener("submit", async (event) => {
   }
 
   await addDoc(collection(db, "employes"), nouvelEmploye);
-  afficherEmployes();
-  afficherBlocDemandeConge();
+
+employes = await chargerEmployes();
+
+afficherEmployes();
+afficherBlocDemandeConge();
   formulaireEmploye.reset();
   document.getElementById("conges-pris").value = "0";
 });
