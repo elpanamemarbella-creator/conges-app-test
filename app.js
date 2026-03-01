@@ -101,20 +101,6 @@ afficherEmployes();
 formulaireDemandeConge.reset();
 
 });
-  employes = employes.map((employe) => {
-    if (employe.id !== idEmploye) {
-      return employe;
-    }
-
-    return {
-
-  sauvegarderEmployes();
-  afficherEmployes();
-  afficherBlocDemandeConge();
-  formulaireDemandeConge.reset();
-  employeDemandeSelect.value = idEmploye;
-});
-
 function normaliserEmployes(donnees) {
   try {
     const employesCharges = JSON.parse(donnees);
