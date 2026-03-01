@@ -33,9 +33,15 @@ const listeEmployes = document.getElementById("liste-employes");
 const employeDemandeSelect = document.getElementById("employe-demande");
 const blocDemandeVide = document.getElementById("bloc-demande-vide");
 
-let employes = chargerEmployes();
-afficherEmployes();
-afficherBlocDemandeConge();
+let employes = [];
+
+async function initApp() {
+  employes = await chargerEmployes();
+  afficherEmployes();
+  afficherBlocDemandeConge();
+}
+
+initApp();
 
 formulaireEmploye.addEventListener("submit", async (event) => {
   event.preventDefault();
