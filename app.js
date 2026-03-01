@@ -8,7 +8,7 @@ setDoc,
 addDoc, 
 deleteDoc,
 getDocs
-} from "https://www.gstatic.com/firebasejs/12.x.x/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyAEtBkoWO_vfn_MgINrumqCqhBmwKU-Sl4",
   authDomain: "conges-paname.firebaseapp.com",
