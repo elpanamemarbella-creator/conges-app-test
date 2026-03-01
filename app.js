@@ -53,7 +53,7 @@ formulaireEmploye.addEventListener("submit", (event) => {
     return;
   }
 
-  employes.push(nouvelEmploye);
+  await addDoc(collection(db, "employes"), nouvelEmploye);
   sauvegarderEmployes();
   afficherEmployes();
   afficherBlocDemandeConge();
