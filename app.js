@@ -1,30 +1,32 @@
 // version 2
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { 
-getFirestore, 
-collection, 
-doc, 
-setDoc, 
-addDoc, 
-deleteDoc,
-getDocs
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  addDoc,
+  deleteDoc,
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyAEtBkoWO_vfn_MgINrumqCqhBmwKU-Sl4",
   authDomain: "conges-paname.firebaseapp.com",
   projectId: "conges-paname",
   storageBucket: "conges-paname.firebasestorage.app",
   messagingSenderId: "941389636961",
-  appId: "1:941389636961:web:89088bc495b0521064d120"
+  appId: "1:941389636961:web:89088bc495b0521064d120",
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
 const CLE_STOCKAGE_V4 = "conges-employes-v4";
 const CLE_STOCKAGE_V3 = "conges-employes-v3";
 const CLE_STOCKAGE_V2 = "conges-employes-v2";
 
-const ORDRE_EQUIPES = ["Bar matin", "Salle matin", "Bar soir", "Salle soir", "Cuisine", "Extras"];
+const ORDRE_EQUIPES = ["Bar matin", "Salle matin", "Bar soir", "Salle soir", "Cuisine", "Extra"];
 
 const CLASSES_EQUIPE = {
   "Bar matin": "bar-matin",
@@ -32,7 +34,7 @@ const CLASSES_EQUIPE = {
   "Bar soir": "bar-soir",
   "Salle soir": "salle-soir",
   Cuisine: "cuisine",
-  Extras: "extras",
+  Extra: "extras",
 };
 
 const formulaireEmploye = document.getElementById("formulaire-employe");
@@ -43,44 +45,110 @@ const blocDemandeVide = document.getElementById("bloc-demande-vide");
 
 let employes = [];
 
-async function initApp() {
-  employes = await chargerEmployes();
+function normaliserEquipe(equipe) {
+  if (equipe === "Extras") {
+    return "Extra";
+  }
+  return ORDRE_EQUIPES.includes(equipe) ? equipe : "Extra";
+}
+
+function normaliserConge(conge) {
+  const idEmploye = conge.idEmploye || conge.employeId || "";
+  const dateDebut = conge.dateDebut || "";
+  const dateFin = conge.dateFin || "";
+  const jours = Number(conge.jours) || calculerJoursOuvresInclus(dateDebut, dateFin);
+
+  return {
+    idEmploye,
+    dateDebut,
+    dateFin,
+    jours,
+  };
+}
+
+async function chargerConges() {
+  const querySnapshot = await getDocs(collection(db, "conges"));
+  const liste = [];
+
+  querySnapshot.forEach((entry) => {
+    const conge = normaliserConge(entry.data());
+    if (!conge.idEmploye || !conge.dateDebut || !conge.dateFin || conge.jours <= 0) {
+      return;
+    }
+    liste.push(conge);
+  });
+
+  return liste;
+}
+
+function construireCongesParEmploye(conges) {
+  return conges.reduce((acc, conge) => {
+    if (!acc[conge.idEmploye]) {
+      acc[conge.idEmploye] = [];
+    }
+
+    acc[conge.idEmploye].push(conge);
+    return acc;
+  }, {});
+}
+
+function fusionnerEmployesEtConges(employesBruts, conges) {
+  const congesParEmploye = construireCongesParEmploye(conges);
+
+  return employesBruts.map((employe) => {
+    const equipe = normaliserEquipe(employe.equipe);
+    const congesEmploye = congesParEmploye[employe.id] || [];
+    const historiqueConges = congesEmploye
+      .map((conge) => ({
+        dateDebut: conge.dateDebut,
+        dateFin: conge.dateFin,
+        jours: conge.jours,
+      }))
+      .sort((a, b) => a.dateDebut.localeCompare(b.dateDebut));
+
+    const congesDepuisDemandes = historiqueConges.reduce((total, conge) => total + conge.jours, 0);
+    const congesInitial = Number(employe.congesPris) || 0;
+
+    return {
+      ...employe,
+      equipe,
+      historiqueConges,
+      congesPris: arrondir1Decimale(congesInitial + congesDepuisDemandes),
+    };
+  });
+}
+
+async function chargerEmployes() {
+  const querySnapshot = await getDocs(collection(db, "employes"));
+  const liste = [];
+
+  querySnapshot.forEach((entry) => {
+    liste.push({
+      ...entry.data(),
+      id: entry.id,
+    });
+  });
+
+  return liste;
+}
+
+async function rafraichirDonnees() {
+  const [employesBruts, conges] = await Promise.all([chargerEmployes(), chargerConges()]);
+  employes = fusionnerEmployesEtConges(employesBruts, conges);
   afficherEmployes();
   afficherBlocDemandeConge();
 }
 
-initApp();
-
-window.addEventListener("load", () => {
-
-  const formulaireDemandeConge = document.getElementById("formulaire-demande-conge");
-
-  formulaireDemandeConge.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const employeId = document.getElementById("employe-demande").value;
-const dateDebut = document.getElementById("demande-date-debut").value;
-const dateFin = document.getElementById("demande-date-fin").value;
-
-  if (!employeId || !dateDebut || !dateFin) {
-    alert("Remplis tous les champs");
-    return;
+async function initApp() {
+  try {
+    await rafraichirDonnees();
+  } catch (erreur) {
+    console.error("Erreur Firebase / Firestore au chargement :", erreur);
+    alert("Impossible de charger les données. Vérifie la connexion Firebase.");
   }
+}
 
-  await addDoc(collection(db, "conges"), {
-    employeId: employeId,
-    dateDebut: dateDebut,
-    dateFin: dateFin,
-    timestamp: Date.now()
-  });
-
-  console.log("Congé enregistré");
-
-  formulaireDemandeConge.reset();
-
-});
-
-});
+initApp();
 
 listeEmployes.addEventListener("click", async (e) => {
   const btn = e.target.closest("[data-supprimer-id]");
@@ -88,11 +156,13 @@ listeEmployes.addEventListener("click", async (e) => {
 
   const id = btn.dataset.supprimerId;
 
-  await supprimerEmploye(id);
-
-  employes = await chargerEmployes();
-  afficherEmployes();
-  afficherBlocDemandeConge();
+  try {
+    await supprimerEmploye(id);
+    await rafraichirDonnees();
+  } catch (erreur) {
+    console.error("Erreur suppression employé :", erreur);
+    alert("Suppression impossible pour le moment.");
+  }
 });
 
 formulaireEmploye.addEventListener("submit", async (event) => {
@@ -101,7 +171,7 @@ formulaireEmploye.addEventListener("submit", async (event) => {
   const nouvelEmploye = {
     id: "",
     nom: document.getElementById("nom-employe").value.trim(),
-    equipe: document.getElementById("equipe-employe").value,
+    equipe: normaliserEquipe(document.getElementById("equipe-employe").value),
     dateEmbauche: document.getElementById("date-embauche").value,
     congesPris: Number(document.getElementById("conges-pris").value),
     historiqueConges: [],
@@ -111,17 +181,18 @@ formulaireEmploye.addEventListener("submit", async (event) => {
     return;
   }
 
-  const ref = await addDoc(collection(db, "employes"), nouvelEmploye);
+  try {
+    const ref = await addDoc(collection(db, "employes"), nouvelEmploye);
+    nouvelEmploye.id = ref.id;
 
-nouvelEmploye.id = ref.id;
+    formulaireEmploye.reset();
+    document.getElementById("conges-pris").value = "0";
 
-employes = await chargerEmployes();
-
-afficherEmployes();
-afficherBlocDemandeConge();
-
-  formulaireEmploye.reset();
-  document.getElementById("conges-pris").value = "0";
+    await rafraichirDonnees();
+  } catch (erreur) {
+    console.error("Erreur ajout employé :", erreur);
+    alert("Impossible d'ajouter l'employé.");
+  }
 });
 
 formulaireDemandeConge.addEventListener("submit", async (event) => {
@@ -129,7 +200,7 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
 
   const idEmploye = employeDemandeSelect.value;
   const dateDebut = document.getElementById("demande-date-debut").value;
-const dateFin = document.getElementById("demande-date-fin").value;
+  const dateFin = document.getElementById("demande-date-fin").value;
 
   if (!idEmploye) {
     alert("Veuillez choisir un employé.");
@@ -148,18 +219,37 @@ const dateFin = document.getElementById("demande-date-fin").value;
     return;
   }
 
+  const historiqueConge = { dateDebut, dateFin, jours };
 
-await addDoc(collection(db, "conges"), {
-idEmploye,
-dateDebut,
-dateFin,
-jours
+  try {
+    await addDoc(collection(db, "conges"), {
+      idEmploye,
+      dateDebut,
+      dateFin,
+      jours,
+      timestamp: Date.now(),
+    });
+
+    const employe = employes.find((entry) => entry.id === idEmploye);
+    if (employe) {
+      const historiqueMaj = [...(employe.historiqueConges || []), historiqueConge];
+      await setDoc(
+        doc(db, "employes", idEmploye),
+        {
+          historiqueConges: historiqueMaj,
+        },
+        { merge: true },
+      );
+    }
+
+    formulaireDemandeConge.reset();
+    await rafraichirDonnees();
+  } catch (erreur) {
+    console.error("Erreur ajout congé :", erreur);
+    alert("Impossible d'ajouter la demande de congé.");
+  }
 });
 
-afficherEmployes();
-formulaireDemandeConge.reset();
-
-});
 function normaliserEmployes(donnees) {
   try {
     const employesCharges = JSON.parse(donnees);
@@ -169,7 +259,7 @@ function normaliserEmployes(donnees) {
 
     return employesCharges.map((employe) => ({
       ...employe,
-      equipe: ORDRE_EQUIPES.includes(employe.equipe) ? employe.equipe : "Extras",
+      equipe: normaliserEquipe(employe.equipe),
       historiqueConges: Array.isArray(employe.historiqueConges) ? employe.historiqueConges : [],
       congesPris: Number(employe.congesPris) || 0,
     }));
@@ -245,16 +335,11 @@ function determinerStatut(congesRestants) {
 
   return ["Faible", "critique"];
 }
+
 async function supprimerEmploye(id) {
-
-await deleteDoc(doc(db, "employes", id));
-
-employes = await chargerEmployes();
-
-afficherEmployes();
-afficherBlocDemandeConge();
-
+  await deleteDoc(doc(db, "employes", id));
 }
+
 function calculerJoursOuvresInclus(dateDebut, dateFin) {
   const debut = new Date(`${dateDebut}T00:00:00`);
   const fin = new Date(`${dateFin}T00:00:00`);
@@ -334,10 +419,6 @@ function afficherEmployes() {
       `;
     })
     .join("");
-
-  listeEmployes.querySelectorAll("[data-supprimer-id]").forEach((bouton) => {
-    bouton.addEventListener("click", () => supprimerEmploye(bouton.dataset.supprimerId));
-  });
 }
 
 function afficherBlocDemandeConge() {
@@ -383,25 +464,15 @@ function formaterDateFr(dateBrute) {
 }
 
 function echapperHtml(valeur) {
-  return valeur
+  return String(valeur)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 }
-async function chargerEmployes() {
 
-    const querySnapshot = await getDocs(collection(db, "employes"));
-
-    const liste = [];
-
-    querySnapshot.forEach((doc) => {
-    liste.push({
-        ...doc.data(),
-        id: doc.id
-    });
-});
-
-    return liste;
-}
+void CLE_STOCKAGE_V2;
+void CLE_STOCKAGE_V3;
+void normaliserEmployes;
+void sauvegarderEmployes;
