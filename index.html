@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestion des congés employés - V4</title>
   <link rel="stylesheet" href="styles.css" />
+  <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyAEtBkoWO_vfn_MgINrumqCqhBmwKU-Sl4",
+authDomain: "conges-paname.firebaseapp.com",
+projectId: "conges-paname",
+storageBucket: "conges-paname.firebasestorage.app",
+messagingSenderId: "941389636961",
+appId: "1:941389636961:web:89088bc495b0521064d120"
+};
+
+initializeApp(firebaseConfig);
+    console.log("Firebase connecté !");
+</script>
 </head>
 <body>
   <main class="conteneur">
