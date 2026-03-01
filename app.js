@@ -65,7 +65,7 @@ formulaireEmploye.addEventListener("submit", async (event) => {
   document.getElementById("conges-pris").value = "0";
 });
 
-formulaireDemandeConge.addEventListener("submit", (event) => {
+formulaireDemandeConge.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const idEmploye = employeDemandeSelect.value;
