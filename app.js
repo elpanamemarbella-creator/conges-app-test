@@ -1,13 +1,18 @@
+const CLE_STOCKAGE_V4 = "conges-employes-v4";
 const CLE_STOCKAGE_V3 = "conges-employes-v3";
 const CLE_STOCKAGE_V2 = "conges-employes-v2";
 
-const formulaire = document.getElementById("formulaire-employe");
+const formulaireEmploye = document.getElementById("formulaire-employe");
+const formulaireDemandeConge = document.getElementById("formulaire-demande-conge");
 const listeEmployes = document.getElementById("liste-employes");
+const employeDemandeSelect = document.getElementById("employe-demande");
+const blocDemandeVide = document.getElementById("bloc-demande-vide");
 
 let employes = chargerEmployes();
 afficherEmployes();
+afficherBlocDemandeConge();
 
-formulaire.addEventListener("submit", (event) => {
+formulaireEmploye.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const nouvelEmploye = {
@@ -26,21 +31,78 @@ formulaire.addEventListener("submit", (event) => {
   employes.push(nouvelEmploye);
   sauvegarderEmployes();
   afficherEmployes();
-  formulaire.reset();
+  afficherBlocDemandeConge();
+  formulaireEmploye.reset();
   document.getElementById("conges-pris").value = "0";
 });
 
-function chargerEmployes() {
-  const donneesV3 = localStorage.getItem(CLE_STOCKAGE_V3);
+formulaireDemandeConge.addEventListener("submit", (event) => {
+  event.preventDefault();
 
+  const idEmploye = employeDemandeSelect.value;
+  const dateDebut = document.getElementById("demande-date-debut").value;
+  const dateFin = document.getElementById("demande-date-fin").value;
+
+  if (!idEmploye) {
+    alert("Veuillez choisir un employé.");
+    return;
+  }
+
+  if (!dateDebut || !dateFin) {
+    alert("Veuillez renseigner la date de début et la date de fin.");
+    return;
+  }
+
+  const jours = calculerJoursOuvresInclus(dateDebut, dateFin);
+
+  if (jours <= 0) {
+    alert("La date de fin doit être après ou égale à la date de début.");
+    return;
+  }
+
+  employes = employes.map((employe) => {
+    if (employe.id !== idEmploye) {
+      return employe;
+    }
+
+    return {
+      ...employe,
+      congesPris: arrondir1Decimale((Number(employe.congesPris) || 0) + jours),
+      historiqueConges: [
+        ...employe.historiqueConges,
+        {
+          dateDebut,
+          dateFin,
+          jours,
+        },
+      ],
+    };
+  });
+
+  sauvegarderEmployes();
+  afficherEmployes();
+  afficherBlocDemandeConge();
+  formulaireDemandeConge.reset();
+  employeDemandeSelect.value = idEmploye;
+});
+
+function chargerEmployes() {
+  const donneesV4 = localStorage.getItem(CLE_STOCKAGE_V4);
+  if (donneesV4) {
+    return normaliserEmployes(donneesV4);
+  }
+
+  const donneesV3 = localStorage.getItem(CLE_STOCKAGE_V3);
   if (donneesV3) {
-    return normaliserEmployes(donneesV3);
+    const employesV3 = normaliserEmployes(donneesV3);
+    localStorage.setItem(CLE_STOCKAGE_V4, JSON.stringify(employesV3));
+    return employesV3;
   }
 
   const donneesV2 = localStorage.getItem(CLE_STOCKAGE_V2);
   if (donneesV2) {
     const employesV2 = normaliserEmployes(donneesV2);
-    localStorage.setItem(CLE_STOCKAGE_V3, JSON.stringify(employesV2));
+    localStorage.setItem(CLE_STOCKAGE_V4, JSON.stringify(employesV2));
     return employesV2;
   }
 
@@ -65,7 +127,7 @@ function normaliserEmployes(donnees) {
 }
 
 function sauvegarderEmployes() {
-  localStorage.setItem(CLE_STOCKAGE_V3, JSON.stringify(employes));
+  localStorage.setItem(CLE_STOCKAGE_V4, JSON.stringify(employes));
 }
 
 function validerEmploye(employe) {
@@ -131,64 +193,7 @@ function supprimerEmploye(id) {
   employes = employes.filter((employe) => employe.id !== id);
   sauvegarderEmployes();
   afficherEmployes();
-}
-
-function afficherFormulaireConge(id) {
-  employes = employes.map((employe) => ({
-    ...employe,
-    formulaireCongeVisible: employe.id === id ? !employe.formulaireCongeVisible : false,
-  }));
-
-  afficherEmployes();
-}
-
-function ajouterDemandeConge(id) {
-  const dateDebutInput = document.querySelector(`[data-conge-debut-id="${id}"]`);
-  const dateFinInput = document.querySelector(`[data-conge-fin-id="${id}"]`);
-
-  if (!dateDebutInput || !dateFinInput) {
-    return;
-  }
-
-  const dateDebut = dateDebutInput.value;
-  const dateFin = dateFinInput.value;
-
-  if (!dateDebut || !dateFin) {
-    alert("Veuillez renseigner la date de début et la date de fin.");
-    return;
-  }
-
-  const jours = calculerJoursOuvresInclus(dateDebut, dateFin);
-
-  if (jours <= 0) {
-    alert("La date de fin doit être après la date de début.");
-    return;
-  }
-
-  employes = employes.map((employe) => {
-    if (employe.id !== id) {
-      return employe;
-    }
-
-    const historiqueConges = [
-      ...employe.historiqueConges,
-      {
-        dateDebut,
-        dateFin,
-        jours,
-      },
-    ];
-
-    return {
-      ...employe,
-      congesPris: arrondir1Decimale((Number(employe.congesPris) || 0) + jours),
-      historiqueConges,
-      formulaireCongeVisible: false,
-    };
-  });
-
-  sauvegarderEmployes();
-  afficherEmployes();
+  afficherBlocDemandeConge();
 }
 
 function calculerJoursOuvresInclus(dateDebut, dateFin) {
@@ -237,21 +242,7 @@ function afficherEmployes() {
           <td data-label="Historique des congés">${afficherHistorique(employe.historiqueConges)}</td>
           <td data-label="Statut"><span class="pastille ${classeStatut}">${libelleStatut}</span></td>
           <td data-label="Action" class="cellule-actions">
-            <button class="bouton-action-secondaire" data-ajouter-conge-id="${employe.id}">Ajouter congé</button>
             <button class="bouton-supprimer" data-supprimer-id="${employe.id}">Supprimer</button>
-            ${employe.formulaireCongeVisible ? `
-              <div class="boite-conge">
-                <label>
-                  Date début
-                  <input type="date" data-conge-debut-id="${employe.id}" />
-                </label>
-                <label>
-                  Date fin
-                  <input type="date" data-conge-fin-id="${employe.id}" />
-                </label>
-                <button class="bouton-enregistrer-conge" data-enregistrer-conge-id="${employe.id}">Enregistrer</button>
-              </div>
-            ` : ""}
           </td>
         </tr>
       `;
@@ -261,14 +252,27 @@ function afficherEmployes() {
   listeEmployes.querySelectorAll("[data-supprimer-id]").forEach((bouton) => {
     bouton.addEventListener("click", () => supprimerEmploye(bouton.dataset.supprimerId));
   });
+}
 
-  listeEmployes.querySelectorAll("[data-ajouter-conge-id]").forEach((bouton) => {
-    bouton.addEventListener("click", () => afficherFormulaireConge(bouton.dataset.ajouterCongeId));
-  });
+function afficherBlocDemandeConge() {
+  if (!employes.length) {
+    blocDemandeVide.hidden = false;
+    formulaireDemandeConge.hidden = true;
+    employeDemandeSelect.innerHTML = "";
+    return;
+  }
 
-  listeEmployes.querySelectorAll("[data-enregistrer-conge-id]").forEach((bouton) => {
-    bouton.addEventListener("click", () => ajouterDemandeConge(bouton.dataset.enregistrerCongeId));
-  });
+  blocDemandeVide.hidden = true;
+  formulaireDemandeConge.hidden = false;
+
+  const options = employes
+    .map(
+      (employe) =>
+        `<option value="${employe.id}">${echapperHtml(employe.nom)} (${echapperHtml(employe.equipe)})</option>`,
+    )
+    .join("");
+
+  employeDemandeSelect.innerHTML = options;
 }
 
 function afficherHistorique(historiqueConges) {
@@ -279,7 +283,7 @@ function afficherHistorique(historiqueConges) {
   return historiqueConges
     .map(
       (conge) =>
-        `<div class="ligne-historique">${formaterDateFr(conge.dateDebut)} → ${formaterDateFr(conge.dateFin)} = ${conge.jours} jour${conge.jours > 1 ? "s" : ""}</div>`,
+        `<div class="ligne-historique">${formaterDateFr(conge.dateDebut)} → ${formaterDateFr(conge.dateFin)} (${conge.jours} jour${conge.jours > 1 ? "s" : ""})</div>`,
     )
     .join("");
 }
