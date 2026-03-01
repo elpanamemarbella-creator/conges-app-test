@@ -42,6 +42,19 @@ async function initApp() {
 
 initApp();
 
+listeEmployes.addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-supprimer-id]");
+  if (!btn) return;
+
+  const id = btn.dataset.supprimerId;
+
+  await supprimerEmploye(id);
+
+  employes = await chargerEmployes();
+  afficherEmployes();
+  afficherBlocDemandeConge();
+});
+
 formulaireEmploye.addEventListener("submit", async (event) => {
   event.preventDefault();
 
