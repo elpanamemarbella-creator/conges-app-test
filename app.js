@@ -1,124 +1,181 @@
-const CLE_STOCKAGE = "suivi-conges-demandes";
+const CLE_STOCKAGE = "conges-employes-v2";
 
-const formulaire = document.getElementById("formulaire-conge");
-const listeDemandes = document.getElementById("liste-demandes");
-const boutonToutEffacer = document.getElementById("tout-effacer");
+const formulaire = document.getElementById("formulaire-employe");
+const listeEmployes = document.getElementById("liste-employes");
 
-let demandes = chargerDemandes();
-afficherDemandes();
+let employes = chargerEmployes();
+afficherEmployes();
 
-formulaire.addEventListener("submit", (evenement) => {
-  evenement.preventDefault();
+formulaire.addEventListener("submit", (event) => {
+  event.preventDefault();
 
-  const donnees = {
+  const nouvelEmploye = {
     id: crypto.randomUUID(),
     nom: document.getElementById("nom-employe").value.trim(),
     equipe: document.getElementById("equipe-employe").value.trim(),
-    allocation: Number(document.getElementById("allocation-annuelle").value),
-    joursDemandes: Number(document.getElementById("jours-demandes").value),
-    dateDebut: document.getElementById("date-debut").value,
-    dateFin: document.getElementById("date-fin").value,
+    dateEmbauche: document.getElementById("date-embauche").value,
+    congesPris: Number(document.getElementById("conges-pris").value),
   };
 
-  if (!validerDonnees(donnees)) {
+  if (!validerEmploye(nouvelEmploye)) {
     return;
   }
 
-  demandes.push(donnees);
-  sauvegarderDemandes();
-  afficherDemandes();
+  employes.push(nouvelEmploye);
+  sauvegarderEmployes();
+  afficherEmployes();
   formulaire.reset();
-  document.getElementById("allocation-annuelle").value = 25;
+  document.getElementById("conges-pris").value = "0";
 });
 
-boutonToutEffacer.addEventListener("click", () => {
-  if (!demandes.length) {
-    return;
+function chargerEmployes() {
+  const donnees = localStorage.getItem(CLE_STOCKAGE);
+  if (!donnees) {
+    return [];
   }
 
-  demandes = [];
-  sauvegarderDemandes();
-  afficherDemandes();
-});
+  try {
+    const employesCharges = JSON.parse(donnees);
+    return Array.isArray(employesCharges) ? employesCharges : [];
+  } catch {
+    return [];
+  }
+}
 
-function validerDonnees(donnees) {
-  if (donnees.dateFin < donnees.dateDebut) {
-    alert("La date de fin doit être postérieure ou égale à la date de début.");
+function sauvegarderEmployes() {
+  localStorage.setItem(CLE_STOCKAGE, JSON.stringify(employes));
+}
+
+function validerEmploye(employe) {
+  if (!employe.nom || !employe.equipe || !employe.dateEmbauche) {
+    alert("Veuillez remplir tous les champs.");
     return false;
   }
 
-  if (donnees.joursDemandes > donnees.allocation) {
-    alert("Les jours demandés ne peuvent pas dépasser l'allocation annuelle.");
+  const dateEmbauche = new Date(`${employe.dateEmbauche}T00:00:00`);
+  const aujourdHui = new Date();
+
+  if (Number.isNaN(dateEmbauche.getTime())) {
+    alert("Date d'embauche invalide.");
+    return false;
+  }
+
+  if (dateEmbauche > aujourdHui) {
+    alert("La date d'embauche ne peut pas être dans le futur.");
+    return false;
+  }
+
+  if (employe.congesPris < 0) {
+    alert("Les congés pris doivent être supérieurs ou égaux à 0.");
     return false;
   }
 
   return true;
 }
 
-function chargerDemandes() {
-  const donneesStockees = localStorage.getItem(CLE_STOCKAGE);
-  return donneesStockees ? JSON.parse(donneesStockees) : [];
+function calculerMoisTravailles(dateEmbauche) {
+  const debut = new Date(`${dateEmbauche}T00:00:00`);
+  const fin = new Date();
+  const differenceMs = fin.getTime() - debut.getTime();
+  const joursTravailles = differenceMs / (1000 * 60 * 60 * 24);
+  const moisTravailles = joursTravailles / 30.4375;
+
+  return Math.max(0, moisTravailles);
 }
 
-function sauvegarderDemandes() {
-  localStorage.setItem(CLE_STOCKAGE, JSON.stringify(demandes));
+function calculerCongesAcquis(dateEmbauche) {
+  const mois = calculerMoisTravailles(dateEmbauche);
+  const acquis = mois * 2.5;
+  return arrondir1Decimale(acquis);
 }
 
-function supprimerDemande(id) {
-  demandes = demandes.filter((demande) => demande.id !== id);
-  sauvegarderDemandes();
-  afficherDemandes();
+function arrondir1Decimale(valeur) {
+  return Math.round(valeur * 10) / 10;
 }
 
-function determinerStatut(joursRestants) {
-  if (joursRestants > 10) {
-    return ["Confortable", "bon"];
+function determinerStatut(congesRestants) {
+  if (congesRestants > 10) {
+    return ["OK", "bon"];
   }
 
-  if (joursRestants > 5) {
-    return ["À surveiller", "vigilance"];
+  if (congesRestants >= 5) {
+    return ["Attention", "vigilance"];
   }
 
   return ["Faible", "critique"];
 }
 
-function afficherDemandes() {
-  if (!demandes.length) {
-    listeDemandes.innerHTML = '<tr><td colspan="7" class="vide">Aucune demande de congé pour le moment.</td></tr>';
+function supprimerEmploye(id) {
+  employes = employes.filter((employe) => employe.id !== id);
+  sauvegarderEmployes();
+  afficherEmployes();
+}
+
+function mettreAJourCongesPris(id, valeur) {
+  const congesPris = Number(valeur);
+  if (Number.isNaN(congesPris) || congesPris < 0) {
     return;
   }
 
-  listeDemandes.innerHTML = demandes
-    .map((demande) => {
-      const joursRestants = demande.allocation - demande.joursDemandes;
-      const [libelleStatut, classeStatut] = determinerStatut(joursRestants);
+  employes = employes.map((employe) => (employe.id === id ? { ...employe, congesPris } : employe));
+  sauvegarderEmployes();
+  afficherEmployes();
+}
+
+function afficherEmployes() {
+  if (!employes.length) {
+    listeEmployes.innerHTML = '<tr><td colspan="8" class="vide">Aucun employé enregistré</td></tr>';
+    return;
+  }
+
+  listeEmployes.innerHTML = employes
+    .map((employe) => {
+      const congesAcquis = calculerCongesAcquis(employe.dateEmbauche);
+      const congesPris = arrondir1Decimale(Number(employe.congesPris) || 0);
+      const congesRestants = arrondir1Decimale(congesAcquis - congesPris);
+      const [libelleStatut, classeStatut] = determinerStatut(congesRestants);
 
       return `
         <tr>
-          <td data-label="Nom de l'employé">${echapperHtml(demande.nom)}</td>
-          <td data-label="Équipe">${echapperHtml(demande.equipe)}</td>
-          <td data-label="Dates">${formaterDate(demande.dateDebut)} → ${formaterDate(demande.dateFin)}</td>
-          <td data-label="Demandé">${demande.joursDemandes} jours</td>
-          <td data-label="Jours restants">${joursRestants} jours</td>
+          <td data-label="Employé">${echapperHtml(employe.nom)}</td>
+          <td data-label="Equipe">${echapperHtml(employe.equipe)}</td>
+          <td data-label="Date embauche">${formaterDateFr(employe.dateEmbauche)}</td>
+          <td data-label="Congés acquis">${congesAcquis.toFixed(1)}</td>
+          <td data-label="Congés pris">
+            <input
+              class="champ-tableau"
+              type="number"
+              min="0"
+              step="0.5"
+              value="${congesPris.toFixed(1)}"
+              data-conges-id="${employe.id}"
+            />
+          </td>
+          <td data-label="Congés restants">${congesRestants.toFixed(1)}</td>
           <td data-label="Statut"><span class="pastille ${classeStatut}">${libelleStatut}</span></td>
-          <td data-label="Action"><button class="bouton-supprimer" data-supprimer-id="${demande.id}">Supprimer</button></td>
+          <td data-label="Action"><button class="bouton-supprimer" data-supprimer-id="${employe.id}">Supprimer</button></td>
         </tr>
       `;
     })
     .join("");
 
-  listeDemandes.querySelectorAll("[data-supprimer-id]").forEach((bouton) => {
-    bouton.addEventListener("click", () => supprimerDemande(bouton.dataset.supprimerId));
+  listeEmployes.querySelectorAll("[data-supprimer-id]").forEach((bouton) => {
+    bouton.addEventListener("click", () => supprimerEmploye(bouton.dataset.supprimerId));
+  });
+
+  listeEmployes.querySelectorAll("[data-conges-id]").forEach((champ) => {
+    const id = champ.dataset.congesId;
+    champ.addEventListener("change", () => mettreAJourCongesPris(id, champ.value));
+    champ.addEventListener("blur", () => mettreAJourCongesPris(id, champ.value));
   });
 }
 
-function formaterDate(dateBrute) {
+function formaterDateFr(dateBrute) {
   const date = new Date(`${dateBrute}T00:00:00`);
-  return new Intl.DateTimeFormat("fr-FR", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(date);
+  const jour = String(date.getDate()).padStart(2, "0");
+  const mois = String(date.getMonth() + 1).padStart(2, "0");
+  const annee = date.getFullYear();
+  return `${jour}/${mois}/${annee}`;
 }
 
 function echapperHtml(valeur) {

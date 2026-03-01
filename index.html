@@ -3,67 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestion des congés des employés</title>
+  <title>Gestion des congés employés - V2</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="conteneur">
     <header>
-      <h1>Gestion des congés des employés</h1>
-      <p>Gérez les soldes de congés des employés et les absences à venir.</p>
+      <h1>Gestion des congés employés</h1>
+      <p>Version 2 - Calcul automatique des congés acquis.</p>
     </header>
 
     <section class="carte">
-      <h2>Ajouter un congé</h2>
-      <form id="formulaire-conge" class="grille-formulaire">
+      <h2>Ajouter un employé</h2>
+      <form id="formulaire-employe" class="grille-formulaire">
         <label>
           Nom de l'employé
           <input type="text" id="nom-employe" required placeholder="ex. Alex Martin" />
         </label>
+
         <label>
-          Équipe
-          <input type="text" id="equipe-employe" required placeholder="ex. Ingénierie" />
+          Equipe
+          <input type="text" id="equipe-employe" required placeholder="ex. Marketing" />
         </label>
+
         <label>
-          Allocation annuelle (jours)
-          <input type="number" id="allocation-annuelle" min="1" required value="25" />
+          Date d'embauche
+          <input type="date" id="date-embauche" required />
         </label>
+
         <label>
-          Jours demandés
-          <input type="number" id="jours-demandes" min="1" required />
+          Congés déjà pris
+          <input type="number" id="conges-pris" min="0" step="0.5" value="0" required />
         </label>
-        <label>
-          Date de début
-          <input type="date" id="date-debut" required />
-        </label>
-        <label>
-          Date de fin
-          <input type="date" id="date-fin" required />
-        </label>
-        <button type="submit">Enregistrer la demande</button>
+
+        <button type="submit">Ajouter employé</button>
       </form>
     </section>
 
     <section class="carte">
-      <div class="entete-tableau">
-        <h2>Demandes de congés</h2>
-        <button id="tout-effacer" class="secondaire">Tout supprimer</button>
-      </div>
+      <h2>Employés</h2>
       <table>
         <thead>
           <tr>
             <th>Employé</th>
-            <th>Équipe</th>
-            <th>Dates</th>
-            <th>Demandé</th>
-            <th>Jours restants</th>
+            <th>Equipe</th>
+            <th>Date embauche</th>
+            <th>Congés acquis</th>
+            <th>Congés pris</th>
+            <th>Congés restants</th>
             <th>Statut</th>
             <th>Action</th>
           </tr>
         </thead>
-        <tbody id="liste-demandes">
+        <tbody id="liste-employes">
           <tr>
-            <td colspan="7" class="vide">Aucune demande de congé pour le moment.</td>
+            <td colspan="8" class="vide">Aucun employé enregistré</td>
           </tr>
         </tbody>
       </table>
