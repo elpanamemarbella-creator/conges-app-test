@@ -23,7 +23,7 @@ body {
 }
 
 .conteneur {
-  width: min(1080px, 92vw);
+  width: min(1180px, 92vw);
   margin: 2rem auto;
   display: grid;
   gap: 1.25rem;
@@ -103,6 +103,7 @@ td {
   padding: 0.65rem;
   border-bottom: 1px solid var(--bordure);
   font-size: 0.92rem;
+  vertical-align: top;
 }
 
 th {
@@ -114,11 +115,6 @@ th {
   text-align: center;
   color: var(--discret);
   padding: 1rem;
-}
-
-.champ-tableau {
-  max-width: 88px;
-  padding: 0.35rem 0.45rem;
 }
 
 .pastille {
@@ -145,15 +141,67 @@ th {
   background: #ffe2e2;
 }
 
+.cellule-actions {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 230px;
+}
+
+.bouton-action-secondaire {
+  background: #e9f0ff;
+  color: #1849b2;
+}
+
+.bouton-action-secondaire:hover {
+  background: #dbe7ff;
+}
+
 .bouton-supprimer {
   background: transparent;
   color: var(--danger);
   padding: 0;
+  text-align: left;
 }
 
 .bouton-supprimer:hover {
   background: transparent;
   color: #a51f1f;
+}
+
+.boite-conge {
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+  padding: 0.6rem;
+  display: grid;
+  gap: 0.45rem;
+  background: #fafcff;
+}
+
+.boite-conge label {
+  font-size: 0.8rem;
+}
+
+.boite-conge input {
+  padding: 0.4rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.bouton-enregistrer-conge {
+  padding: 0.45rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.ligne-historique {
+  margin-bottom: 0.3rem;
+  white-space: nowrap;
+}
+
+.ligne-historique:last-child {
+  margin-bottom: 0;
+}
+
+.historique-vide {
+  color: var(--discret);
 }
 
 @media (max-width: 940px) {
@@ -189,5 +237,15 @@ th {
     content: attr(data-label);
     color: var(--discret);
     font-weight: 600;
+    min-width: 140px;
+  }
+
+  .cellule-actions {
+    width: 100%;
+  }
+
+  .ligne-historique {
+    white-space: normal;
+    text-align: right;
   }
 }
