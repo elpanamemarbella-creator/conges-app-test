@@ -88,7 +88,25 @@ formulaireDemandeConge.addEventListener("submit", (event) => {
     alert("La date de fin doit être après ou égale à la date de début.");
     return;
   }
+const employe = employes.find(e => e.id === idEmploye);
 
+employe.historiqueConges.push({
+dateDebut,
+dateFin,
+jours
+});
+
+await addDoc(collection(db, "conges"), {
+idEmploye,
+dateDebut,
+dateFin,
+jours
+});
+
+afficherEmployes();
+formulaireDemandeConge.reset();
+
+});
   employes = employes.map((employe) => {
     if (employe.id !== idEmploye) {
       return employe;
