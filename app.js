@@ -88,13 +88,7 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
     alert("La date de fin doit être après ou égale à la date de début.");
     return;
   }
-const employe = employes.find(e => e.id === idEmploye);
 
-employe.historiqueConges.push({
-dateDebut,
-dateFin,
-jours
-});
 
 await addDoc(collection(db, "conges"), {
 idEmploye,
@@ -113,18 +107,6 @@ formulaireDemandeConge.reset();
     }
 
     return {
-      ...employe,
-      congesPris: arrondir1Decimale((Number(employe.congesPris) || 0) + jours),
-      historiqueConges: [
-        ...employe.historiqueConges,
-        {
-          dateDebut,
-          dateFin,
-          jours,
-        },
-      ],
-    };
-  });
 
   sauvegarderEmployes();
   afficherEmployes();
