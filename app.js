@@ -42,6 +42,13 @@ async function initApp() {
 
 initApp();
 
+formulaireDemandeConge.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  console.log("Demande de congé envoyée");
+
+});
+
 listeEmployes.addEventListener("click", async (e) => {
   const btn = e.target.closest("[data-supprimer-id]");
   if (!btn) return;
