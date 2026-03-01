@@ -361,3 +361,15 @@ function echapperHtml(valeur) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 }
+async function chargerEmployes() {
+
+    const querySnapshot = await getDocs(collection(db, "employes"));
+
+    const liste = [];
+
+    querySnapshot.forEach((doc) => {
+        liste.push(doc.data());
+    });
+
+    return liste;
+}
