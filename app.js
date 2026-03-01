@@ -1,3 +1,17 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAEtBkoWO_vfn_MgINrumqCqhBmwKU-Sl4",
+  authDomain: "conges-paname.firebaseapp.com",
+  projectId: "conges-paname",
+  storageBucket: "conges-paname.firebasestorage.app",
+  messagingSenderId: "941389636961",
+  appId: "1:941389636961:web:89088bc495b0521064d120"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const CLE_STOCKAGE_V4 = "conges-employes-v4";
 const CLE_STOCKAGE_V3 = "conges-employes-v3";
 const CLE_STOCKAGE_V2 = "conges-employes-v2";
