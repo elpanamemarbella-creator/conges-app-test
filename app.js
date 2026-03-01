@@ -358,8 +358,11 @@ async function chargerEmployes() {
     const liste = [];
 
     querySnapshot.forEach((doc) => {
-        liste.push(doc.data());
+    liste.push({
+        ...doc.data(),
+        id: doc.id
     });
+});
 
     return liste;
 }
