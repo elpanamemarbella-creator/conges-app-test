@@ -109,6 +109,22 @@ initializeApp(firebaseConfig);
         <button type="submit">Ajouter la demande</button>
       </form>
     </section>
+
+    <section class="carte">
+      <h2>Demandes de congés en attente</h2>
+      <ul id="liste-demandes-en-attente" class="liste-demandes">
+        <li class="vide">Chargement...</li>
+      </ul>
+    </section>
+
+    <section class="carte">
+      <h2>Calendrier visuel 2026</h2>
+      <ul id="legende-employes" class="legende-employes">
+        <li class="vide">Chargement...</li>
+      </ul>
+      <div id="calendrier-2026" class="calendrier-annee"></div>
+    </section>
+
   </main>
 
   <script type="module" src="app.js"></script>
