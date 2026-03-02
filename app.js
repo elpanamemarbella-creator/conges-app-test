@@ -42,11 +42,17 @@ const blocDemandeVide = document.getElementById("bloc-demande-vide");
 const listeDemandesEnAttente = document.getElementById("liste-demandes-en-attente");
 
 const listeResume = document.getElementById("liste-resume");
+const filtreEquipeSelect = document.getElementById("filtre-equipe");
+const rechercheEmployeInput = document.getElementById("recherche-employe");
+const tableauBord = document.getElementById("tableau-bord");
+const boutonExportExcel = document.getElementById("bouton-export-excel");
+const calendrierCongesMois = document.getElementById("calendrier-conges-mois");
 const menuOnglets = document.querySelectorAll(".menu-onglet");
 const zonesOnglets = document.querySelectorAll("[data-zone]");
 
 let employes = [];
 let conges = [];
+let employesFiltres = [];
 
 function normaliserEquipe(equipe) {
   if (equipe === "Extras") {
@@ -201,6 +207,8 @@ async function rafraichirDonnees() {
   afficherBlocDemandeConge();
   afficherDemandesEnAttente();
   afficherResume();
+  afficherTableauBord();
+  afficherCalendrierMensuel();
 }
 
 async function initApp() {
@@ -218,6 +226,18 @@ menuOnglets.forEach((onglet) => {
   onglet.addEventListener("click", () => {
     afficherOnglet(onglet.dataset.onglet || "employes");
   });
+});
+
+filtreEquipeSelect?.addEventListener("change", () => {
+  afficherEmployes();
+});
+
+rechercheEmployeInput?.addEventListener("input", () => {
+  afficherEmployes();
+});
+
+boutonExportExcel?.addEventListener("click", () => {
+  exporterEmployesExcel();
 });
 
 
@@ -447,13 +467,32 @@ function trierEmployesParEquipe() {
   });
 }
 
+function obtenirEmployesFiltres() {
+  const equipeFiltre = filtreEquipeSelect?.value || "Toutes les équipes";
+  const recherche = (rechercheEmployeInput?.value || "").trim().toLowerCase();
+
+  return trierEmployesParEquipe().filter((employe) => {
+    const correspondEquipe = equipeFiltre === "Toutes les équipes" || employe.equipe === equipeFiltre;
+    const correspondRecherche = !recherche || employe.nom.toLowerCase().includes(recherche);
+    return correspondEquipe && correspondRecherche;
+  });
+}
+
 function afficherEmployes() {
   if (!employes.length) {
     listeEmployes.innerHTML = '<tr><td colspan="9" class="vide">Aucun employé enregistré</td></tr>';
+    employesFiltres = [];
     return;
   }
 
-  const employesTries = trierEmployesParEquipe();
+  const employesTries = obtenirEmployesFiltres();
+  employesFiltres = employesTries;
+
+  if (!employesTries.length) {
+    listeEmployes.innerHTML = '<tr><td colspan="9" class="vide">Aucun employé ne correspond au filtre</td></tr>';
+    return;
+  }
+
   let equipeEnCours = "";
 
   listeEmployes.innerHTML = employesTries
@@ -491,6 +530,145 @@ function afficherEmployes() {
       `;
     })
     .join("");
+}
+
+function afficherTableauBord() {
+  if (!tableauBord) {
+    return;
+  }
+
+  const totalEmployes = employes.length;
+  const demandesEnAttente = conges.filter((conge) => conge.statut === "en_attente").length;
+  const employesEnCongeAujourdhui = calculerEmployesEnCongeAujourdHui();
+
+  tableauBord.innerHTML = `
+    <article class="tuile-kpi">
+      <span class="kpi-titre">Employés</span>
+      <strong class="kpi-valeur">${totalEmployes}</strong>
+    </article>
+    <article class="tuile-kpi">
+      <span class="kpi-titre">Demandes en attente</span>
+      <strong class="kpi-valeur">${demandesEnAttente}</strong>
+    </article>
+    <article class="tuile-kpi">
+      <span class="kpi-titre">En congé aujourd'hui</span>
+      <strong class="kpi-valeur">${employesEnCongeAujourdhui}</strong>
+    </article>
+  `;
+}
+
+function calculerEmployesEnCongeAujourdHui() {
+  const aujourdHui = new Date();
+  aujourdHui.setHours(0, 0, 0, 0);
+
+  const ids = new Set();
+
+  conges
+    .filter((conge) => conge.statut === "valide")
+    .forEach((conge) => {
+      const debut = new Date(`${conge.dateDebut}T00:00:00`);
+      const fin = new Date(`${conge.dateFin}T00:00:00`);
+
+      if (aujourdHui >= debut && aujourdHui <= fin) {
+        ids.add(conge.idEmploye);
+      }
+    });
+
+  return ids.size;
+}
+
+function exporterEmployesExcel() {
+  if (!window.XLSX) {
+    alert("La librairie d'export Excel n'est pas disponible.");
+    return;
+  }
+
+  const lignes = employesFiltres.map((employe) => {
+    const congesAcquis = calculerCongesAcquis(employe.dateEmbauche);
+    const congesPris = arrondir1Decimale(Number(employe.congesPris) || 0);
+    const congesRestants = arrondir1Decimale(congesAcquis - congesPris);
+
+    return {
+      Nom: employe.nom,
+      Equipe: employe.equipe,
+      "Date entrée": formaterDateFr(employe.dateEmbauche),
+      "Jours acquis": congesAcquis,
+      "Jours pris": congesPris,
+      "Jours restants": congesRestants,
+    };
+  });
+
+  const classeur = window.XLSX.utils.book_new();
+  const feuille = window.XLSX.utils.json_to_sheet(lignes);
+  window.XLSX.utils.book_append_sheet(classeur, feuille, "Employés");
+  window.XLSX.writeFile(classeur, "conges-employes.xlsx");
+}
+
+function afficherCalendrierMensuel() {
+  if (!calendrierCongesMois) {
+    return;
+  }
+
+  const dateRef = new Date();
+  const mois = dateRef.getMonth();
+  const annee = dateRef.getFullYear();
+  const debutMois = new Date(annee, mois, 1);
+  const finMois = new Date(annee, mois + 1, 0);
+
+  const lignes = employes
+    .map((employe) => {
+      const joursDansMois = extraireJoursCongeDansMois(employe, debutMois, finMois);
+      if (!joursDansMois.length) {
+        return "";
+      }
+
+      const blocs = joursDansMois
+        .map(
+          (date) =>
+            `<span class="bloc-conge" style="background-color:${echapperHtml(employe.couleur || "#2f80ed")}" title="${formaterDateFr(date)}"></span>`,
+        )
+        .join("");
+
+      return `
+        <div class="ligne-calendrier">
+          <strong>${echapperHtml(employe.nom)}</strong>
+          <div class="barre-conges">${blocs}</div>
+        </div>
+      `;
+    })
+    .filter(Boolean)
+    .join("");
+
+  calendrierCongesMois.innerHTML =
+    lignes || '<p class="message-vide">Aucun congé validé sur le mois en cours.</p>';
+}
+
+function extraireJoursCongeDansMois(employe, debutMois, finMois) {
+  const jours = [];
+
+  conges
+    .filter((conge) => conge.idEmploye === employe.id && conge.statut === "valide")
+    .forEach((conge) => {
+      const debutConge = new Date(`${conge.dateDebut}T00:00:00`);
+      const finConge = new Date(`${conge.dateFin}T00:00:00`);
+      const debut = debutConge > debutMois ? debutConge : debutMois;
+      const fin = finConge < finMois ? finConge : finMois;
+
+      if (fin < debut) {
+        return;
+      }
+
+      const curseur = new Date(debut);
+      while (curseur <= fin) {
+        const jour = curseur.getDay();
+        if (jour !== 0 && jour !== 6) {
+          jours.push(curseur.toISOString().split("T")[0]);
+        }
+        curseur.setDate(curseur.getDate() + 1);
+      }
+    });
+
+  return [...new Set(jours)].sort();
 }
 
 function afficherBlocDemandeConge() {
