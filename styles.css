@@ -29,8 +29,39 @@ body {
 }
 
 .entete-app {
+  position: relative;
   text-align: center;
   margin-bottom: 1.35rem;
+}
+
+.selecteur-langue {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.82rem;
+  color: var(--discret);
+}
+
+.langue-btn {
+  border: none;
+  background: transparent;
+  color: var(--discret);
+  min-height: auto;
+  padding: 0.1rem 0.2rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.langue-btn:hover {
+  background: #eaf0fb;
+  color: #1f2d3d;
+}
+
+.langue-btn.actif {
+  color: #1f2d3d;
 }
 
 .entete-app h1 {

@@ -21,7 +21,122 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const ORDRE_EQUIPES = ["Bar matin", "Salle matin", "Bar soir", "Salle soir", "Cuisine", "Extra"];
+const TRADUCTIONS = {
+  fr: {
+    app_title: "Gestion des congés employés",
+    dashboard_title: "Tableau de bord",
+    add_employee_title: "Ajouter un employé",
+    employee_name_label: "Nom de l'employé",
+    employee_name_placeholder: "ex. Alex Martin",
+    team_label: "Equipe",
+    team_select_placeholder: "Sélectionner une équipe",
+    hire_date_label: "Date d'embauche",
+    used_leave_label: "Congés déjà pris",
+    add_employee_button: "Ajouter employé",
+    employees_title: "Employés",
+    team_filter_label: "Filtre équipe",
+    all_teams: "Toutes les équipes",
+    employee_search_label: "Recherche employé",
+    employee_search_placeholder: "Rechercher un employé",
+    export_excel: "Exporter Excel",
+    employee_col: "Employé",
+    team_col: "Equipe",
+    hire_date_col: "Date embauche",
+    earned_leave_col: "Congés acquis",
+    taken_leave_col: "Congés pris",
+    remaining_leave_col: "Congés restants",
+    leave_history_col: "Historique des congés",
+    status_col: "Statut",
+    action_col: "Action",
+    no_employee_registered: "Aucun employé enregistré",
+    no_employee_matching: "Aucun employé ne correspond au filtre",
+    new_leave_request_title: "Nouvelle demande de congé",
+    no_employee_available: "Aucun employé disponible",
+    start_date_label: "Date de début",
+    end_date_label: "Date de fin",
+    add_request_button: "Ajouter la demande",
+    pending_requests_title: "Demandes de congés en attente",
+    loading: "Chargement...",
+    no_pending_request: "Aucune demande en attente",
+    unknown_employee: "Employé inconnu",
+    validate: "Valider",
+    refuse: "Refuser",
+    summary_title: "Résumé",
+    name_col: "Nom",
+    entry_date_col: "Date d'entrée",
+    save_title: "Sauvegarde",
+    save_auto_message: "La sauvegarde est gérée automatiquement par le système existant.",
+    calendar_title: "Calendrier des congés",
+    no_validated_leave_month: "Aucun congé validé sur le mois en cours.",
+    no_leave: "Aucun congé",
+    day_singular: "jour",
+    day_plural: "jours",
+    status_ok: "OK",
+    status_attention: "Attention",
+    status_low: "Faible",
+    kpi_employees: "Employés",
+    kpi_pending_requests: "Demandes en attente",
+    kpi_on_leave_today: "En congé aujourd'hui",
+  },
+  es: {
+    app_title: "Gestión de vacaciones empleados",
+    dashboard_title: "Panel de control",
+    add_employee_title: "Añadir empleado",
+    employee_name_label: "Nombre del empleado",
+    employee_name_placeholder: "ej. Alex Martin",
+    team_label: "Equipo",
+    team_select_placeholder: "Selección equipo",
+    hire_date_label: "Fecha de incorporación",
+    used_leave_label: "Vacaciones ya disfrutadas",
+    add_employee_button: "Añadir empleado",
+    employees_title: "Empleados",
+    team_filter_label: "Filtro equipo",
+    all_teams: "Todos los equipos",
+    employee_search_label: "Búsqueda empleado",
+    employee_search_placeholder: "Buscar empleado",
+    export_excel: "Exportar Excel",
+    employee_col: "Empleado",
+    team_col: "Equipo",
+    hire_date_col: "Fecha incorporación",
+    earned_leave_col: "Vacaciones acumuladas",
+    taken_leave_col: "Vacaciones disfrutadas",
+    remaining_leave_col: "Vacaciones restantes",
+    leave_history_col: "Historial de vacaciones",
+    status_col: "Estado",
+    action_col: "Acción",
+    no_employee_registered: "Ningún empleado registrado",
+    no_employee_matching: "Ningún empleado coincide con el filtro",
+    new_leave_request_title: "Nueva solicitud de vacaciones",
+    no_employee_available: "No hay empleados disponibles",
+    start_date_label: "Fecha inicio",
+    end_date_label: "Fecha fin",
+    add_request_button: "Añadir solicitud",
+    pending_requests_title: "Solicitudes de vacaciones pendientes",
+    loading: "Cargando...",
+    no_pending_request: "No hay solicitudes pendientes",
+    unknown_employee: "Empleado desconocido",
+    validate: "Validar",
+    refuse: "Rechazar",
+    summary_title: "Resumen",
+    name_col: "Nombre",
+    entry_date_col: "Fecha de incorporación",
+    save_title: "Guardar",
+    save_auto_message: "La copia de seguridad se gestiona automáticamente por el sistema existente.",
+    calendar_title: "Calendario de vacaciones",
+    no_validated_leave_month: "No hay vacaciones validadas en el mes actual.",
+    no_leave: "Sin vacaciones",
+    day_singular: "día",
+    day_plural: "días",
+    status_ok: "OK",
+    status_attention: "Atención",
+    status_low: "Bajo",
+    kpi_employees: "Empleados",
+    kpi_pending_requests: "Solicitudes pendientes",
+    kpi_on_leave_today: "De vacaciones hoy",
+  },
+};
+
+const ORDRE_EQUIPES = ["Bar matin", "Salle matin", "Bar soir", "Salle soir", "Cuisine", "Extra", "Nettoyage et entretien"];
 const PALETTE_COULEURS = ["#2f80ed", "#eb5757", "#27ae60", "#f2994a", "#9b51e0", "#00b8d9", "#e84393", "#6c5ce7"];
 const CODE_MANAGER = "2005";
 
@@ -32,6 +147,7 @@ const CLASSES_EQUIPE = {
   "Salle soir": "salle-soir",
   Cuisine: "cuisine",
   Extra: "extras",
+  "Nettoyage et entretien": "nettoyage-entretien",
 };
 
 const formulaireEmploye = document.getElementById("formulaire-employe");
@@ -49,10 +165,45 @@ const boutonExportExcel = document.getElementById("bouton-export-excel");
 const calendrierCongesMois = document.getElementById("calendrier-conges-mois");
 const menuOnglets = document.querySelectorAll(".menu-onglet");
 const zonesOnglets = document.querySelectorAll("[data-zone]");
+const boutonsLangue = document.querySelectorAll("[data-langue]");
 
 let employes = [];
 let conges = [];
 let employesFiltres = [];
+let langueCourante = "fr";
+
+function t(cle) {
+  return TRADUCTIONS[langueCourante]?.[cle] || TRADUCTIONS.fr[cle] || cle;
+}
+
+function appliquerTraductionsStatiques() {
+  document.documentElement.lang = langueCourante;
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    element.textContent = t(element.dataset.i18n);
+  });
+
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+    element.placeholder = t(element.dataset.i18nPlaceholder);
+  });
+
+  boutonsLangue.forEach((bouton) => {
+    bouton.classList.toggle("actif", bouton.dataset.langue === langueCourante);
+  });
+}
+
+function changerLangue(langue) {
+  if (!TRADUCTIONS[langue]) {
+    return;
+  }
+  langueCourante = langue;
+  appliquerTraductionsStatiques();
+  afficherEmployes();
+  afficherBlocDemandeConge();
+  afficherDemandesEnAttente();
+  afficherResume();
+  afficherTableauBord();
+  afficherCalendrierMensuel();
+}
 
 function normaliserEquipe(equipe) {
   if (equipe === "Extras") {
@@ -216,11 +367,18 @@ async function initApp() {
     await rafraichirDonnees();
   } catch (erreur) {
     console.error("Erreur Firebase / Firestore au chargement :", erreur);
-    alert("Impossible de charger les données. Vérifie la connexion Firebase.");
+    alert(langueCourante === "es" ? "No se pueden cargar los datos. Verifica la conexión Firebase." : "Impossible de charger les données. Vérifie la connexion Firebase.");
   }
 }
 
+appliquerTraductionsStatiques();
 initApp();
+
+boutonsLangue.forEach((bouton) => {
+  bouton.addEventListener("click", () => {
+    changerLangue(bouton.dataset.langue || "fr");
+  });
+});
 
 menuOnglets.forEach((onglet) => {
   onglet.addEventListener("click", () => {
@@ -252,7 +410,7 @@ listeEmployes.addEventListener("click", async (e) => {
     await rafraichirDonnees();
   } catch (erreur) {
     console.error("Erreur suppression employé :", erreur);
-    alert("Suppression impossible pour le moment.");
+    alert(langueCourante === "es" ? "Eliminación imposible por el momento." : "Suppression impossible pour le moment.");
   }
 });
 
@@ -266,10 +424,10 @@ listeDemandesEnAttente.addEventListener("click", async (event) => {
   }
 
   const nouveauStatut = boutonValidation ? "valide" : "refuse";
-  const codeSaisi = window.prompt("Entrer le code manager");
+  const codeSaisi = window.prompt(langueCourante === "es" ? "Introduce el código del manager" : "Entrer le code manager");
 
   if (codeSaisi !== CODE_MANAGER) {
-    alert("Code incorrect");
+    alert(langueCourante === "es" ? "Código incorrecto" : "Code incorrect");
     return;
   }
 
@@ -284,7 +442,7 @@ listeDemandesEnAttente.addEventListener("click", async (event) => {
     await rafraichirDonnees();
   } catch (erreur) {
     console.error("Erreur mise à jour du statut :", erreur);
-    alert("Impossible de mettre à jour la demande de congé.");
+    alert(langueCourante === "es" ? "No se puede actualizar la solicitud de vacaciones." : "Impossible de mettre à jour la demande de congé.");
   }
 });
 
@@ -318,7 +476,7 @@ formulaireEmploye.addEventListener("submit", async (event) => {
     await rafraichirDonnees();
   } catch (erreur) {
     console.error("Erreur ajout employé :", erreur);
-    alert("Impossible d'ajouter l'employé.");
+    alert(langueCourante === "es" ? "No se puede añadir el empleado." : "Impossible d'ajouter l'employé.");
   }
 });
 
@@ -330,19 +488,19 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
   const dateFin = document.getElementById("demande-date-fin").value;
 
   if (!idEmploye) {
-    alert("Veuillez choisir un employé.");
+    alert(langueCourante === "es" ? "Seleccione un empleado." : "Veuillez choisir un employé.");
     return;
   }
 
   if (!dateDebut || !dateFin) {
-    alert("Veuillez renseigner la date de début et la date de fin.");
+    alert(langueCourante === "es" ? "Indique la fecha de inicio y de fin." : "Veuillez renseigner la date de début et la date de fin.");
     return;
   }
 
   const jours = calculerJoursOuvresInclus(dateDebut, dateFin);
 
   if (jours <= 0) {
-    alert("La date de fin doit être après ou égale à la date de début.");
+    alert(langueCourante === "es" ? "La fecha de fin debe ser posterior o igual a la fecha de inicio." : "La date de fin doit être après ou égale à la date de début.");
     return;
   }
 
@@ -360,18 +518,18 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
     await rafraichirDonnees();
   } catch (erreur) {
     console.error("Erreur ajout congé :", erreur);
-    alert("Impossible d'ajouter la demande de congé.");
+    alert(langueCourante === "es" ? "No se puede añadir la solicitud de vacaciones." : "Impossible d'ajouter la demande de congé.");
   }
 });
 
 function validerEmploye(employe) {
   if (!employe.nom || !employe.equipe || !employe.dateEmbauche) {
-    alert("Veuillez remplir tous les champs.");
+    alert(langueCourante === "es" ? "Complete todos los campos." : "Veuillez remplir tous les champs.");
     return false;
   }
 
   if (!ORDRE_EQUIPES.includes(employe.equipe)) {
-    alert("Veuillez sélectionner une équipe valide.");
+    alert(langueCourante === "es" ? "Seleccione un equipo válido." : "Veuillez sélectionner une équipe valide.");
     return false;
   }
 
@@ -379,17 +537,17 @@ function validerEmploye(employe) {
   const aujourdHui = new Date();
 
   if (Number.isNaN(dateEmbauche.getTime())) {
-    alert("Date d'embauche invalide.");
+    alert(langueCourante === "es" ? "Fecha de incorporación no válida." : "Date d'embauche invalide.");
     return false;
   }
 
   if (dateEmbauche > aujourdHui) {
-    alert("La date d'embauche ne peut pas être dans le futur.");
+    alert(langueCourante === "es" ? "La fecha de incorporación no puede estar en el futuro." : "La date d'embauche ne peut pas être dans le futur.");
     return false;
   }
 
   if (employe.congesPris < 0) {
-    alert("Les congés pris doivent être supérieurs ou égaux à 0.");
+    alert(langueCourante === "es" ? "Las vacaciones disfrutadas deben ser mayores o iguales a 0." : "Les congés pris doivent être supérieurs ou égaux à 0.");
     return false;
   }
 
@@ -418,14 +576,14 @@ function arrondir1Decimale(valeur) {
 
 function determinerStatut(congesRestants) {
   if (congesRestants > 10) {
-    return ["OK", "bon"];
+    return [t("status_ok"), "bon"];
   }
 
   if (congesRestants >= 5) {
-    return ["Attention", "vigilance"];
+    return [t("status_attention"), "vigilance"];
   }
 
-  return ["Faible", "critique"];
+  return [t("status_low"), "critique"];
 }
 
 async function supprimerEmploye(id) {
@@ -480,7 +638,7 @@ function obtenirEmployesFiltres() {
 
 function afficherEmployes() {
   if (!employes.length) {
-    listeEmployes.innerHTML = '<tr><td colspan="9" class="vide">Aucun employé enregistré</td></tr>';
+    listeEmployes.innerHTML = `<tr><td colspan="9" class="vide">${t("no_employee_registered")}</td></tr>`;
     employesFiltres = [];
     return;
   }
@@ -489,7 +647,7 @@ function afficherEmployes() {
   employesFiltres = employesTries;
 
   if (!employesTries.length) {
-    listeEmployes.innerHTML = '<tr><td colspan="9" class="vide">Aucun employé ne correspond au filtre</td></tr>';
+    listeEmployes.innerHTML = `<tr><td colspan="9" class="vide">${t("no_employee_matching")}</td></tr>`;
     return;
   }
 
@@ -515,16 +673,16 @@ function afficherEmployes() {
             : ""
         }
         <tr class="ligne-employe equipe-${classeEquipe}">
-          <td data-label="Employé">${echapperHtml(employe.nom)}</td>
-          <td data-label="Equipe"><span class="badge-equipe equipe-${classeEquipe}">${echapperHtml(employe.equipe)}</span></td>
-          <td data-label="Date embauche">${formaterDateFr(employe.dateEmbauche)}</td>
-          <td data-label="Congés acquis">${congesAcquis.toFixed(1)}</td>
-          <td data-label="Congés pris">${congesPris.toFixed(1)}</td>
-          <td data-label="Congés restants">${congesRestants.toFixed(1)}</td>
-          <td data-label="Historique des congés">${afficherHistorique(employe.historiqueConges)}</td>
-          <td data-label="Statut"><span class="pastille ${classeStatut}">${libelleStatut}</span></td>
-          <td data-label="Action" class="cellule-actions">
-            <button class="bouton-supprimer" data-supprimer-id="${employe.id}">Supprimer</button>
+          <td data-label="${t("employee_col")}">${echapperHtml(employe.nom)}</td>
+          <td data-label="${t("team_col")}"><span class="badge-equipe equipe-${classeEquipe}">${echapperHtml(employe.equipe)}</span></td>
+          <td data-label="${t("hire_date_col")}">${formaterDateFr(employe.dateEmbauche)}</td>
+          <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
+          <td data-label="${t("taken_leave_col")}">${congesPris.toFixed(1)}</td>
+          <td data-label="${t("remaining_leave_col")}">${congesRestants.toFixed(1)}</td>
+          <td data-label="${t("leave_history_col")}">${afficherHistorique(employe.historiqueConges)}</td>
+          <td data-label="${t("status_col")}"><span class="pastille ${classeStatut}">${libelleStatut}</span></td>
+          <td data-label="${t("action_col")}" class="cellule-actions">
+            <button class="bouton-supprimer" data-supprimer-id="${employe.id}">${langueCourante === "es" ? "Eliminar" : "Supprimer"}</button>
           </td>
         </tr>
       `;
@@ -543,15 +701,15 @@ function afficherTableauBord() {
 
   tableauBord.innerHTML = `
     <article class="tuile-kpi">
-      <span class="kpi-titre">Employés</span>
+      <span class="kpi-titre">${t("kpi_employees")}</span>
       <strong class="kpi-valeur">${totalEmployes}</strong>
     </article>
     <article class="tuile-kpi">
-      <span class="kpi-titre">Demandes en attente</span>
+      <span class="kpi-titre">${t("kpi_pending_requests")}</span>
       <strong class="kpi-valeur">${demandesEnAttente}</strong>
     </article>
     <article class="tuile-kpi">
-      <span class="kpi-titre">En congé aujourd'hui</span>
+      <span class="kpi-titre">${t("kpi_on_leave_today")}</span>
       <strong class="kpi-valeur">${employesEnCongeAujourdhui}</strong>
     </article>
   `;
@@ -579,7 +737,7 @@ function calculerEmployesEnCongeAujourdHui() {
 
 function exporterEmployesExcel() {
   if (!window.XLSX) {
-    alert("La librairie d'export Excel n'est pas disponible.");
+    alert(langueCourante === "es" ? "La librería de exportación Excel no está disponible." : "La librairie d'export Excel n'est pas disponible.");
     return;
   }
 
@@ -640,7 +798,7 @@ function afficherCalendrierMensuel() {
     .join("");
 
   calendrierCongesMois.innerHTML =
-    lignes || '<p class="message-vide">Aucun congé validé sur le mois en cours.</p>';
+    lignes || `<p class="message-vide">${t("no_validated_leave_month")}</p>`;
 }
 
 function extraireJoursCongeDansMois(employe, debutMois, finMois) {
@@ -698,21 +856,21 @@ function afficherDemandesEnAttente() {
     .sort((a, b) => a.dateDebut.localeCompare(b.dateDebut));
 
   if (!demandesEnAttente.length) {
-    listeDemandesEnAttente.innerHTML = '<li class="vide">Aucune demande en attente</li>';
+    listeDemandesEnAttente.innerHTML = `<li class="vide">${t("no_pending_request")}</li>`;
     return;
   }
 
   listeDemandesEnAttente.innerHTML = demandesEnAttente
     .map((conge) => {
       const employe = employes.find((entry) => entry.id === conge.idEmploye);
-      const nom = employe?.nom || "Employé inconnu";
+      const nom = employe?.nom || t("unknown_employee");
 
       return `
         <li class="demande-item">
           <div><strong>${echapperHtml(nom)}</strong> : ${formaterDateFr(conge.dateDebut)} → ${formaterDateFr(conge.dateFin)}</div>
           <div class="actions-demande">
-            <button data-valider-id="${conge.id}" class="bouton-secondaire">Valider</button>
-            <button data-refuser-id="${conge.id}" class="bouton-refuser">Refuser</button>
+            <button data-valider-id="${conge.id}" class="bouton-secondaire">${t("validate")}</button>
+            <button data-refuser-id="${conge.id}" class="bouton-refuser">${t("refuse")}</button>
           </div>
         </li>
       `;
@@ -732,7 +890,7 @@ afficherOnglet();
 
 function afficherResume() {
   if (!employes.length) {
-    listeResume.innerHTML = '<tr><td colspan="5" class="vide">Aucun employé enregistré</td></tr>';
+    listeResume.innerHTML = `<tr><td colspan="5" class="vide">${t("no_employee_registered")}</td></tr>`;
     return;
   }
 
@@ -746,11 +904,11 @@ function afficherResume() {
 
       return `
         <tr>
-          <td data-label="Nom">${echapperHtml(employe.nom)}</td>
-          <td data-label="Date d'entrée">${formaterDateFr(employe.dateEmbauche)}</td>
-          <td data-label="Congés acquis">${congesAcquis.toFixed(1)}</td>
-          <td data-label="Congés pris">${congesPris.toFixed(1)}</td>
-          <td data-label="Congés restants">${congesRestants.toFixed(1)}</td>
+          <td data-label="${t("name_col")}">${echapperHtml(employe.nom)}</td>
+          <td data-label="${t("entry_date_col")}">${formaterDateFr(employe.dateEmbauche)}</td>
+          <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
+          <td data-label="${t("taken_leave_col")}">${congesPris.toFixed(1)}</td>
+          <td data-label="${t("remaining_leave_col")}">${congesRestants.toFixed(1)}</td>
         </tr>
       `;
     })
@@ -759,13 +917,13 @@ function afficherResume() {
 
 function afficherHistorique(historiqueConges) {
   if (!historiqueConges.length) {
-    return '<span class="historique-vide">Aucun congé</span>';
+    return `<span class="historique-vide">${t("no_leave")}</span>`;
   }
 
   return historiqueConges
     .map(
       (conge) =>
-        `<div class="ligne-historique">${formaterDateFr(conge.dateDebut)} → ${formaterDateFr(conge.dateFin)} (${conge.jours} jour${conge.jours > 1 ? "s" : ""})</div>`,
+        `<div class="ligne-historique">${formaterDateFr(conge.dateDebut)} → ${formaterDateFr(conge.dateFin)} (${conge.jours} ${conge.jours > 1 ? t("day_plural") : t("day_singular")})</div>`,
     )
     .join("");
 }
