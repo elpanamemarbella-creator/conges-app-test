@@ -122,6 +122,25 @@ initializeApp(firebaseConfig);
       </section>
 
       <section class="carte">
+        <h2 data-i18n="archived_employees_title">Employés archivés</h2>
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="employee_col">Employé</th>
+              <th data-i18n="team_col">Equipe</th>
+              <th data-i18n="hire_date_col">Date embauche</th>
+              <th data-i18n="action_col">Action</th>
+            </tr>
+          </thead>
+          <tbody id="liste-employes-archives">
+            <tr>
+              <td colspan="4" class="vide" data-i18n="no_archived_employee">Aucun employé archivé</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="carte">
         <h2 data-i18n="new_leave_request_title">Nouvelle demande de congé</h2>
         <div id="bloc-demande-vide" class="message-vide" hidden data-i18n="no_employee_available">Aucun employé disponible</div>
         <form id="formulaire-demande-conge" class="grille-formulaire" hidden>
