@@ -24,153 +24,160 @@ initializeApp(firebaseConfig);
 <body>
   <main class="conteneur">
     <header class="entete-app">
-      <h1>Gestion des congés employés</h1>
+      <div class="selecteur-langue" aria-label="Sélecteur de langue">
+        <button type="button" class="langue-btn actif" data-langue="fr">FR</button>
+        <span>|</span>
+        <button type="button" class="langue-btn" data-langue="es">ES</button>
+      </div>
+      <h1 data-i18n="app_title">Gestion des congés employés</h1>
     </header>
 
     <section class="zone-onglet" data-zone="employes">
       <section class="carte">
-        <h2>Tableau de bord</h2>
+        <h2 data-i18n="dashboard_title">Tableau de bord</h2>
         <div class="tableau-bord" id="tableau-bord"></div>
       </section>
 
       <section class="carte">
-        <h2>Ajouter un employé</h2>
+        <h2 data-i18n="add_employee_title">Ajouter un employé</h2>
         <form id="formulaire-employe" class="grille-formulaire">
           <label>
-            Nom de l'employé
-            <input type="text" id="nom-employe" required placeholder="ex. Alex Martin" />
+            <span data-i18n="employee_name_label">Nom de l'employé</span>
+            <input type="text" id="nom-employe" required placeholder="ex. Alex Martin" data-i18n-placeholder="employee_name_placeholder" />
           </label>
 
           <label>
-            Equipe
+            <span data-i18n="team_label">Equipe</span>
             <select id="equipe-employe" required>
-              <option value="">Sélectionner une équipe</option>
+              <option value="" data-i18n="team_select_placeholder">Sélectionner une équipe</option>
               <option value="Bar matin">Bar matin</option>
               <option value="Salle matin">Salle matin</option>
               <option value="Bar soir">Bar soir</option>
               <option value="Salle soir">Salle soir</option>
               <option value="Cuisine">Cuisine</option>
               <option value="Extras">Extras</option>
+              <option value="Nettoyage et entretien">Nettoyage et entretien</option>
             </select>
           </label>
 
           <label>
-            Date d'embauche
+            <span data-i18n="hire_date_label">Date d'embauche</span>
             <input type="date" id="date-embauche" required />
           </label>
 
           <label>
-            Congés déjà pris
+            <span data-i18n="used_leave_label">Congés déjà pris</span>
             <input type="number" id="conges-pris" min="0" step="0.5" value="0" required />
           </label>
 
-          <button type="submit">Ajouter employé</button>
+          <button type="submit" data-i18n="add_employee_button">Ajouter employé</button>
         </form>
       </section>
 
       <section class="carte">
-        <h2>Employés</h2>
+        <h2 data-i18n="employees_title">Employés</h2>
         <div class="barre-filtres">
           <label>
-            Filtre équipe
+            <span data-i18n="team_filter_label">Filtre équipe</span>
             <select id="filtre-equipe">
-              <option value="Toutes les équipes">Toutes les équipes</option>
+              <option value="Toutes les équipes" data-i18n="all_teams">Toutes les équipes</option>
               <option value="Bar matin">Bar matin</option>
               <option value="Salle matin">Salle matin</option>
               <option value="Bar soir">Bar soir</option>
               <option value="Salle soir">Salle soir</option>
               <option value="Cuisine">Cuisine</option>
               <option value="Extra">Extra</option>
+              <option value="Nettoyage et entretien">Nettoyage et entretien</option>
             </select>
           </label>
 
           <label>
-            Recherche employé
-            <input type="search" id="recherche-employe" placeholder="Rechercher un employé" />
+            <span data-i18n="employee_search_label">Recherche employé</span>
+            <input type="search" id="recherche-employe" placeholder="Rechercher un employé" data-i18n-placeholder="employee_search_placeholder" />
           </label>
 
-          <button type="button" id="bouton-export-excel">Exporter Excel</button>
+          <button type="button" id="bouton-export-excel" data-i18n="export_excel">Exporter Excel</button>
         </div>
 
         <table>
           <thead>
             <tr>
-              <th>Employé</th>
-              <th>Equipe</th>
-              <th>Date embauche</th>
-              <th>Congés acquis</th>
-              <th>Congés pris</th>
-              <th>Congés restants</th>
-              <th>Historique des congés</th>
-              <th>Statut</th>
-              <th>Action</th>
+              <th data-i18n="employee_col">Employé</th>
+              <th data-i18n="team_col">Equipe</th>
+              <th data-i18n="hire_date_col">Date embauche</th>
+              <th data-i18n="earned_leave_col">Congés acquis</th>
+              <th data-i18n="taken_leave_col">Congés pris</th>
+              <th data-i18n="remaining_leave_col">Congés restants</th>
+              <th data-i18n="leave_history_col">Historique des congés</th>
+              <th data-i18n="status_col">Statut</th>
+              <th data-i18n="action_col">Action</th>
             </tr>
           </thead>
           <tbody id="liste-employes">
             <tr>
-              <td colspan="9" class="vide">Aucun employé enregistré</td>
+              <td colspan="9" class="vide" data-i18n="no_employee_registered">Aucun employé enregistré</td>
             </tr>
           </tbody>
         </table>
       </section>
 
       <section class="carte">
-        <h2>Nouvelle demande de congé</h2>
-        <div id="bloc-demande-vide" class="message-vide" hidden>Aucun employé disponible</div>
+        <h2 data-i18n="new_leave_request_title">Nouvelle demande de congé</h2>
+        <div id="bloc-demande-vide" class="message-vide" hidden data-i18n="no_employee_available">Aucun employé disponible</div>
         <form id="formulaire-demande-conge" class="grille-formulaire" hidden>
           <label>
-            Employé
+            <span data-i18n="employee_col">Employé</span>
             <select id="employe-demande" required></select>
           </label>
 
           <label>
-            Date de début
+            <span data-i18n="start_date_label">Date de début</span>
             <input type="date" id="demande-date-debut" required />
           </label>
 
           <label>
-            Date de fin
+            <span data-i18n="end_date_label">Date de fin</span>
             <input type="date" id="demande-date-fin" required />
           </label>
 
-          <button type="submit">Ajouter la demande</button>
+          <button type="submit" data-i18n="add_request_button">Ajouter la demande</button>
         </form>
       </section>
 
       <section class="carte">
-        <h2>Demandes de congés en attente</h2>
+        <h2 data-i18n="pending_requests_title">Demandes de congés en attente</h2>
         <ul id="liste-demandes-en-attente" class="liste-demandes">
-          <li class="vide">Chargement...</li>
+          <li class="vide" data-i18n="loading">Chargement...</li>
         </ul>
       </section>
 
       <section class="carte" data-zone="resume">
-        <h2>Résumé</h2>
+        <h2 data-i18n="summary_title">Résumé</h2>
         <table>
           <thead>
             <tr>
-              <th>Nom</th>
-              <th>Date d'entrée</th>
-              <th>Congés acquis</th>
-              <th>Congés pris</th>
-              <th>Congés restants</th>
+              <th data-i18n="name_col">Nom</th>
+              <th data-i18n="entry_date_col">Date d'entrée</th>
+              <th data-i18n="earned_leave_col">Congés acquis</th>
+              <th data-i18n="taken_leave_col">Congés pris</th>
+              <th data-i18n="remaining_leave_col">Congés restants</th>
             </tr>
           </thead>
           <tbody id="liste-resume">
             <tr>
-              <td colspan="5" class="vide">Aucun employé enregistré</td>
+              <td colspan="5" class="vide" data-i18n="no_employee_registered">Aucun employé enregistré</td>
             </tr>
           </tbody>
         </table>
       </section>
 
       <section class="carte" data-zone="sauvegarde">
-        <h2>Sauvegarde</h2>
-        <p class="message-vide">La sauvegarde est gérée automatiquement par le système existant.</p>
+        <h2 data-i18n="save_title">Sauvegarde</h2>
+        <p class="message-vide" data-i18n="save_auto_message">La sauvegarde est gérée automatiquement par le système existant.</p>
       </section>
 
       <section class="carte">
-        <h2>Calendrier des congés</h2>
+        <h2 data-i18n="calendar_title">Calendrier des congés</h2>
         <div id="calendrier-conges-mois"></div>
       </section>
     </section>
