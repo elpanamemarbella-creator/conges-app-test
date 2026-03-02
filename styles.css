@@ -1,10 +1,10 @@
 :root {
-  --fond: #f4f7fb;
+  --fond: #f5f6fa;
   --carte: #ffffff;
   --texte: #17212f;
   --discret: #5c6978;
-  --primaire: #2668f6;
-  --primaire-fonce: #1b50c5;
+  --primaire: #2c7be5;
+  --primaire-fonce: #1f69ca;
   --bon: #127a45;
   --vigilance: #9b6a09;
   --danger: #c53131;
@@ -17,25 +17,44 @@
 
 body {
   margin: 0;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family: system-ui, Arial, sans-serif;
   background: var(--fond);
   color: var(--texte);
 }
 
 .conteneur {
-  width: min(1180px, 92vw);
+  width: min(1000px, 92vw);
   margin: 2rem auto;
   display: grid;
   gap: 1.25rem;
 }
 
-header h1 {
-  margin-bottom: 0.25rem;
+.entete-app {
+  text-align: center;
 }
 
-header p {
-  margin: 0;
-  color: var(--discret);
+.entete-app h1 {
+  margin: 0 0 1rem;
+}
+
+.menu {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.menu-onglet {
+  min-width: 130px;
+}
+
+.menu-onglet.actif {
+  background: var(--primaire-fonce);
+}
+
+.zone-onglet {
+  display: grid;
+  gap: 1.25rem;
 }
 
 .carte {
@@ -43,7 +62,7 @@ header p {
   border: 1px solid var(--bordure);
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 2px 8px rgba(20, 33, 52, 0.05);
+  box-shadow: 0 4px 14px rgba(20, 33, 52, 0.06);
 }
 
 .grille-formulaire {
@@ -71,6 +90,7 @@ select {
   border-radius: 8px;
   padding: 0.55rem 0.65rem;
   font-size: 0.95rem;
+  min-height: 40px;
 }
 
 input:focus,
@@ -86,6 +106,7 @@ button {
   background: var(--primaire);
   color: #fff;
   padding: 0.65rem 0.9rem;
+  min-height: 40px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -217,6 +238,7 @@ th {
   color: var(--danger);
   padding: 0;
   text-align: left;
+  min-height: auto;
 }
 
 .bouton-supprimer:hover {
@@ -341,4 +363,3 @@ th {
 .bouton-refuser:hover {
   background: #a62222;
 }
-

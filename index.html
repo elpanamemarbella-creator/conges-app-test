@@ -23,100 +23,134 @@ initializeApp(firebaseConfig);
 </head>
 <body>
   <main class="conteneur">
-    <header>
+    <header class="entete-app carte">
       <h1>Gestion des congés employés</h1>
-      <p>Version 4 - Demandes de congés par dates avec calcul automatique.</p>
+      <nav class="menu" aria-label="Navigation principale">
+        <button type="button" class="menu-onglet actif" data-onglet="employes">Employés</button>
+        <button type="button" class="menu-onglet" data-onglet="resume">Résumé</button>
+        <button type="button" class="menu-onglet" data-onglet="sauvegarde">Sauvegarde</button>
+      </nav>
     </header>
 
-    <section class="carte">
-      <h2>Ajouter un employé</h2>
-      <form id="formulaire-employe" class="grille-formulaire">
-        <label>
-          Nom de l'employé
-          <input type="text" id="nom-employe" required placeholder="ex. Alex Martin" />
-        </label>
+    <section class="zone-onglet" data-zone="employes">
+      <section class="carte">
+        <h2>Ajouter un employé</h2>
+        <form id="formulaire-employe" class="grille-formulaire">
+          <label>
+            Nom de l'employé
+            <input type="text" id="nom-employe" required placeholder="ex. Alex Martin" />
+          </label>
 
-        <label>
-          Equipe
-          <select id="equipe-employe" required>
-            <option value="">Sélectionner une équipe</option>
-            <option value="Bar matin">Bar matin</option>
-            <option value="Salle matin">Salle matin</option>
-            <option value="Bar soir">Bar soir</option>
-            <option value="Salle soir">Salle soir</option>
-            <option value="Cuisine">Cuisine</option>
-            <option value="Extras">Extras</option>
-          </select>
-        </label>
+          <label>
+            Equipe
+            <select id="equipe-employe" required>
+              <option value="">Sélectionner une équipe</option>
+              <option value="Bar matin">Bar matin</option>
+              <option value="Salle matin">Salle matin</option>
+              <option value="Bar soir">Bar soir</option>
+              <option value="Salle soir">Salle soir</option>
+              <option value="Cuisine">Cuisine</option>
+              <option value="Extras">Extras</option>
+            </select>
+          </label>
 
-        <label>
-          Date d'embauche
-          <input type="date" id="date-embauche" required />
-        </label>
+          <label>
+            Date d'embauche
+            <input type="date" id="date-embauche" required />
+          </label>
 
-        <label>
-          Congés déjà pris
-          <input type="number" id="conges-pris" min="0" step="0.5" value="0" required />
-        </label>
+          <label>
+            Congés déjà pris
+            <input type="number" id="conges-pris" min="0" step="0.5" value="0" required />
+          </label>
 
-        <button type="submit">Ajouter employé</button>
-      </form>
+          <button type="submit">Ajouter employé</button>
+        </form>
+      </section>
+
+      <section class="carte">
+        <h2>Employés</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Employé</th>
+              <th>Equipe</th>
+              <th>Date embauche</th>
+              <th>Congés acquis</th>
+              <th>Congés pris</th>
+              <th>Congés restants</th>
+              <th>Historique des congés</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="liste-employes">
+            <tr>
+              <td colspan="9" class="vide">Aucun employé enregistré</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="carte">
+        <h2>Nouvelle demande de congé</h2>
+        <div id="bloc-demande-vide" class="message-vide" hidden>Aucun employé disponible</div>
+        <form id="formulaire-demande-conge" class="grille-formulaire" hidden>
+          <label>
+            Employé
+            <select id="employe-demande" required></select>
+          </label>
+
+          <label>
+            Date de début
+            <input type="date" id="demande-date-debut" required />
+          </label>
+
+          <label>
+            Date de fin
+            <input type="date" id="demande-date-fin" required />
+          </label>
+
+          <button type="submit">Ajouter la demande</button>
+        </form>
+      </section>
+
+      <section class="carte">
+        <h2>Demandes de congés en attente</h2>
+        <ul id="liste-demandes-en-attente" class="liste-demandes">
+          <li class="vide">Chargement...</li>
+        </ul>
+      </section>
     </section>
 
-    <section class="carte">
-      <h2>Employés</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Employé</th>
-            <th>Equipe</th>
-            <th>Date embauche</th>
-            <th>Congés acquis</th>
-            <th>Congés pris</th>
-            <th>Congés restants</th>
-            <th>Historique des congés</th>
-            <th>Statut</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="liste-employes">
-          <tr>
-            <td colspan="9" class="vide">Aucun employé enregistré</td>
-          </tr>
-        </tbody>
-      </table>
+    <section class="zone-onglet" data-zone="resume" hidden>
+      <section class="carte">
+        <h2>Résumé</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Date d'entrée</th>
+              <th>Congés acquis</th>
+              <th>Congés pris</th>
+              <th>Congés restants</th>
+            </tr>
+          </thead>
+          <tbody id="liste-resume">
+            <tr>
+              <td colspan="5" class="vide">Aucun employé enregistré</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
     </section>
 
-    <section class="carte">
-      <h2>Nouvelle demande de congé</h2>
-      <div id="bloc-demande-vide" class="message-vide" hidden>Aucun employé disponible</div>
-      <form id="formulaire-demande-conge" class="grille-formulaire" hidden>
-        <label>
-          Employé
-          <select id="employe-demande" required></select>
-        </label>
-
-        <label>
-          Date de début
-          <input type="date" id="demande-date-debut" required />
-        </label>
-
-        <label>
-          Date de fin
-          <input type="date" id="demande-date-fin" required />
-        </label>
-
-        <button type="submit">Ajouter la demande</button>
-      </form>
+    <section class="zone-onglet" data-zone="sauvegarde" hidden>
+      <section class="carte">
+        <h2>Sauvegarde</h2>
+        <p class="message-vide">La sauvegarde est gérée automatiquement par le système existant.</p>
+      </section>
     </section>
-
-    <section class="carte">
-      <h2>Demandes de congés en attente</h2>
-      <ul id="liste-demandes-en-attente" class="liste-demandes">
-        <li class="vide">Chargement...</li>
-      </ul>
-    </section>
-
   </main>
 
   <script type="module" src="app.js"></script>

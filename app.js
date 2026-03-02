@@ -41,6 +41,10 @@ const employeDemandeSelect = document.getElementById("employe-demande");
 const blocDemandeVide = document.getElementById("bloc-demande-vide");
 const listeDemandesEnAttente = document.getElementById("liste-demandes-en-attente");
 
+const listeResume = document.getElementById("liste-resume");
+const menuOnglets = document.querySelectorAll(".menu-onglet");
+const zonesOnglets = document.querySelectorAll("[data-zone]");
+
 let employes = [];
 let conges = [];
 
@@ -196,6 +200,7 @@ async function rafraichirDonnees() {
   afficherEmployes();
   afficherBlocDemandeConge();
   afficherDemandesEnAttente();
+  afficherResume();
 }
 
 async function initApp() {
@@ -208,6 +213,14 @@ async function initApp() {
 }
 
 initApp();
+
+menuOnglets.forEach((onglet) => {
+  onglet.addEventListener("click", () => {
+    afficherOnglet(onglet.dataset.onglet || "employes");
+  });
+});
+
+afficherOnglet("employes");
 
 listeEmployes.addEventListener("click", async (e) => {
   const btn = e.target.closest("[data-supprimer-id]");
@@ -530,6 +543,44 @@ function afficherDemandesEnAttente() {
     .join("");
 }
 
+
+
+function afficherOnglet(nomOnglet) {
+  zonesOnglets.forEach((zone) => {
+    zone.hidden = zone.dataset.zone !== nomOnglet;
+  });
+
+  menuOnglets.forEach((onglet) => {
+    onglet.classList.toggle("actif", onglet.dataset.onglet === nomOnglet);
+  });
+}
+
+function afficherResume() {
+  if (!employes.length) {
+    listeResume.innerHTML = '<tr><td colspan="5" class="vide">Aucun employé enregistré</td></tr>';
+    return;
+  }
+
+  const employesTries = [...employes].sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
+
+  listeResume.innerHTML = employesTries
+    .map((employe) => {
+      const congesAcquis = calculerCongesAcquis(employe.dateEmbauche);
+      const congesPris = arrondir1Decimale(Number(employe.congesPris) || 0);
+      const congesRestants = arrondir1Decimale(congesAcquis - congesPris);
+
+      return `
+        <tr>
+          <td data-label="Nom">${echapperHtml(employe.nom)}</td>
+          <td data-label="Date d'entrée">${formaterDateFr(employe.dateEmbauche)}</td>
+          <td data-label="Congés acquis">${congesAcquis.toFixed(1)}</td>
+          <td data-label="Congés pris">${congesPris.toFixed(1)}</td>
+          <td data-label="Congés restants">${congesRestants.toFixed(1)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+}
 
 function afficherHistorique(historiqueConges) {
   if (!historiqueConges.length) {
