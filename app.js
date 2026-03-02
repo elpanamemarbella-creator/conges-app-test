@@ -23,7 +23,7 @@ const db = getFirestore(app);
 
 const ORDRE_EQUIPES = ["Bar matin", "Salle matin", "Bar soir", "Salle soir", "Cuisine", "Extra"];
 const PALETTE_COULEURS = ["#2f80ed", "#eb5757", "#27ae60", "#f2994a", "#9b51e0", "#00b8d9", "#e84393", "#6c5ce7"];
-const ANNEE_CALENDRIER = 2026;
+const CODE_MANAGER = "2005";
 
 const CLASSES_EQUIPE = {
   "Bar matin": "bar-matin",
@@ -40,8 +40,6 @@ const listeEmployes = document.getElementById("liste-employes");
 const employeDemandeSelect = document.getElementById("employe-demande");
 const blocDemandeVide = document.getElementById("bloc-demande-vide");
 const listeDemandesEnAttente = document.getElementById("liste-demandes-en-attente");
-const legendeEmployes = document.getElementById("legende-employes");
-const calendrier2026 = document.getElementById("calendrier-2026");
 
 let employes = [];
 let conges = [];
@@ -198,8 +196,6 @@ async function rafraichirDonnees() {
   afficherEmployes();
   afficherBlocDemandeConge();
   afficherDemandesEnAttente();
-  afficherLegendeEmployes();
-  afficherCalendrier2026();
 }
 
 async function initApp() {
@@ -238,6 +234,12 @@ listeDemandesEnAttente.addEventListener("click", async (event) => {
   }
 
   const nouveauStatut = boutonValidation ? "valide" : "refuse";
+  const codeSaisi = window.prompt("Entrer le code manager");
+
+  if (codeSaisi !== CODE_MANAGER) {
+    alert("Code incorrect");
+    return;
+  }
 
   try {
     await setDoc(
@@ -528,76 +530,6 @@ function afficherDemandesEnAttente() {
     .join("");
 }
 
-function afficherLegendeEmployes() {
-  if (!employes.length) {
-    legendeEmployes.innerHTML = '<li class="vide">Aucun employé</li>';
-    return;
-  }
-
-  const employesTries = [...employes].sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
-  legendeEmployes.innerHTML = employesTries
-    .map(
-      (employe) =>
-        `<li><span class="pastille-couleur" style="background:${echapperHtml(employe.couleur)}"></span>${echapperHtml(employe.nom)}</li>`,
-    )
-    .join("");
-}
-
-function afficherCalendrier2026() {
-  const congesValides = conges.filter((conge) => conge.statut === "valide");
-  const congesParDate = construireCongesParDate(congesValides);
-
-  calendrier2026.innerHTML = Array.from({ length: 12 }, (_, mois) => {
-    const joursDuMois = new Date(ANNEE_CALENDRIER, mois + 1, 0).getDate();
-
-    const cellules = Array.from({ length: joursDuMois }, (_, index) => {
-      const jour = index + 1;
-      const cleDate = `${ANNEE_CALENDRIER}-${String(mois + 1).padStart(2, "0")}-${String(jour).padStart(2, "0")}`;
-      const occupants = congesParDate.get(cleDate) || [];
-      const premierOccupant = occupants[0];
-      const couleurFond = premierOccupant?.couleur || "transparent";
-      const couleurTexte = premierOccupant ? "#ffffff" : "#22313f";
-      const titre = occupants.length
-        ? occupants.map((entry) => `${entry.nom} (${formaterDateFr(cleDate)})`).join(" • ")
-        : formaterDateFr(cleDate);
-
-      return `<div class="jour-case" style="background:${couleurFond};color:${couleurTexte}" title="${echapperHtml(titre)}">${jour}</div>`;
-    }).join("");
-
-    return `
-      <article class="mois-bloc">
-        <h3>${nomMoisFrancais(mois)} ${ANNEE_CALENDRIER}</h3>
-        <div class="grille-jours">${cellules}</div>
-      </article>
-    `;
-  }).join("");
-}
-
-function construireCongesParDate(congesValides) {
-  const resultat = new Map();
-
-  congesValides.forEach((conge) => {
-    const employe = employes.find((entry) => entry.id === conge.idEmploye);
-    const nom = employe?.nom || "Employé inconnu";
-    const couleur = employe?.couleur || "#95a5a6";
-
-    const debut = new Date(`${conge.dateDebut}T00:00:00`);
-    const fin = new Date(`${conge.dateFin}T00:00:00`);
-
-    for (const date = new Date(debut); date <= fin; date.setDate(date.getDate() + 1)) {
-      if (date.getFullYear() !== ANNEE_CALENDRIER) {
-        continue;
-      }
-
-      const cleDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-      const liste = resultat.get(cleDate) || [];
-      liste.push({ nom, couleur });
-      resultat.set(cleDate, liste);
-    }
-  });
-
-  return resultat;
-}
 
 function afficherHistorique(historiqueConges) {
   if (!historiqueConges.length) {
@@ -610,23 +542,6 @@ function afficherHistorique(historiqueConges) {
         `<div class="ligne-historique">${formaterDateFr(conge.dateDebut)} → ${formaterDateFr(conge.dateFin)} (${conge.jours} jour${conge.jours > 1 ? "s" : ""})</div>`,
     )
     .join("");
-}
-
-function nomMoisFrancais(indexMois) {
-  return [
-    "Janvier",
-    "Février",
-    "Mars",
-    "Avril",
-    "Mai",
-    "Juin",
-    "Juillet",
-    "Août",
-    "Septembre",
-    "Octobre",
-    "Novembre",
-    "Décembre",
-  ][indexMois];
 }
 
 function formaterDateFr(dateBrute) {
