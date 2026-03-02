@@ -220,7 +220,6 @@ menuOnglets.forEach((onglet) => {
   });
 });
 
-afficherOnglet("employes");
 
 listeEmployes.addEventListener("click", async (e) => {
   const btn = e.target.closest("[data-supprimer-id]");
@@ -545,15 +544,13 @@ function afficherDemandesEnAttente() {
 
 
 
-function afficherOnglet(nomOnglet) {
+function afficherOnglet() {
   zonesOnglets.forEach((zone) => {
-    zone.hidden = zone.dataset.zone !== nomOnglet;
-  });
-
-  menuOnglets.forEach((onglet) => {
-    onglet.classList.toggle("actif", onglet.dataset.onglet === nomOnglet);
+    zone.hidden = false;
   });
 }
+
+afficherOnglet();
 
 function afficherResume() {
   if (!employes.length) {

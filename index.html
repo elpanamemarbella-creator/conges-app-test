@@ -23,13 +23,8 @@ initializeApp(firebaseConfig);
 </head>
 <body>
   <main class="conteneur">
-    <header class="entete-app carte">
+    <header class="entete-app">
       <h1>Gestion des congés employés</h1>
-      <nav class="menu" aria-label="Navigation principale">
-        <button type="button" class="menu-onglet actif" data-onglet="employes">Employés</button>
-        <button type="button" class="menu-onglet" data-onglet="resume">Résumé</button>
-        <button type="button" class="menu-onglet" data-onglet="sauvegarde">Sauvegarde</button>
-      </nav>
     </header>
 
     <section class="zone-onglet" data-zone="employes">
@@ -121,10 +116,8 @@ initializeApp(firebaseConfig);
           <li class="vide">Chargement...</li>
         </ul>
       </section>
-    </section>
 
-    <section class="zone-onglet" data-zone="resume" hidden>
-      <section class="carte">
+      <section class="carte" data-zone="resume">
         <h2>Résumé</h2>
         <table>
           <thead>
@@ -143,10 +136,8 @@ initializeApp(firebaseConfig);
           </tbody>
         </table>
       </section>
-    </section>
 
-    <section class="zone-onglet" data-zone="sauvegarde" hidden>
-      <section class="carte">
+      <section class="carte" data-zone="sauvegarde">
         <h2>Sauvegarde</h2>
         <p class="message-vide">La sauvegarde est gérée automatiquement par le système existant.</p>
       </section>
