@@ -29,6 +29,11 @@ initializeApp(firebaseConfig);
 
     <section class="zone-onglet" data-zone="employes">
       <section class="carte">
+        <h2>Tableau de bord</h2>
+        <div class="tableau-bord" id="tableau-bord"></div>
+      </section>
+
+      <section class="carte">
         <h2>Ajouter un employé</h2>
         <form id="formulaire-employe" class="grille-formulaire">
           <label>
@@ -65,6 +70,28 @@ initializeApp(firebaseConfig);
 
       <section class="carte">
         <h2>Employés</h2>
+        <div class="barre-filtres">
+          <label>
+            Filtre équipe
+            <select id="filtre-equipe">
+              <option value="Toutes les équipes">Toutes les équipes</option>
+              <option value="Bar matin">Bar matin</option>
+              <option value="Salle matin">Salle matin</option>
+              <option value="Bar soir">Bar soir</option>
+              <option value="Salle soir">Salle soir</option>
+              <option value="Cuisine">Cuisine</option>
+              <option value="Extra">Extra</option>
+            </select>
+          </label>
+
+          <label>
+            Recherche employé
+            <input type="search" id="recherche-employe" placeholder="Rechercher un employé" />
+          </label>
+
+          <button type="button" id="bouton-export-excel">Exporter Excel</button>
+        </div>
+
         <table>
           <thead>
             <tr>
@@ -141,9 +168,15 @@ initializeApp(firebaseConfig);
         <h2>Sauvegarde</h2>
         <p class="message-vide">La sauvegarde est gérée automatiquement par le système existant.</p>
       </section>
+
+      <section class="carte">
+        <h2>Calendrier des congés</h2>
+        <div id="calendrier-conges-mois"></div>
+      </section>
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

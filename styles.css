@@ -58,6 +58,41 @@ body {
   font-size: 1.1rem;
 }
 
+.tableau-bord {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.7rem;
+}
+
+.tuile-kpi {
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+  padding: 0.75rem;
+  background: #f8fbff;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.kpi-titre {
+  color: var(--discret);
+  font-size: 0.9rem;
+}
+
+.kpi-valeur {
+  font-size: 1.5rem;
+}
+
+.barre-filtres {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.8rem;
+  align-items: end;
+}
+
+.barre-filtres button {
+  width: fit-content;
+}
+
 .grille-formulaire {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -304,6 +339,32 @@ th {
   background: #a62222;
 }
 
+#calendrier-conges-mois {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.ligne-calendrier {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 0.7rem;
+  align-items: center;
+}
+
+.barre-conges {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  min-height: 14px;
+}
+
+.bloc-conge {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
 @media (max-width: 940px) {
   table,
   thead,
@@ -367,5 +428,9 @@ th {
   .demande-item {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .ligne-calendrier {
+    grid-template-columns: 1fr;
   }
 }
