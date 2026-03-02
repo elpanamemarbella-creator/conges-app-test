@@ -396,6 +396,70 @@ th {
   display: inline-block;
 }
 
+.modal-manager {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: grid;
+  place-items: center;
+}
+
+.modal-manager[hidden] {
+  display: none;
+}
+
+.modal-manager__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 33, 52, 0.38);
+}
+
+.modal-manager__carte {
+  position: relative;
+  z-index: 1;
+  width: min(92vw, 360px);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  padding: 1rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.modal-manager__carte h3 {
+  margin: 0;
+}
+
+.modal-manager__erreur {
+  color: var(--danger);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.modal-manager__actions {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.modal-manager__actions button {
+  flex: 1;
+  min-height: 40px;
+  background: #2c7be5;
+  color: #fff;
+}
+
+.modal-manager__actions button:hover {
+  background: #1f69ca;
+}
+
+.modal-manager__annuler {
+  background: #7d8b9c;
+}
+
+.modal-manager__annuler:hover {
+  background: #6c7988;
+}
+
 @media (max-width: 940px) {
   table,
   thead,
