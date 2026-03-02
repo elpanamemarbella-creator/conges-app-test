@@ -183,6 +183,19 @@ initializeApp(firebaseConfig);
     </section>
   </main>
 
+  <div id="manager-modal" class="modal-manager" hidden>
+    <div class="modal-manager__overlay" data-modal-close></div>
+    <div class="modal-manager__carte" role="dialog" aria-modal="true" aria-labelledby="manager-modal-titre">
+      <h3 id="manager-modal-titre">Code manager requis</h3>
+      <input id="manager-code-input" type="password" autocomplete="off" />
+      <p id="manager-modal-erreur" class="modal-manager__erreur" hidden>Code incorrect</p>
+      <div class="modal-manager__actions">
+        <button type="button" id="manager-modal-valider">Valider</button>
+        <button type="button" id="manager-modal-annuler" class="modal-manager__annuler">Annuler</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script type="module" src="app.js"></script>
 </body>

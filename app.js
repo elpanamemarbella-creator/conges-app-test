@@ -163,6 +163,11 @@ const rechercheEmployeInput = document.getElementById("recherche-employe");
 const tableauBord = document.getElementById("tableau-bord");
 const boutonExportExcel = document.getElementById("bouton-export-excel");
 const calendrierCongesMois = document.getElementById("calendrier-conges-mois");
+const managerModal = document.getElementById("manager-modal");
+const managerCodeInput = document.getElementById("manager-code-input");
+const managerModalErreur = document.getElementById("manager-modal-erreur");
+const managerModalValider = document.getElementById("manager-modal-valider");
+const managerModalAnnuler = document.getElementById("manager-modal-annuler");
 const menuOnglets = document.querySelectorAll(".menu-onglet");
 const zonesOnglets = document.querySelectorAll("[data-zone]");
 const boutonsLangue = document.querySelectorAll("[data-langue]");
@@ -404,6 +409,10 @@ listeEmployes.addEventListener("click", async (e) => {
   if (!btn) return;
 
   const id = btn.dataset.supprimerId;
+  const codeValide = await demanderCodeManager();
+  if (!codeValide) {
+    return;
+  }
 
   try {
     await supprimerEmploye(id);
@@ -413,6 +422,68 @@ listeEmployes.addEventListener("click", async (e) => {
     alert(langueCourante === "es" ? "Eliminación imposible por el momento." : "Suppression impossible pour le moment.");
   }
 });
+
+function demanderCodeManager() {
+  return new Promise((resolve) => {
+    if (!managerModal || !managerCodeInput || !managerModalErreur || !managerModalValider || !managerModalAnnuler) {
+      resolve(false);
+      return;
+    }
+
+    const fermer = (resultat) => {
+      managerModal.hidden = true;
+      managerCodeInput.value = "";
+      managerModalErreur.hidden = true;
+      managerCodeInput.removeEventListener("keydown", gererClavier);
+      managerModalValider.removeEventListener("click", valider);
+      managerModalAnnuler.removeEventListener("click", annuler);
+      managerModal.removeEventListener("click", gererFermetureOverlay);
+      resolve(resultat);
+    };
+
+    const valider = () => {
+      if (managerCodeInput.value === CODE_MANAGER) {
+        fermer(true);
+        return;
+      }
+
+      managerModalErreur.hidden = false;
+      managerCodeInput.focus();
+      managerCodeInput.select();
+    };
+
+    const annuler = () => {
+      fermer(false);
+    };
+
+    const gererClavier = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        valider();
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        annuler();
+      }
+    };
+
+    const gererFermetureOverlay = (event) => {
+      if (event.target.hasAttribute("data-modal-close")) {
+        annuler();
+      }
+    };
+
+    managerModal.hidden = false;
+    managerCodeInput.value = "";
+    managerModalErreur.hidden = true;
+    managerModalValider.addEventListener("click", valider);
+    managerModalAnnuler.addEventListener("click", annuler);
+    managerCodeInput.addEventListener("keydown", gererClavier);
+    managerModal.addEventListener("click", gererFermetureOverlay);
+    managerCodeInput.focus();
+  });
+}
 
 listeDemandesEnAttente.addEventListener("click", async (event) => {
   const boutonValidation = event.target.closest("[data-valider-id]");
