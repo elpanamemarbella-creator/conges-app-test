@@ -5,7 +5,6 @@ import {
   doc,
   setDoc,
   addDoc,
-  deleteDoc,
   getDocs,
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
@@ -77,6 +76,9 @@ const TRADUCTIONS = {
     kpi_employees: "Employés",
     kpi_pending_requests: "Demandes en attente",
     kpi_on_leave_today: "En congé aujourd'hui",
+    archived_employees_title: "Employés archivés",
+    no_archived_employee: "Aucun employé archivé",
+    reactivate: "Réactiver",
   },
   es: {
     app_title: "Gestión de vacaciones empleados",
@@ -133,6 +135,9 @@ const TRADUCTIONS = {
     kpi_employees: "Empleados",
     kpi_pending_requests: "Solicitudes pendientes",
     kpi_on_leave_today: "De vacaciones hoy",
+    archived_employees_title: "Empleados archivados",
+    no_archived_employee: "Ningún empleado archivado",
+    reactivate: "Reactivar",
   },
 };
 
@@ -158,6 +163,7 @@ const blocDemandeVide = document.getElementById("bloc-demande-vide");
 const listeDemandesEnAttente = document.getElementById("liste-demandes-en-attente");
 
 const listeResume = document.getElementById("liste-resume");
+const listeEmployesArchives = document.getElementById("liste-employes-archives");
 const filtreEquipeSelect = document.getElementById("filtre-equipe");
 const rechercheEmployeInput = document.getElementById("recherche-employe");
 const tableauBord = document.getElementById("tableau-bord");
@@ -175,6 +181,8 @@ const boutonsLangue = document.querySelectorAll("[data-langue]");
 let employes = [];
 let conges = [];
 let employesFiltres = [];
+let employesActifs = [];
+let employesArchives = [];
 let langueCourante = "fr";
 
 function t(cle) {
@@ -357,6 +365,8 @@ async function rafraichirDonnees() {
   await garantirCouleursEmployes(employesBruts);
 
   employes = fusionnerEmployesEtConges(employesBruts, congesCharges);
+  employesActifs = employes.filter((employe) => employe.actif !== false);
+  employesArchives = employes.filter((employe) => employe.actif === false);
   conges = congesCharges;
 
   afficherEmployes();
@@ -420,6 +430,19 @@ listeEmployes.addEventListener("click", async (e) => {
   } catch (erreur) {
     console.error("Erreur suppression employé :", erreur);
     alert(langueCourante === "es" ? "Eliminación imposible por el momento." : "Suppression impossible pour le moment.");
+  }
+});
+
+listeEmployesArchives?.addEventListener("click", async (event) => {
+  const btn = event.target.closest("[data-reactiver-id]");
+  if (!btn) return;
+
+  try {
+    await reactiverEmploye(btn.dataset.reactiverId);
+    await rafraichirDonnees();
+  } catch (erreur) {
+    console.error("Erreur réactivation employé :", erreur);
+    alert(langueCourante === "es" ? "Reactivación imposible por el momento." : "Réactivation impossible pour le moment.");
   }
 });
 
@@ -528,6 +551,7 @@ formulaireEmploye.addEventListener("submit", async (event) => {
     congesPris: Number(document.getElementById("conges-pris").value),
     historiqueConges: [],
     couleur: "",
+    actif: true,
   };
 
   if (!validerEmploye(nouvelEmploye)) {
@@ -658,7 +682,23 @@ function determinerStatut(congesRestants) {
 }
 
 async function supprimerEmploye(id) {
-  await deleteDoc(doc(db, "employes", id));
+  await setDoc(
+    doc(db, "employes", id),
+    {
+      actif: false,
+    },
+    { merge: true },
+  );
+}
+
+async function reactiverEmploye(id) {
+  await setDoc(
+    doc(db, "employes", id),
+    {
+      actif: true,
+    },
+    { merge: true },
+  );
 }
 
 function calculerJoursOuvresInclus(dateDebut, dateFin) {
@@ -684,7 +724,7 @@ function calculerJoursOuvresInclus(dateDebut, dateFin) {
 }
 
 function trierEmployesParEquipe() {
-  return [...employes].sort((a, b) => {
+  return [...employesActifs].sort((a, b) => {
     const indexA = ORDRE_EQUIPES.indexOf(a.equipe);
     const indexB = ORDRE_EQUIPES.indexOf(b.equipe);
 
@@ -708,9 +748,10 @@ function obtenirEmployesFiltres() {
 }
 
 function afficherEmployes() {
-  if (!employes.length) {
+  if (!employesActifs.length) {
     listeEmployes.innerHTML = `<tr><td colspan="9" class="vide">${t("no_employee_registered")}</td></tr>`;
     employesFiltres = [];
+    afficherEmployesArchives();
     return;
   }
 
@@ -719,6 +760,7 @@ function afficherEmployes() {
 
   if (!employesTries.length) {
     listeEmployes.innerHTML = `<tr><td colspan="9" class="vide">${t("no_employee_matching")}</td></tr>`;
+    afficherEmployesArchives();
     return;
   }
 
@@ -759,6 +801,34 @@ function afficherEmployes() {
       `;
     })
     .join("");
+
+  afficherEmployesArchives();
+}
+
+function afficherEmployesArchives() {
+  if (!listeEmployesArchives) {
+    return;
+  }
+
+  if (!employesArchives.length) {
+    listeEmployesArchives.innerHTML = `<tr><td colspan="4" class="vide">${t("no_archived_employee")}</td></tr>`;
+    return;
+  }
+
+  const employesTries = [...employesArchives].sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
+
+  listeEmployesArchives.innerHTML = employesTries
+    .map(
+      (employe) => `
+      <tr>
+        <td>${echapperHtml(employe.nom)}</td>
+        <td>${echapperHtml(employe.equipe)}</td>
+        <td>${formaterDateFr(employe.dateEmbauche)}</td>
+        <td class="cellule-actions"><button class="bouton-secondaire" data-reactiver-id="${employe.id}">${t("reactivate")}</button></td>
+      </tr>
+    `,
+    )
+    .join("");
 }
 
 function afficherTableauBord() {
@@ -766,7 +836,7 @@ function afficherTableauBord() {
     return;
   }
 
-  const totalEmployes = employes.length;
+  const totalEmployes = employesActifs.length;
   const demandesEnAttente = conges.filter((conge) => conge.statut === "en_attente").length;
   const employesEnCongeAujourdhui = calculerEmployesEnCongeAujourdHui();
 
@@ -901,7 +971,7 @@ function extraireJoursCongeDansMois(employe, debutMois, finMois) {
 }
 
 function afficherBlocDemandeConge() {
-  if (!employes.length) {
+  if (!employesActifs.length) {
     blocDemandeVide.hidden = false;
     formulaireDemandeConge.hidden = true;
     employeDemandeSelect.innerHTML = "";
@@ -960,12 +1030,12 @@ function afficherOnglet() {
 afficherOnglet();
 
 function afficherResume() {
-  if (!employes.length) {
+  if (!employesActifs.length) {
     listeResume.innerHTML = `<tr><td colspan="5" class="vide">${t("no_employee_registered")}</td></tr>`;
     return;
   }
 
-  const employesTries = [...employes].sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
+  const employesTries = [...employesActifs].sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
 
   listeResume.innerHTML = employesTries
     .map((employe) => {
