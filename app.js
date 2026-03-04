@@ -277,7 +277,7 @@ function normaliserConge(id, conge) {
   const idEmploye = conge.idEmploye || conge.employeId || "";
   const dateDebut = conge.dateDebut || "";
   const dateFin = conge.dateFin || "";
-  const jours = Number(conge.jours) || calculJoursCalendaires(dateDebut, dateFin);
+  const jours = calculJoursCalendaires(dateDebut, dateFin);
 
   return {
     id,
@@ -292,14 +292,34 @@ function normaliserConge(id, conge) {
 async function chargerConges() {
   const querySnapshot = await getDocs(collection(db, "conges"));
   const liste = [];
+  const misesAJourJours = [];
 
   querySnapshot.forEach((entry) => {
-    const conge = normaliserConge(entry.id, entry.data());
+    const donneesBrutes = entry.data();
+    const joursStockes = Number(donneesBrutes.jours);
+    const conge = normaliserConge(entry.id, donneesBrutes);
     if (!conge.idEmploye || !conge.dateDebut || !conge.dateFin || conge.jours <= 0) {
       return;
     }
+
+    if (joursStockes !== conge.jours) {
+      misesAJourJours.push(
+        setDoc(
+          doc(db, "conges", conge.id),
+          {
+            jours: conge.jours,
+          },
+          { merge: true },
+        ),
+      );
+    }
+
     liste.push(conge);
   });
+
+  if (misesAJourJours.length) {
+    await Promise.all(misesAJourJours);
+  }
 
   return liste;
 }
