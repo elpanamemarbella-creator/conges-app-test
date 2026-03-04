@@ -76,6 +76,7 @@ initializeApp(firebaseConfig);
 
       <section class="carte">
         <h2 data-i18n="employees_title">Employés</h2>
+        <p class="message-vide" data-i18n="history_hint">Cliquer sur un salarié pour afficher l'historique complet de ses demandes.</p>
         <div class="barre-filtres">
           <label>
             <span data-i18n="team_filter_label">Filtre équipe</span>
@@ -119,6 +120,21 @@ initializeApp(firebaseConfig);
             </tr>
           </tbody>
         </table>
+
+        <div id="historique-salarie" class="historique-salarie" hidden>
+          <h3 id="historique-salarie-titre">Historique des congés</h3>
+          <table>
+            <thead>
+              <tr>
+                <th data-i18n="start_date_label">Date de début</th>
+                <th data-i18n="end_date_label">Date de fin</th>
+                <th data-i18n="days_col">Nombre de jours</th>
+                <th data-i18n="status_col">Statut</th>
+              </tr>
+            </thead>
+            <tbody id="historique-salarie-liste"></tbody>
+          </table>
+        </div>
       </section>
 
       <section class="carte">
