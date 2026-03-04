@@ -277,7 +277,7 @@ function normaliserConge(id, conge) {
   const idEmploye = conge.idEmploye || conge.employeId || "";
   const dateDebut = conge.dateDebut || "";
   const dateFin = conge.dateFin || "";
-  const jours = Number(conge.jours) || calculerJoursOuvresInclus(dateDebut, dateFin);
+  const jours = Number(conge.jours) || calculJoursCalendaires(dateDebut, dateFin);
 
   return {
     id,
@@ -653,7 +653,7 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
     return;
   }
 
-  const jours = calculerJoursOuvresInclus(dateDebut, dateFin);
+  const jours = calculJoursCalendaires(dateDebut, dateFin);
 
   if (jours <= 0) {
     alert(langueCourante === "es" ? "La fecha de fin debe ser posterior o igual a la fecha de inicio." : "La date de fin doit être après ou égale à la date de début.");
@@ -877,26 +877,18 @@ async function reactiverEmploye(id) {
   );
 }
 
-function calculerJoursOuvresInclus(dateDebut, dateFin) {
-  const debut = new Date(`${dateDebut}T00:00:00`);
-  const fin = new Date(`${dateFin}T00:00:00`);
+function calculJoursCalendaires(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
 
-  if (Number.isNaN(debut.getTime()) || Number.isNaN(fin.getTime()) || fin < debut) {
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) {
     return 0;
   }
 
-  let compteur = 0;
-  const curseur = new Date(debut);
+  const diffTime = end - start;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-  while (curseur <= fin) {
-    const jourSemaine = curseur.getDay();
-    if (jourSemaine !== 0 && jourSemaine !== 6) {
-      compteur += 1;
-    }
-    curseur.setDate(curseur.getDate() + 1);
-  }
-
-  return compteur;
+  return diffDays;
 }
 
 function trierEmployesParEquipe() {
