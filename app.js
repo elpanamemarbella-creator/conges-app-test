@@ -145,6 +145,17 @@ const ORDRE_EQUIPES = ["Bar matin", "Salle matin", "Bar soir", "Salle soir", "Cu
 const PALETTE_COULEURS = ["#2f80ed", "#eb5757", "#27ae60", "#f2994a", "#9b51e0", "#00b8d9", "#e84393", "#6c5ce7"];
 const CODE_MANAGER = "2005";
 
+const EMAILJS_PUBLIC_KEY = "cBFH1mPW-cT8LzOBh";
+const EMAILJS_SERVICE_ID = "service_ikwsjko";
+const EMAILJS_TEMPLATE_ID = "j95naa";
+
+if (window.emailjs && !window.__emailjsInitialized) {
+  window.emailjs.init(EMAILJS_PUBLIC_KEY);
+  window.__emailjsInitialized = true;
+}
+
+window.__sendingEmail = false;
+
 const CLASSES_EQUIPE = {
   "Bar matin": "bar-matin",
   "Salle matin": "salle-matin",
@@ -161,6 +172,8 @@ const listeEmployes = document.getElementById("liste-employes");
 const employeDemandeSelect = document.getElementById("employe-demande");
 const blocDemandeVide = document.getElementById("bloc-demande-vide");
 const listeDemandesEnAttente = document.getElementById("liste-demandes-en-attente");
+const messageDemandeConge = document.getElementById("message-demande-conge");
+const boutonSoumettreDemande = formulaireDemandeConge?.querySelector('button[type="submit"]');
 
 const listeResume = document.getElementById("liste-resume");
 const listeEmployesArchives = document.getElementById("liste-employes-archives");
@@ -578,6 +591,10 @@ formulaireEmploye.addEventListener("submit", async (event) => {
 formulaireDemandeConge.addEventListener("submit", async (event) => {
   event.preventDefault();
 
+  if (window.__sendingEmail) {
+    return;
+  }
+
   const idEmploye = employeDemandeSelect.value;
   const dateDebut = document.getElementById("demande-date-debut").value;
   const dateFin = document.getElementById("demande-date-fin").value;
@@ -599,23 +616,118 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
     return;
   }
 
+  const employe = employes.find((entry) => entry.id === idEmploye);
+  const demande = {
+    idEmploye,
+    employee_name: employe?.nom || t("unknown_employee"),
+    dateDebut,
+    dateFin,
+    start_date_formatted: formatDateFR(dateDebut),
+    end_date_formatted: formatDateFR(dateFin),
+    days_requested: jours,
+    request_id: genererRequestId(),
+    status: "EN ATTENTE",
+    statut: "en_attente",
+    timestamp: Date.now(),
+  };
+
+  window.__sendingEmail = true;
+  if (boutonSoumettreDemande) {
+    boutonSoumettreDemande.disabled = true;
+  }
+
   try {
     await addDoc(collection(db, "conges"), {
-      idEmploye,
-      dateDebut,
-      dateFin,
-      jours,
-      statut: "en_attente",
-      timestamp: Date.now(),
+      idEmploye: demande.idEmploye,
+      dateDebut: demande.dateDebut,
+      dateFin: demande.dateFin,
+      jours: demande.days_requested,
+      statut: demande.statut,
+      status: demande.status,
+      requestId: demande.request_id,
+      timestamp: demande.timestamp,
     });
+
+    try {
+      await sendLeaveRequestEmail(demande);
+      afficherMessageDemandeConge("Demande créée et email envoyé", "success");
+    } catch (emailErreur) {
+      console.error("Erreur envoi email demande de congé :", emailErreur);
+      afficherMessageDemandeConge("Demande créée, mais email non envoyé", "error");
+    }
 
     formulaireDemandeConge.reset();
     await rafraichirDonnees();
   } catch (erreur) {
     console.error("Erreur ajout congé :", erreur);
     alert(langueCourante === "es" ? "No se puede añadir la solicitud de vacaciones." : "Impossible d'ajouter la demande de congé.");
+  } finally {
+    window.__sendingEmail = false;
+    if (boutonSoumettreDemande) {
+      boutonSoumettreDemande.disabled = false;
+    }
   }
 });
+
+function formatDateFR(yyyy_mm_dd) {
+  if (!yyyy_mm_dd) {
+    return "";
+  }
+
+  const [annee, mois, jour] = yyyy_mm_dd.split("-");
+
+  if (!annee || !mois || !jour) {
+    return yyyy_mm_dd;
+  }
+
+  return `${jour}/${mois}/${annee}`;
+}
+
+function genererRequestId() {
+  const maintenant = new Date();
+  const annee = String(maintenant.getFullYear());
+  const mois = String(maintenant.getMonth() + 1).padStart(2, "0");
+  const jour = String(maintenant.getDate()).padStart(2, "0");
+  const heures = String(maintenant.getHours()).padStart(2, "0");
+  const minutes = String(maintenant.getMinutes()).padStart(2, "0");
+  const secondes = String(maintenant.getSeconds()).padStart(2, "0");
+  const suffixe = Math.random().toString(36).slice(2, 6).toUpperCase().padEnd(4, "X");
+
+  return `LR-${annee}${mois}${jour}-${heures}${minutes}${secondes}-${suffixe}`;
+}
+
+function afficherMessageDemandeConge(message, type = "info") {
+  if (!messageDemandeConge) {
+    return;
+  }
+
+  messageDemandeConge.hidden = false;
+  messageDemandeConge.textContent = message;
+  messageDemandeConge.classList.remove("message-retour-succes", "message-retour-erreur");
+
+  if (type === "success") {
+    messageDemandeConge.classList.add("message-retour-succes");
+  }
+
+  if (type === "error") {
+    messageDemandeConge.classList.add("message-retour-erreur");
+  }
+}
+
+async function sendLeaveRequestEmail(demande) {
+  if (!window.emailjs) {
+    throw new Error("EmailJS indisponible : librairie non chargée.");
+  }
+
+  return window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    employee_name: demande.employee_name,
+    start_date: demande.start_date_formatted,
+    end_date: demande.end_date_formatted,
+    days_requested: demande.days_requested,
+    request_id: demande.request_id,
+    status: demande.status,
+  });
+}
 
 function validerEmploye(employe) {
   if (!employe.nom || !employe.equipe || !employe.dateEmbauche) {
