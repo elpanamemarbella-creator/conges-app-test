@@ -31,6 +31,9 @@ const TRADUCTIONS = {
     team_select_placeholder: "Sélectionner une équipe",
     hire_date_label: "Date d'embauche",
     used_leave_label: "Congés déjà pris",
+    birth_date_label: "Date de naissance (JJ/MM)",
+    confirm_birth_date_label: "Confirmez votre date de naissance (JJ/MM)",
+    birth_date_placeholder: "ex. 18/03",
     add_employee_button: "Ajouter employé",
     employees_title: "Employés",
     team_filter_label: "Filtre équipe",
@@ -110,6 +113,9 @@ const TRADUCTIONS = {
     invalid_hire_date_error: "Date d'embauche invalide.",
     hire_date_future_error: "La date d'embauche ne peut pas être dans le futur.",
     used_leave_negative_error: "Les congés pris doivent être supérieurs ou égaux à 0.",
+    birth_date_format_error: "Date de naissance invalide. Utilisez le format JJ/MM.",
+    birth_date_incorrect_error: "Date de naissance incorrecte. La demande ne peut pas être envoyée.",
+    birth_date_setup_prompt: "Pour sécuriser votre compte, veuillez confirmer votre date de naissance (JJ/MM).",
     excel_lib_missing_error: "La librairie d'export Excel n'est pas disponible.",
     team_bar_morning: "Bar matin",
     team_floor_morning: "Salle matin",
@@ -134,6 +140,9 @@ const TRADUCTIONS = {
     team_select_placeholder: "Selección equipo",
     hire_date_label: "Fecha de incorporación",
     used_leave_label: "Vacaciones ya disfrutadas",
+    birth_date_label: "Fecha de nacimiento (DD/MM)",
+    confirm_birth_date_label: "Confirma tu fecha de nacimiento (DD/MM)",
+    birth_date_placeholder: "ej. 18/03",
     add_employee_button: "Añadir empleado",
     employees_title: "Empleados",
     team_filter_label: "Filtro equipo",
@@ -213,6 +222,9 @@ const TRADUCTIONS = {
     invalid_hire_date_error: "Fecha de incorporación no válida.",
     hire_date_future_error: "La fecha de incorporación no puede estar en el futuro.",
     used_leave_negative_error: "Las vacaciones disfrutadas deben ser mayores o iguales a 0.",
+    birth_date_format_error: "Fecha de nacimiento no válida. Usa el formato DD/MM.",
+    birth_date_incorrect_error: "Fecha de nacimiento incorrecta. La solicitud no se puede enviar.",
+    birth_date_setup_prompt: "Para proteger tu cuenta, confirma tu fecha de nacimiento (DD/MM).",
     excel_lib_missing_error: "La librería de exportación Excel no está disponible.",
     team_bar_morning: "Bar mañana",
     team_floor_morning: "Sala mañana",
@@ -237,6 +249,9 @@ const TRADUCTIONS = {
     team_select_placeholder: "Select a team",
     hire_date_label: "Hire date",
     used_leave_label: "Leave already taken",
+    birth_date_label: "Birth date (DD/MM)",
+    confirm_birth_date_label: "Confirm your birth date (DD/MM)",
+    birth_date_placeholder: "e.g. 18/03",
     add_employee_button: "Add employee",
     employees_title: "Employees",
     team_filter_label: "Team filter",
@@ -316,6 +331,9 @@ const TRADUCTIONS = {
     invalid_hire_date_error: "Invalid hire date.",
     hire_date_future_error: "Hire date cannot be in the future.",
     used_leave_negative_error: "Taken leave must be greater than or equal to 0.",
+    birth_date_format_error: "Invalid birth date. Use DD/MM format.",
+    birth_date_incorrect_error: "Incorrect birth date. The request cannot be sent.",
+    birth_date_setup_prompt: "To secure your account, please confirm your birth date (DD/MM).",
     excel_lib_missing_error: "Excel export library is not available.",
     team_bar_morning: "Bar – morning shift",
     team_floor_morning: "Service – morning shift",
@@ -368,6 +386,8 @@ const formulaireEmploye = document.getElementById("formulaire-employe");
 const formulaireDemandeConge = document.getElementById("formulaire-demande-conge");
 const listeEmployes = document.getElementById("liste-employes");
 const employeDemandeSelect = document.getElementById("employe-demande");
+const birthDateEmployeInput = document.getElementById("birth-date-employe");
+const birthDateDemandeInput = document.getElementById("demande-birth-date");
 const blocDemandeVide = document.getElementById("bloc-demande-vide");
 const listeDemandesEnAttente = document.getElementById("liste-demandes-en-attente");
 const messageDemandeConge = document.getElementById("message-demande-conge");
@@ -847,12 +867,20 @@ listeDemandesEnAttente.addEventListener("click", async (event) => {
 formulaireEmploye.addEventListener("submit", async (event) => {
   event.preventDefault();
 
+  const birthCode = normaliserCodeNaissance(birthDateEmployeInput?.value);
+
+  if (!birthCode) {
+    alert(t("birth_date_format_error"));
+    return;
+  }
+
   const nouvelEmploye = {
     id: "",
     nom: document.getElementById("nom-employe").value.trim(),
     equipe: normaliserEquipe(document.getElementById("equipe-employe").value),
     dateEmbauche: document.getElementById("date-embauche").value,
     congesPris: Number(document.getElementById("conges-pris").value),
+    birthCode,
     historiqueConges: [],
     couleur: "",
     actif: true,
@@ -889,6 +917,7 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
   const idEmploye = employeDemandeSelect.value;
   const dateDebut = document.getElementById("demande-date-debut").value;
   const dateFin = document.getElementById("demande-date-fin").value;
+  const codeSaisi = normaliserCodeNaissance(birthDateDemandeInput?.value);
 
   if (!idEmploye) {
     alert(t("select_employee_error"));
@@ -900,6 +929,11 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
     return;
   }
 
+  if (!codeSaisi) {
+    alert(t("birth_date_format_error"));
+    return;
+  }
+
   const jours = calculJoursCalendaires(dateDebut, dateFin);
 
   if (jours <= 0) {
@@ -908,6 +942,18 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
   }
 
   const employe = employes.find((entry) => entry.id === idEmploye);
+
+  if (!employe) {
+    alert(t("select_employee_error"));
+    return;
+  }
+
+  const codeValide = await garantirCodeNaissanceEmploye(employe, codeSaisi);
+  if (!codeValide) {
+    alert(t("birth_date_incorrect_error"));
+    return;
+  }
+
   const demande = {
     idEmploye,
     employee_name: employe?.nom || t("unknown_employee"),
@@ -1072,8 +1118,44 @@ async function sendLeaveRequestEmail(demande) {
     });
 }
 
+function normaliserCodeNaissance(valeur) {
+  const correspondance = String(valeur || "").trim().match(/^(\d{2})\s*[\/\-\.]?\s*(\d{2})$/);
+
+  if (!correspondance) {
+    return "";
+  }
+
+  const jour = Number(correspondance[1]);
+  const mois = Number(correspondance[2]);
+
+  if (jour < 1 || jour > 31 || mois < 1 || mois > 12) {
+    return "";
+  }
+
+  return `${String(jour).padStart(2, "0")}${String(mois).padStart(2, "0")}`;
+}
+
+async function garantirCodeNaissanceEmploye(employe, codeSaisi) {
+  if (employe.birthCode) {
+    return employe.birthCode === codeSaisi;
+  }
+
+  alert(t("birth_date_setup_prompt"));
+
+  await setDoc(
+    doc(db, "employes", employe.id),
+    {
+      birthCode: codeSaisi,
+    },
+    { merge: true },
+  );
+
+  employe.birthCode = codeSaisi;
+  return true;
+}
+
 function validerEmploye(employe) {
-  if (!employe.nom || !employe.equipe || !employe.dateEmbauche) {
+  if (!employe.nom || !employe.equipe || !employe.dateEmbauche || !employe.birthCode) {
     alert(t("fill_all_fields_error"));
     return false;
   }
