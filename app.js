@@ -147,7 +147,7 @@ const CODE_MANAGER = "2005";
 
 const EMAILJS_PUBLIC_KEY = "cBFH1mPW-cT8LzOBh";
 const EMAILJS_SERVICE_ID = "service_ikwsjko";
-const EMAILJS_TEMPLATE_ID = "j95naa";
+const EMAILJS_TEMPLATE_ID = "template_108z5ht";
 
 if (window.emailjs && !window.__emailjsInitialized) {
   window.emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -622,6 +622,8 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
     employee_name: employe?.nom || t("unknown_employee"),
     dateDebut,
     dateFin,
+    start_date: dateDebut,
+    end_date: dateFin,
     start_date_formatted: formatDateFR(dateDebut),
     end_date_formatted: formatDateFR(dateFin),
     days_requested: jours,
@@ -719,14 +721,23 @@ async function sendLeaveRequestEmail(demande) {
     throw new Error("EmailJS indisponible : librairie non chargée.");
   }
 
-  return window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-    employee_name: demande.employee_name,
-    start_date: demande.start_date_formatted,
-    end_date: demande.end_date_formatted,
-    days_requested: demande.days_requested,
-    request_id: demande.request_id,
-    status: demande.status,
-  });
+  return window.emailjs
+    .send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      employee_name: demande.employee_name,
+      start_date: demande.start_date,
+      end_date: demande.end_date,
+      days_requested: demande.days_requested,
+      request_id: demande.request_id,
+      status: demande.status,
+    })
+    .then((response) => {
+      console.log("Email envoyé", response.status);
+      return response;
+    })
+    .catch((error) => {
+      console.error("Erreur EmailJS :", error);
+      throw error;
+    });
 }
 
 function validerEmploye(employe) {
