@@ -414,6 +414,11 @@ function tEquipe(equipe) {
 }
 
 function detecterLangueInitiale() {
+  const langueEmail = localStorage.getItem("language");
+  if (TRADUCTIONS[langueEmail]) {
+    return langueEmail;
+  }
+
   const langueSauvegardee = localStorage.getItem("langue-app");
   if (TRADUCTIONS[langueSauvegardee]) {
     return langueSauvegardee;
@@ -463,6 +468,7 @@ function changerLangue(langue) {
   }
   langueCourante = langue;
   localStorage.setItem("langue-app", langue);
+  localStorage.setItem("language", langue);
   appliquerTraductionsStatiques();
   afficherEmployes();
   mettreAJourLibelleArchives();
@@ -472,6 +478,11 @@ function changerLangue(langue) {
   afficherTableauBord();
   afficherCalendrierMensuel();
   afficherHistoriqueSalarieSelectionne();
+}
+
+function recupererLangueActive() {
+  const langueStockee = localStorage.getItem("language") || localStorage.getItem("langue-app") || "fr";
+  return TRADUCTIONS[langueStockee] ? langueStockee : "fr";
 }
 
 function normaliserEquipe(equipe) {
@@ -1006,7 +1017,7 @@ async function sendLeaveRequestEmail(demande) {
   const endDate = demande.end_date;
   const daysRequested = demande.days_requested;
 
-  const language = ["fr", "es", "en"].includes(langueCourante) ? langueCourante : "fr";
+  const language = recupererLangueActive();
   let subject;
   let message;
 
