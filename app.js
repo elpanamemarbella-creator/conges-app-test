@@ -721,15 +721,22 @@ async function sendLeaveRequestEmail(demande) {
     throw new Error("EmailJS indisponible : librairie non chargée.");
   }
 
+  const employeeName = demande.employee_name;
+  const startDate = demande.start_date;
+  const endDate = demande.end_date;
+  const daysRequested = demande.days_requested;
+  const requestId = demande.request_id;
+  const status = demande.status;
+
   return window.emailjs
     .send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-      employee_name: demande.employee_name,
-      start_date: demande.start_date,
-      end_date: demande.end_date,
-      days_requested: demande.days_requested,
-      request_id: demande.request_id,
-      status: demande.status,
-    })
+      employee_name: employeeName,
+      start_date: startDate,
+      end_date: endDate,
+      days_requested: daysRequested,
+      request_id: requestId,
+      status,
+    }, EMAILJS_PUBLIC_KEY)
     .then((response) => {
       console.log("Email envoyé", response.status);
       return response;
