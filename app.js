@@ -56,6 +56,7 @@ const TRADUCTIONS = {
     status_pending: "En attente",
     no_employee_registered: "Aucun employé enregistré",
     no_employee_matching: "Aucun employé ne correspond au filtre",
+    new_paid_leave_request_title: "Nouvelle demande de congé payé",
     new_leave_request_title: "Nouvelle demande de congé",
     no_employee_available: "Aucun employé disponible",
     start_date_label: "Date de début",
@@ -158,6 +159,7 @@ const TRADUCTIONS = {
     status_pending: "En espera",
     no_employee_registered: "Ningún empleado registrado",
     no_employee_matching: "Ningún empleado coincide con el filtro",
+    new_paid_leave_request_title: "Nueva solicitud de vacaciones pagadas",
     new_leave_request_title: "Nueva solicitud de vacaciones",
     no_employee_available: "No hay empleados disponibles",
     start_date_label: "Fecha inicio",
@@ -260,6 +262,7 @@ const TRADUCTIONS = {
     status_pending: "Pending",
     no_employee_registered: "No employee registered",
     no_employee_matching: "No employee matches the filter",
+    new_paid_leave_request_title: "New paid leave request",
     new_leave_request_title: "New leave request",
     no_employee_available: "No employee available",
     start_date_label: "Start date",
@@ -314,10 +317,10 @@ const TRADUCTIONS = {
     hire_date_future_error: "Hire date cannot be in the future.",
     used_leave_negative_error: "Taken leave must be greater than or equal to 0.",
     excel_lib_missing_error: "Excel export library is not available.",
-    team_bar_morning: "Morning bar",
-    team_floor_morning: "Morning floor",
-    team_bar_evening: "Evening bar",
-    team_floor_evening: "Evening floor",
+    team_bar_morning: "Bar – morning shift",
+    team_floor_morning: "Service – morning shift",
+    team_bar_evening: "Bar – evening shift",
+    team_floor_evening: "Service – evening shift",
     team_kitchen: "Kitchen",
     team_extra: "Extra",
     team_cleaning: "Cleaning and maintenance",
@@ -1002,35 +1005,55 @@ async function sendLeaveRequestEmail(demande) {
   const startDate = demande.start_date;
   const endDate = demande.end_date;
   const daysRequested = demande.days_requested;
-  const requestId = demande.request_id;
-  const status = demande.status;
 
-  const emailBody = [
-    t("email_leave_request_title"),
-    "",
-    `${t("email_employee_label")} : ${employeeName}`,
-    `${t("email_start_label")} : ${startDate}`,
-    `${t("email_end_label")} : ${endDate}`,
-    `${t("email_days_label")} : ${daysRequested}`,
-  ].join("\n");
-
-  const params = {
-    employee_name: employeeName,
-    start_date: startDate,
-    end_date: endDate,
-    days_requested: daysRequested,
-    request_id: requestId,
-    status,
-    email_title: t("email_leave_request_title"),
-    email_employee_label: t("email_employee_label"),
-    email_start_label: t("email_start_label"),
-    email_end_label: t("email_end_label"),
-    email_days_label: t("email_days_label"),
-    message: emailBody,
+  const EMAIL_PAR_LANGUE = {
+    fr: {
+      subject: "Nouvelle demande de congé",
+      message: [
+        "Nouvelle demande de congé",
+        "",
+        `Employé : ${employeeName}`,
+        `Début : ${startDate}`,
+        `Fin : ${endDate}`,
+        `Nombre de jours : ${daysRequested}`,
+      ].join("\n"),
+    },
+    es: {
+      subject: "Nueva solicitud de vacaciones",
+      message: [
+        "Nueva solicitud de vacaciones",
+        "",
+        `Empleado : ${employeeName}`,
+        `Inicio : ${startDate}`,
+        `Fin : ${endDate}`,
+        `Días : ${daysRequested}`,
+      ].join("\n"),
+    },
+    en: {
+      subject: "New leave request",
+      message: [
+        "New leave request",
+        "",
+        `Employee : ${employeeName}`,
+        `Start : ${startDate}`,
+        `End : ${endDate}`,
+        `Days : ${daysRequested}`,
+      ].join("\n"),
+    },
   };
 
+  const langueActive = ["fr", "es", "en"].includes(langueCourante) ? langueCourante : "fr";
+  const { subject, message } = EMAIL_PAR_LANGUE[langueActive];
+
   return window.emailjs
-    .send("service_ikwskjo", "template_108z5ht", params, "cBFH1mPW-cT8LzOBh")
+    .send("service_ikwskjo", "template_108z5ht", {
+      subject,
+      message,
+      employee_name: employeeName,
+      start_date: startDate,
+      end_date: endDate,
+      days_requested: daysRequested,
+    })
     .then((response) => {
       console.log("Email envoyé", response.status);
       return response;
