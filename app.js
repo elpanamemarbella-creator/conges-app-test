@@ -146,8 +146,6 @@ const PALETTE_COULEURS = ["#2f80ed", "#eb5757", "#27ae60", "#f2994a", "#9b51e0",
 const CODE_MANAGER = "2005";
 
 const EMAILJS_PUBLIC_KEY = "cBFH1mPW-cT8LzOBh";
-const EMAILJS_SERVICE_ID = "service_ikwsjko";
-const EMAILJS_TEMPLATE_ID = "template_108z5ht";
 
 if (window.emailjs && !window.__emailjsInitialized) {
   window.emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -728,15 +726,17 @@ async function sendLeaveRequestEmail(demande) {
   const requestId = demande.request_id;
   const status = demande.status;
 
+  const params = {
+    employee_name: employeeName,
+    start_date: startDate,
+    end_date: endDate,
+    days_requested: daysRequested,
+    request_id: requestId,
+    status,
+  };
+
   return window.emailjs
-    .send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-      employee_name: employeeName,
-      start_date: startDate,
-      end_date: endDate,
-      days_requested: daysRequested,
-      request_id: requestId,
-      status,
-    }, EMAILJS_PUBLIC_KEY)
+    .send("service_ikwskjo", "template_108z5ht", params, "cBFH1mPW-cT8LzOBh")
     .then((response) => {
       console.log("Email envoyé", response.status);
       return response;
