@@ -83,11 +83,45 @@ const TRADUCTIONS = {
     kpi_employees: "Employés",
     kpi_pending_requests: "Demandes en attente",
     kpi_on_leave_today: "En congé aujourd'hui",
-    archived_employees_title: "Salariés archivés",
+    archived_employees_title: "Employés archivés",
     archived_show: "▼ afficher",
     archived_hide: "▲ masquer",
     no_archived_employee: "Aucun employé archivé",
     reactivate: "Réactiver",
+    delete: "Supprimer",
+    browser_data_load_error: "Impossible de charger les données. Vérifie la connexion Firebase.",
+    delete_error: "Suppression impossible pour le moment.",
+    reactivate_error: "Réactivation impossible pour le moment.",
+    manager_prompt: "Entrer le code manager",
+    manager_code_required: "Code manager requis",
+    cancel: "Annuler",
+    wrong_code: "Code incorrect",
+    leave_update_error: "Impossible de mettre à jour la demande de congé.",
+    add_employee_error: "Impossible d'ajouter l'employé.",
+    select_employee_error: "Veuillez choisir un employé.",
+    select_dates_error: "Veuillez renseigner la date de début et la date de fin.",
+    invalid_range_error: "La date de fin doit être après ou égale à la date de début.",
+    leave_created_email_sent: "Demande créée et email envoyé",
+    leave_created_email_failed: "Demande créée, mais email non envoyé",
+    leave_add_error: "Impossible d'ajouter la demande de congé.",
+    fill_all_fields_error: "Veuillez remplir tous les champs.",
+    valid_team_error: "Veuillez sélectionner une équipe valide.",
+    invalid_hire_date_error: "Date d'embauche invalide.",
+    hire_date_future_error: "La date d'embauche ne peut pas être dans le futur.",
+    used_leave_negative_error: "Les congés pris doivent être supérieurs ou égaux à 0.",
+    excel_lib_missing_error: "La librairie d'export Excel n'est pas disponible.",
+    team_bar_morning: "Bar matin",
+    team_floor_morning: "Salle matin",
+    team_bar_evening: "Bar soir",
+    team_floor_evening: "Salle soir",
+    team_kitchen: "Cuisine",
+    team_extra: "Extra",
+    team_cleaning: "Nettoyage et entretien",
+    email_leave_request_title: "Nouvelle demande de congé",
+    email_employee_label: "Employé",
+    email_start_label: "Début",
+    email_end_label: "Fin",
+    email_days_label: "Nombre de jours",
   },
   es: {
     app_title: "Gestión de vacaciones empleados",
@@ -133,7 +167,7 @@ const TRADUCTIONS = {
     loading: "Cargando...",
     no_pending_request: "No hay solicitudes pendientes",
     unknown_employee: "Empleado desconocido",
-    validate: "Validar",
+    validate: "Aprobar",
     refuse: "Rechazar",
     summary_title: "Resumen",
     name_col: "Nombre",
@@ -156,10 +190,155 @@ const TRADUCTIONS = {
     archived_hide: "▲ ocultar",
     no_archived_employee: "Ningún empleado archivado",
     reactivate: "Reactivar",
+    delete: "Eliminar",
+    browser_data_load_error: "No se pueden cargar los datos. Verifica la conexión Firebase.",
+    delete_error: "Eliminación imposible por el momento.",
+    reactivate_error: "Reactivación imposible por el momento.",
+    manager_prompt: "Introduce el código del manager",
+    manager_code_required: "Código de manager requerido",
+    cancel: "Cancelar",
+    wrong_code: "Código incorrecto",
+    leave_update_error: "No se puede actualizar la solicitud de vacaciones.",
+    add_employee_error: "No se puede añadir el empleado.",
+    select_employee_error: "Seleccione un empleado.",
+    select_dates_error: "Indique la fecha de inicio y de fin.",
+    invalid_range_error: "La fecha de fin debe ser posterior o igual a la fecha de inicio.",
+    leave_created_email_sent: "Solicitud creada y email enviado",
+    leave_created_email_failed: "Solicitud creada, pero email no enviado",
+    leave_add_error: "No se puede añadir la solicitud de vacaciones.",
+    fill_all_fields_error: "Complete todos los campos.",
+    valid_team_error: "Seleccione un equipo válido.",
+    invalid_hire_date_error: "Fecha de incorporación no válida.",
+    hire_date_future_error: "La fecha de incorporación no puede estar en el futuro.",
+    used_leave_negative_error: "Las vacaciones disfrutadas deben ser mayores o iguales a 0.",
+    excel_lib_missing_error: "La librería de exportación Excel no está disponible.",
+    team_bar_morning: "Bar mañana",
+    team_floor_morning: "Sala mañana",
+    team_bar_evening: "Bar noche",
+    team_floor_evening: "Sala noche",
+    team_kitchen: "Cocina",
+    team_extra: "Extra",
+    team_cleaning: "Limpieza y mantenimiento",
+    email_leave_request_title: "Nueva solicitud de vacaciones",
+    email_employee_label: "Empleado",
+    email_start_label: "Inicio",
+    email_end_label: "Fin",
+    email_days_label: "Días",
+  },
+  en: {
+    app_title: "Employee leave management",
+    dashboard_title: "Dashboard",
+    add_employee_title: "Add employee",
+    employee_name_label: "Employee name",
+    employee_name_placeholder: "e.g. Alex Martin",
+    team_label: "Team",
+    team_select_placeholder: "Select a team",
+    hire_date_label: "Hire date",
+    used_leave_label: "Leave already taken",
+    add_employee_button: "Add employee",
+    employees_title: "Employees",
+    team_filter_label: "Team filter",
+    all_teams: "All teams",
+    employee_search_label: "Employee search",
+    employee_search_placeholder: "Search an employee",
+    export_excel: "Export Excel",
+    employee_col: "Employee",
+    team_col: "Team",
+    hire_date_col: "Hire date",
+    earned_leave_col: "Leave earned",
+    taken_leave_col: "Leave taken",
+    remaining_leave_col: "Leave remaining",
+    leave_history_col: "Leave history",
+    status_col: "Status",
+    action_col: "Action",
+    history_hint: "Click an employee to display the full request history.",
+    days_col: "Number of days",
+    employee_history_title: "Leave history - {name}",
+    no_employee_history: "This employee has no leave requests.",
+    status_validated: "Approved",
+    status_refused: "Rejected",
+    status_pending: "Pending",
+    no_employee_registered: "No employee registered",
+    no_employee_matching: "No employee matches the filter",
+    new_leave_request_title: "New leave request",
+    no_employee_available: "No employee available",
+    start_date_label: "Start date",
+    end_date_label: "End date",
+    add_request_button: "Add request",
+    pending_requests_title: "Pending leave requests",
+    loading: "Loading...",
+    no_pending_request: "No pending request",
+    unknown_employee: "Unknown employee",
+    validate: "Approve",
+    refuse: "Reject",
+    summary_title: "Summary",
+    name_col: "Name",
+    entry_date_col: "Entry date",
+    save_title: "Backup",
+    save_auto_message: "Backup is handled automatically by the existing system.",
+    calendar_title: "Leave calendar",
+    no_validated_leave_month: "No approved leave in the current month.",
+    no_leave: "No leave",
+    day_singular: "day",
+    day_plural: "days",
+    status_ok: "OK",
+    status_attention: "Attention",
+    status_low: "Low",
+    kpi_employees: "Employees",
+    kpi_pending_requests: "Pending requests",
+    kpi_on_leave_today: "On leave today",
+    archived_employees_title: "Archived employees",
+    archived_show: "▼ show",
+    archived_hide: "▲ hide",
+    no_archived_employee: "No archived employee",
+    reactivate: "Reactivate",
+    delete: "Delete",
+    browser_data_load_error: "Unable to load data. Please check the Firebase connection.",
+    delete_error: "Unable to delete employee for now.",
+    reactivate_error: "Unable to reactivate employee for now.",
+    manager_prompt: "Enter manager code",
+    manager_code_required: "Manager code required",
+    cancel: "Cancel",
+    wrong_code: "Wrong code",
+    leave_update_error: "Unable to update leave request.",
+    add_employee_error: "Unable to add employee.",
+    select_employee_error: "Please select an employee.",
+    select_dates_error: "Please provide start and end dates.",
+    invalid_range_error: "End date must be after or equal to start date.",
+    leave_created_email_sent: "Request created and email sent",
+    leave_created_email_failed: "Request created, but email was not sent",
+    leave_add_error: "Unable to add leave request.",
+    fill_all_fields_error: "Please fill in all fields.",
+    valid_team_error: "Please select a valid team.",
+    invalid_hire_date_error: "Invalid hire date.",
+    hire_date_future_error: "Hire date cannot be in the future.",
+    used_leave_negative_error: "Taken leave must be greater than or equal to 0.",
+    excel_lib_missing_error: "Excel export library is not available.",
+    team_bar_morning: "Morning bar",
+    team_floor_morning: "Morning floor",
+    team_bar_evening: "Evening bar",
+    team_floor_evening: "Evening floor",
+    team_kitchen: "Kitchen",
+    team_extra: "Extra",
+    team_cleaning: "Cleaning and maintenance",
+    email_leave_request_title: "New leave request",
+    email_employee_label: "Employee",
+    email_start_label: "Start",
+    email_end_label: "End",
+    email_days_label: "Days",
   },
 };
 
 const ORDRE_EQUIPES = ["Bar matin", "Salle matin", "Bar soir", "Salle soir", "Cuisine", "Extra", "Nettoyage et entretien"];
+const CLES_EQUIPE = {
+  "Bar matin": "team_bar_morning",
+  "Salle matin": "team_floor_morning",
+  "Bar soir": "team_bar_evening",
+  "Salle soir": "team_floor_evening",
+  Cuisine: "team_kitchen",
+  Extra: "team_extra",
+  "Nettoyage et entretien": "team_cleaning",
+};
 const PALETTE_COULEURS = ["#2f80ed", "#eb5757", "#27ae60", "#f2994a", "#9b51e0", "#00b8d9", "#e84393", "#6c5ce7"];
 const CODE_MANAGER = "2005";
 
@@ -220,11 +399,42 @@ let employesFiltres = [];
 let employesActifs = [];
 let employesArchives = [];
 let archivesOuvertes = false;
-let langueCourante = "fr";
+let langueCourante = detecterLangueInitiale();
 let employeSelectionneId = "";
 
 function t(cle) {
   return TRADUCTIONS[langueCourante]?.[cle] || TRADUCTIONS.fr[cle] || cle;
+}
+
+function tEquipe(equipe) {
+  return t(CLES_EQUIPE[equipe] || "team_extra");
+}
+
+function detecterLangueInitiale() {
+  const langueSauvegardee = localStorage.getItem("langue-app");
+  if (TRADUCTIONS[langueSauvegardee]) {
+    return langueSauvegardee;
+  }
+
+  const browserLang = (navigator.language || navigator.userLanguage || "fr").toLowerCase();
+  if (browserLang.startsWith("es")) {
+    return "es";
+  }
+
+  if (browserLang.startsWith("en")) {
+    return "en";
+  }
+
+  return "fr";
+}
+
+function rafraichirSelecteursEquipes() {
+  const selecteurs = [document.getElementById("equipe-employe"), filtreEquipeSelect].filter(Boolean);
+  selecteurs.forEach((selecteur) => {
+    selecteur.querySelectorAll("option[data-equipe-value]").forEach((option) => {
+      option.textContent = tEquipe(option.dataset.equipeValue);
+    });
+  });
 }
 
 function appliquerTraductionsStatiques() {
@@ -240,6 +450,8 @@ function appliquerTraductionsStatiques() {
   boutonsLangue.forEach((bouton) => {
     bouton.classList.toggle("actif", bouton.dataset.langue === langueCourante);
   });
+
+  rafraichirSelecteursEquipes();
 }
 
 function changerLangue(langue) {
@@ -247,6 +459,7 @@ function changerLangue(langue) {
     return;
   }
   langueCourante = langue;
+  localStorage.setItem("langue-app", langue);
   appliquerTraductionsStatiques();
   afficherEmployes();
   mettreAJourLibelleArchives();
@@ -444,7 +657,7 @@ async function initApp() {
     await rafraichirDonnees();
   } catch (erreur) {
     console.error("Erreur Firebase / Firestore au chargement :", erreur);
-    alert(langueCourante === "es" ? "No se pueden cargar los datos. Verifica la conexión Firebase." : "Impossible de charger les données. Vérifie la connexion Firebase.");
+    alert(t("browser_data_load_error"));
   }
 }
 
@@ -495,7 +708,7 @@ listeEmployes.addEventListener("click", async (event) => {
       await rafraichirDonnees();
     } catch (erreur) {
       console.error("Erreur suppression employé :", erreur);
-      alert(langueCourante === "es" ? "Eliminación imposible por el momento." : "Suppression impossible pour le moment.");
+      alert(t("delete_error"));
     }
     return;
   }
@@ -519,7 +732,7 @@ listeEmployesArchives?.addEventListener("click", async (event) => {
     await rafraichirDonnees();
   } catch (erreur) {
     console.error("Erreur réactivation employé :", erreur);
-    alert(langueCourante === "es" ? "Reactivación imposible por el momento." : "Réactivation impossible pour le moment.");
+    alert(t("reactivate_error"));
   }
 });
 
@@ -595,10 +808,10 @@ listeDemandesEnAttente.addEventListener("click", async (event) => {
   }
 
   const nouveauStatut = boutonValidation ? "valide" : "refuse";
-  const codeSaisi = window.prompt(langueCourante === "es" ? "Introduce el código del manager" : "Entrer le code manager");
+  const codeSaisi = window.prompt(t("manager_prompt"));
 
   if (codeSaisi !== CODE_MANAGER) {
-    alert(langueCourante === "es" ? "Código incorrecto" : "Code incorrect");
+    alert(t("wrong_code"));
     return;
   }
 
@@ -613,7 +826,7 @@ listeDemandesEnAttente.addEventListener("click", async (event) => {
     await rafraichirDonnees();
   } catch (erreur) {
     console.error("Erreur mise à jour du statut :", erreur);
-    alert(langueCourante === "es" ? "No se puede actualizar la solicitud de vacaciones." : "Impossible de mettre à jour la demande de congé.");
+    alert(t("leave_update_error"));
   }
 });
 
@@ -648,7 +861,7 @@ formulaireEmploye.addEventListener("submit", async (event) => {
     await rafraichirDonnees();
   } catch (erreur) {
     console.error("Erreur ajout employé :", erreur);
-    alert(langueCourante === "es" ? "No se puede añadir el empleado." : "Impossible d'ajouter l'employé.");
+    alert(t("add_employee_error"));
   }
 });
 
@@ -664,19 +877,19 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
   const dateFin = document.getElementById("demande-date-fin").value;
 
   if (!idEmploye) {
-    alert(langueCourante === "es" ? "Seleccione un empleado." : "Veuillez choisir un employé.");
+    alert(t("select_employee_error"));
     return;
   }
 
   if (!dateDebut || !dateFin) {
-    alert(langueCourante === "es" ? "Indique la fecha de inicio y de fin." : "Veuillez renseigner la date de début et la date de fin.");
+    alert(t("select_dates_error"));
     return;
   }
 
   const jours = calculJoursCalendaires(dateDebut, dateFin);
 
   if (jours <= 0) {
-    alert(langueCourante === "es" ? "La fecha de fin debe ser posterior o igual a la fecha de inicio." : "La date de fin doit être après ou égale à la date de début.");
+    alert(t("invalid_range_error"));
     return;
   }
 
@@ -716,17 +929,17 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
 
     try {
       await sendLeaveRequestEmail(demande);
-      afficherMessageDemandeConge("Demande créée et email envoyé", "success");
+      afficherMessageDemandeConge(t("leave_created_email_sent"), "success");
     } catch (emailErreur) {
       console.error("Erreur envoi email demande de congé :", emailErreur);
-      afficherMessageDemandeConge("Demande créée, mais email non envoyé", "error");
+      afficherMessageDemandeConge(t("leave_created_email_failed"), "error");
     }
 
     formulaireDemandeConge.reset();
     await rafraichirDonnees();
   } catch (erreur) {
     console.error("Erreur ajout congé :", erreur);
-    alert(langueCourante === "es" ? "No se puede añadir la solicitud de vacaciones." : "Impossible d'ajouter la demande de congé.");
+    alert(t("leave_add_error"));
   } finally {
     window.__sendingEmail = false;
     if (boutonSoumettreDemande) {
@@ -792,6 +1005,15 @@ async function sendLeaveRequestEmail(demande) {
   const requestId = demande.request_id;
   const status = demande.status;
 
+  const emailBody = [
+    t("email_leave_request_title"),
+    "",
+    `${t("email_employee_label")} : ${employeeName}`,
+    `${t("email_start_label")} : ${startDate}`,
+    `${t("email_end_label")} : ${endDate}`,
+    `${t("email_days_label")} : ${daysRequested}`,
+  ].join("\n");
+
   const params = {
     employee_name: employeeName,
     start_date: startDate,
@@ -799,6 +1021,12 @@ async function sendLeaveRequestEmail(demande) {
     days_requested: daysRequested,
     request_id: requestId,
     status,
+    email_title: t("email_leave_request_title"),
+    email_employee_label: t("email_employee_label"),
+    email_start_label: t("email_start_label"),
+    email_end_label: t("email_end_label"),
+    email_days_label: t("email_days_label"),
+    message: emailBody,
   };
 
   return window.emailjs
@@ -815,12 +1043,12 @@ async function sendLeaveRequestEmail(demande) {
 
 function validerEmploye(employe) {
   if (!employe.nom || !employe.equipe || !employe.dateEmbauche) {
-    alert(langueCourante === "es" ? "Complete todos los campos." : "Veuillez remplir tous les champs.");
+    alert(t("fill_all_fields_error"));
     return false;
   }
 
   if (!ORDRE_EQUIPES.includes(employe.equipe)) {
-    alert(langueCourante === "es" ? "Seleccione un equipo válido." : "Veuillez sélectionner une équipe valide.");
+    alert(t("valid_team_error"));
     return false;
   }
 
@@ -828,17 +1056,17 @@ function validerEmploye(employe) {
   const aujourdHui = new Date();
 
   if (Number.isNaN(dateEmbauche.getTime())) {
-    alert(langueCourante === "es" ? "Fecha de incorporación no válida." : "Date d'embauche invalide.");
+    alert(t("invalid_hire_date_error"));
     return false;
   }
 
   if (dateEmbauche > aujourdHui) {
-    alert(langueCourante === "es" ? "La fecha de incorporación no puede estar en el futuro." : "La date d'embauche ne peut pas être dans le futur.");
+    alert(t("hire_date_future_error"));
     return false;
   }
 
   if (employe.congesPris < 0) {
-    alert(langueCourante === "es" ? "Las vacaciones disfrutadas deben ser mayores o iguales a 0." : "Les congés pris doivent être supérieurs ou égaux à 0.");
+    alert(t("used_leave_negative_error"));
     return false;
   }
 
@@ -925,11 +1153,11 @@ function trierEmployesParEquipe() {
 }
 
 function obtenirEmployesFiltres() {
-  const equipeFiltre = filtreEquipeSelect?.value || "Toutes les équipes";
+  const equipeFiltre = filtreEquipeSelect?.value || "";
   const recherche = (rechercheEmployeInput?.value || "").trim().toLowerCase();
 
   return trierEmployesParEquipe().filter((employe) => {
-    const correspondEquipe = equipeFiltre === "Toutes les équipes" || employe.equipe === equipeFiltre;
+    const correspondEquipe = !equipeFiltre || employe.equipe === equipeFiltre;
     const correspondRecherche = !recherche || employe.nom.toLowerCase().includes(recherche);
     return correspondEquipe && correspondRecherche;
   });
@@ -973,12 +1201,12 @@ function afficherEmployes() {
       return `
         ${
           ajouterTitre
-            ? `<tr class="ligne-groupe"><td colspan="9">=== ${echapperHtml(employe.equipe.toUpperCase())} ===</td></tr>`
+            ? `<tr class="ligne-groupe"><td colspan="9">=== ${echapperHtml(tEquipe(employe.equipe).toUpperCase())} ===</td></tr>`
             : ""
         }
         <tr class="ligne-employe equipe-${classeEquipe} ${employeSelectionneId === employe.id ? "selectionne" : ""}" data-employe-id="${employe.id}">
           <td data-label="${t("employee_col")}">${echapperHtml(employe.nom)}</td>
-          <td data-label="${t("team_col")}"><span class="badge-equipe equipe-${classeEquipe}">${echapperHtml(employe.equipe)}</span></td>
+          <td data-label="${t("team_col")}"><span class="badge-equipe equipe-${classeEquipe}">${echapperHtml(tEquipe(employe.equipe))}</span></td>
           <td data-label="${t("hire_date_col")}">${formaterDateFr(employe.dateEmbauche)}</td>
           <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
           <td data-label="${t("taken_leave_col")}">${congesPris.toFixed(1)}</td>
@@ -986,7 +1214,7 @@ function afficherEmployes() {
           <td data-label="${t("leave_history_col")}">${afficherHistorique(employe.historiqueConges)}</td>
           <td data-label="${t("status_col")}"><span class="pastille ${classeStatut}">${libelleStatut}</span></td>
           <td data-label="${t("action_col")}" class="cellule-actions">
-            <button class="bouton-supprimer" data-supprimer-id="${employe.id}">${langueCourante === "es" ? "Eliminar" : "Supprimer"}</button>
+            <button class="bouton-supprimer" data-supprimer-id="${employe.id}">${t("delete")}</button>
           </td>
         </tr>
       `;
@@ -1041,7 +1269,7 @@ function afficherEmployesArchives() {
       (employe) => `
       <tr>
         <td>${echapperHtml(employe.nom)}</td>
-        <td>${echapperHtml(employe.equipe)}</td>
+        <td>${echapperHtml(tEquipe(employe.equipe))}</td>
         <td>${formaterDateFr(employe.dateEmbauche)}</td>
         <td class="cellule-actions"><button class="bouton-secondaire" data-reactiver-id="${employe.id}">${t("reactivate")}</button></td>
       </tr>
@@ -1097,7 +1325,7 @@ function calculerEmployesEnCongeAujourdHui() {
 
 function exporterEmployesExcel() {
   if (!window.XLSX) {
-    alert(langueCourante === "es" ? "La librería de exportación Excel no está disponible." : "La librairie d'export Excel n'est pas disponible.");
+    alert(t("excel_lib_missing_error"));
     return;
   }
 
@@ -1108,7 +1336,7 @@ function exporterEmployesExcel() {
 
     return {
       Nom: employe.nom,
-      Equipe: employe.equipe,
+      Equipe: tEquipe(employe.equipe),
       "Date entrée": formaterDateFr(employe.dateEmbauche),
       "Jours acquis": congesAcquis,
       "Jours pris": congesPris,
@@ -1203,7 +1431,7 @@ function afficherBlocDemandeConge() {
   const options = trierEmployesParEquipe()
     .map(
       (employe) =>
-        `<option value="${employe.id}">${echapperHtml(employe.nom)} (${echapperHtml(employe.equipe)})</option>`,
+        `<option value="${employe.id}">${echapperHtml(employe.nom)} (${echapperHtml(tEquipe(employe.equipe))})</option>`,
     )
     .join("");
 
