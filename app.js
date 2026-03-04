@@ -1006,44 +1006,41 @@ async function sendLeaveRequestEmail(demande) {
   const endDate = demande.end_date;
   const daysRequested = demande.days_requested;
 
-  const EMAIL_PAR_LANGUE = {
-    fr: {
-      subject: "Nouvelle demande de congé",
-      message: [
-        "Nouvelle demande de congé",
-        "",
-        `Employé : ${employeeName}`,
-        `Début : ${startDate}`,
-        `Fin : ${endDate}`,
-        `Nombre de jours : ${daysRequested}`,
-      ].join("\n"),
-    },
-    es: {
-      subject: "Nueva solicitud de vacaciones",
-      message: [
-        "Nueva solicitud de vacaciones",
-        "",
-        `Empleado : ${employeeName}`,
-        `Inicio : ${startDate}`,
-        `Fin : ${endDate}`,
-        `Días : ${daysRequested}`,
-      ].join("\n"),
-    },
-    en: {
-      subject: "New leave request",
-      message: [
-        "New leave request",
-        "",
-        `Employee : ${employeeName}`,
-        `Start : ${startDate}`,
-        `End : ${endDate}`,
-        `Days : ${daysRequested}`,
-      ].join("\n"),
-    },
-  };
+  const language = ["fr", "es", "en"].includes(langueCourante) ? langueCourante : "fr";
+  let subject;
+  let message;
 
-  const langueActive = ["fr", "es", "en"].includes(langueCourante) ? langueCourante : "fr";
-  const { subject, message } = EMAIL_PAR_LANGUE[langueActive];
+  if (language === "en") {
+    subject = "New leave request";
+    message = [
+      "New leave request",
+      "",
+      `Employee : ${employeeName}`,
+      `Start : ${startDate}`,
+      `End : ${endDate}`,
+      `Days : ${daysRequested}`,
+    ].join("\n");
+  } else if (language === "es") {
+    subject = "Nueva solicitud de vacaciones";
+    message = [
+      "Nueva solicitud de vacaciones",
+      "",
+      `Empleado : ${employeeName}`,
+      `Inicio : ${startDate}`,
+      `Fin : ${endDate}`,
+      `Días : ${daysRequested}`,
+    ].join("\n");
+  } else {
+    subject = "Nouvelle demande de congé";
+    message = [
+      "Nouvelle demande de congé",
+      "",
+      `Employé : ${employeeName}`,
+      `Début : ${startDate}`,
+      `Fin : ${endDate}`,
+      `Nombre de jours : ${daysRequested}`,
+    ].join("\n");
+  }
 
   return window.emailjs
     .send("service_ikwskjo", "template_108z5ht", {
