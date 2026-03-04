@@ -253,6 +253,10 @@ th {
   background: #fffdeb;
 }
 
+.ligne-employe.selectionne {
+  outline: 2px solid #2c7be5;
+}
+
 .badge-equipe {
   display: inline-block;
   padding: 0.2rem 0.55rem;
@@ -338,6 +342,14 @@ th {
 
 .historique-vide {
   color: var(--discret);
+}
+
+.historique-salarie {
+  margin-top: 1rem;
+}
+
+.historique-salarie h3 {
+  margin: 0.3rem 0 0.6rem;
 }
 
 .message-vide {

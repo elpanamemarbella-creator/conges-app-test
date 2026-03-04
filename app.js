@@ -47,6 +47,13 @@ const TRADUCTIONS = {
     leave_history_col: "Historique des congés",
     status_col: "Statut",
     action_col: "Action",
+    history_hint: "Cliquer sur un salarié pour afficher l'historique complet de ses demandes.",
+    days_col: "Nombre de jours",
+    employee_history_title: "Historique des congés - {name}",
+    no_employee_history: "Ce salarié n'a aucune demande de congé.",
+    status_validated: "Validé",
+    status_refused: "Refusé",
+    status_pending: "En attente",
     no_employee_registered: "Aucun employé enregistré",
     no_employee_matching: "Aucun employé ne correspond au filtre",
     new_leave_request_title: "Nouvelle demande de congé",
@@ -108,6 +115,13 @@ const TRADUCTIONS = {
     leave_history_col: "Historial de vacaciones",
     status_col: "Estado",
     action_col: "Acción",
+    history_hint: "Haz clic en un empleado para mostrar su historial completo de solicitudes.",
+    days_col: "Número de días",
+    employee_history_title: "Historial de vacaciones - {name}",
+    no_employee_history: "Este empleado no tiene solicitudes de vacaciones.",
+    status_validated: "Validado",
+    status_refused: "Rechazado",
+    status_pending: "En espera",
     no_employee_registered: "Ningún empleado registrado",
     no_employee_matching: "Ningún empleado coincide con el filtro",
     new_leave_request_title: "Nueva solicitud de vacaciones",
@@ -187,6 +201,9 @@ const filtreEquipeSelect = document.getElementById("filtre-equipe");
 const rechercheEmployeInput = document.getElementById("recherche-employe");
 const tableauBord = document.getElementById("tableau-bord");
 const boutonExportExcel = document.getElementById("bouton-export-excel");
+const historiqueSalarieBloc = document.getElementById("historique-salarie");
+const historiqueSalarieTitre = document.getElementById("historique-salarie-titre");
+const historiqueSalarieListe = document.getElementById("historique-salarie-liste");
 const calendrierCongesMois = document.getElementById("calendrier-conges-mois");
 const managerModal = document.getElementById("manager-modal");
 const managerCodeInput = document.getElementById("manager-code-input");
@@ -204,6 +221,7 @@ let employesActifs = [];
 let employesArchives = [];
 let archivesOuvertes = false;
 let langueCourante = "fr";
+let employeSelectionneId = "";
 
 function t(cle) {
   return TRADUCTIONS[langueCourante]?.[cle] || TRADUCTIONS.fr[cle] || cle;
@@ -237,6 +255,7 @@ function changerLangue(langue) {
   afficherResume();
   afficherTableauBord();
   afficherCalendrierMensuel();
+  afficherHistoriqueSalarieSelectionne();
 }
 
 function normaliserEquipe(equipe) {
@@ -397,6 +416,7 @@ async function rafraichirDonnees() {
   afficherResume();
   afficherTableauBord();
   afficherCalendrierMensuel();
+  afficherHistoriqueSalarieSelectionne();
 }
 
 async function initApp() {
@@ -441,23 +461,33 @@ boutonBasculerArchives?.addEventListener("click", () => {
 
 mettreAJourLibelleArchives();
 
-listeEmployes.addEventListener("click", async (e) => {
-  const btn = e.target.closest("[data-supprimer-id]");
-  if (!btn) return;
+listeEmployes.addEventListener("click", async (event) => {
+  const boutonSuppression = event.target.closest("[data-supprimer-id]");
+  if (boutonSuppression) {
+    const id = boutonSuppression.dataset.supprimerId;
+    const codeValide = await demanderCodeManager();
+    if (!codeValide) {
+      return;
+    }
 
-  const id = btn.dataset.supprimerId;
-  const codeValide = await demanderCodeManager();
-  if (!codeValide) {
+    try {
+      await supprimerEmploye(id);
+      await rafraichirDonnees();
+    } catch (erreur) {
+      console.error("Erreur suppression employé :", erreur);
+      alert(langueCourante === "es" ? "Eliminación imposible por el momento." : "Suppression impossible pour le moment.");
+    }
     return;
   }
 
-  try {
-    await supprimerEmploye(id);
-    await rafraichirDonnees();
-  } catch (erreur) {
-    console.error("Erreur suppression employé :", erreur);
-    alert(langueCourante === "es" ? "Eliminación imposible por el momento." : "Suppression impossible pour le moment.");
+  const ligneEmploye = event.target.closest(".ligne-employe[data-employe-id]");
+  if (!ligneEmploye) {
+    return;
   }
+
+  employeSelectionneId = ligneEmploye.dataset.employeId || "";
+  afficherEmployes();
+  afficherHistoriqueSalarieSelectionne();
 });
 
 listeEmployesArchives?.addEventListener("click", async (event) => {
@@ -897,7 +927,9 @@ function afficherEmployes() {
   if (!employesActifs.length) {
     listeEmployes.innerHTML = `<tr><td colspan="9" class="vide">${t("no_employee_registered")}</td></tr>`;
     employesFiltres = [];
+    employeSelectionneId = "";
     afficherEmployesArchives();
+    afficherHistoriqueSalarieSelectionne();
     return;
   }
 
@@ -907,6 +939,7 @@ function afficherEmployes() {
   if (!employesTries.length) {
     listeEmployes.innerHTML = `<tr><td colspan="9" class="vide">${t("no_employee_matching")}</td></tr>`;
     afficherEmployesArchives();
+    afficherHistoriqueSalarieSelectionne();
     return;
   }
 
@@ -931,7 +964,7 @@ function afficherEmployes() {
             ? `<tr class="ligne-groupe"><td colspan="9">=== ${echapperHtml(employe.equipe.toUpperCase())} ===</td></tr>`
             : ""
         }
-        <tr class="ligne-employe equipe-${classeEquipe}">
+        <tr class="ligne-employe equipe-${classeEquipe} ${employeSelectionneId === employe.id ? "selectionne" : ""}" data-employe-id="${employe.id}">
           <td data-label="${t("employee_col")}">${echapperHtml(employe.nom)}</td>
           <td data-label="${t("team_col")}"><span class="badge-equipe equipe-${classeEquipe}">${echapperHtml(employe.equipe)}</span></td>
           <td data-label="${t("hire_date_col")}">${formaterDateFr(employe.dateEmbauche)}</td>
@@ -948,7 +981,12 @@ function afficherEmployes() {
     })
     .join("");
 
+  if (employeSelectionneId && !employesTries.some((employe) => employe.id === employeSelectionneId)) {
+    employeSelectionneId = "";
+  }
+
   afficherEmployesArchives();
+  afficherHistoriqueSalarieSelectionne();
 }
 
 
@@ -1188,6 +1226,63 @@ function afficherDemandesEnAttente() {
     .join("");
 }
 
+
+
+function libelleStatutConge(statut) {
+  if (statut === "valide") {
+    return t("status_validated");
+  }
+
+  if (statut === "refuse") {
+    return t("status_refused");
+  }
+
+  return t("status_pending");
+}
+
+function afficherHistoriqueSalarieSelectionne() {
+  if (!historiqueSalarieBloc || !historiqueSalarieListe || !historiqueSalarieTitre) {
+    return;
+  }
+
+  if (!employeSelectionneId) {
+    historiqueSalarieBloc.hidden = true;
+    historiqueSalarieListe.innerHTML = "";
+    return;
+  }
+
+  const employe = employesActifs.find((entry) => entry.id === employeSelectionneId);
+  if (!employe) {
+    historiqueSalarieBloc.hidden = true;
+    historiqueSalarieListe.innerHTML = "";
+    return;
+  }
+
+  historiqueSalarieBloc.hidden = false;
+  historiqueSalarieTitre.textContent = t("employee_history_title").replace("{name}", employe.nom);
+
+  const historique = conges
+    .filter((conge) => conge.idEmploye === employe.id)
+    .sort((a, b) => b.dateDebut.localeCompare(a.dateDebut));
+
+  if (!historique.length) {
+    historiqueSalarieListe.innerHTML = `<tr><td colspan="4" class="vide">${t("no_employee_history")}</td></tr>`;
+    return;
+  }
+
+  historiqueSalarieListe.innerHTML = historique
+    .map(
+      (conge) => `
+      <tr>
+        <td data-label="${t("start_date_label")}">${formaterDateFr(conge.dateDebut)}</td>
+        <td data-label="${t("end_date_label")}">${formaterDateFr(conge.dateFin)}</td>
+        <td data-label="${t("days_col")}">${conge.jours}</td>
+        <td data-label="${t("status_col")}">${libelleStatutConge(conge.statut)}</td>
+      </tr>
+    `,
+    )
+    .join("");
+}
 
 
 function afficherOnglet() {
