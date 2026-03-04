@@ -28,6 +28,8 @@ initializeApp(firebaseConfig);
         <button type="button" class="langue-btn actif" data-langue="fr">FR</button>
         <span>|</span>
         <button type="button" class="langue-btn" data-langue="es">ES</button>
+        <span>|</span>
+        <button type="button" class="langue-btn" data-langue="en">EN</button>
       </div>
       <h1 data-i18n="app_title">Gestion des congés employés</h1>
     </header>
@@ -55,13 +57,13 @@ initializeApp(firebaseConfig);
             <span data-i18n="team_label">Equipe</span>
             <select id="equipe-employe" required>
               <option value="" data-i18n="team_select_placeholder">Sélectionner une équipe</option>
-              <option value="Bar matin">Bar matin</option>
-              <option value="Salle matin">Salle matin</option>
-              <option value="Bar soir">Bar soir</option>
-              <option value="Salle soir">Salle soir</option>
-              <option value="Cuisine">Cuisine</option>
-              <option value="Extras">Extras</option>
-              <option value="Nettoyage et entretien">Nettoyage et entretien</option>
+              <option value="Bar matin" data-equipe-value="Bar matin">Bar matin</option>
+              <option value="Salle matin" data-equipe-value="Salle matin">Salle matin</option>
+              <option value="Bar soir" data-equipe-value="Bar soir">Bar soir</option>
+              <option value="Salle soir" data-equipe-value="Salle soir">Salle soir</option>
+              <option value="Cuisine" data-equipe-value="Cuisine">Cuisine</option>
+              <option value="Extra" data-equipe-value="Extra">Extra</option>
+              <option value="Nettoyage et entretien" data-equipe-value="Nettoyage et entretien">Nettoyage et entretien</option>
             </select>
           </label>
 
@@ -86,14 +88,14 @@ initializeApp(firebaseConfig);
           <label>
             <span data-i18n="team_filter_label">Filtre équipe</span>
             <select id="filtre-equipe">
-              <option value="Toutes les équipes" data-i18n="all_teams">Toutes les équipes</option>
-              <option value="Bar matin">Bar matin</option>
-              <option value="Salle matin">Salle matin</option>
-              <option value="Bar soir">Bar soir</option>
-              <option value="Salle soir">Salle soir</option>
-              <option value="Cuisine">Cuisine</option>
-              <option value="Extra">Extra</option>
-              <option value="Nettoyage et entretien">Nettoyage et entretien</option>
+              <option value="" data-i18n="all_teams">Toutes les équipes</option>
+              <option value="Bar matin" data-equipe-value="Bar matin">Bar matin</option>
+              <option value="Salle matin" data-equipe-value="Salle matin">Salle matin</option>
+              <option value="Bar soir" data-equipe-value="Bar soir">Bar soir</option>
+              <option value="Salle soir" data-equipe-value="Salle soir">Salle soir</option>
+              <option value="Cuisine" data-equipe-value="Cuisine">Cuisine</option>
+              <option value="Extra" data-equipe-value="Extra">Extra</option>
+              <option value="Nettoyage et entretien" data-equipe-value="Nettoyage et entretien">Nettoyage et entretien</option>
             </select>
           </label>
 
@@ -232,12 +234,12 @@ initializeApp(firebaseConfig);
   <div id="manager-modal" class="modal-manager" hidden>
     <div class="modal-manager__overlay" data-modal-close></div>
     <div class="modal-manager__carte" role="dialog" aria-modal="true" aria-labelledby="manager-modal-titre">
-      <h3 id="manager-modal-titre">Code manager requis</h3>
+      <h3 id="manager-modal-titre" data-i18n="manager_code_required">Code manager requis</h3>
       <input id="manager-code-input" type="password" autocomplete="off" />
-      <p id="manager-modal-erreur" class="modal-manager__erreur" hidden>Code incorrect</p>
+      <p id="manager-modal-erreur" class="modal-manager__erreur" hidden data-i18n="wrong_code">Code incorrect</p>
       <div class="modal-manager__actions">
-        <button type="button" id="manager-modal-valider">Valider</button>
-        <button type="button" id="manager-modal-annuler" class="modal-manager__annuler">Annuler</button>
+        <button type="button" id="manager-modal-valider" data-i18n="validate">Valider</button>
+        <button type="button" id="manager-modal-annuler" class="modal-manager__annuler" data-i18n="cancel">Annuler</button>
       </div>
     </div>
   </div>
