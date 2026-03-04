@@ -66,6 +66,11 @@ initializeApp(firebaseConfig);
             <input type="date" id="demande-date-fin" required />
           </label>
 
+          <label>
+            <span data-i18n="confirm_birth_date_label">Confirmez votre date de naissance (JJ/MM)</span>
+            <input type="text" id="demande-birth-date" inputmode="numeric" maxlength="5" placeholder="18/03" data-i18n-placeholder="birth_date_placeholder" required />
+          </label>
+
           <button type="submit" data-i18n="add_request_button">Ajouter la demande</button>
         </form>
         <p id="message-demande-conge" class="message-vide" hidden></p>
@@ -106,6 +111,11 @@ initializeApp(firebaseConfig);
           <label>
             <span data-i18n="used_leave_label">Congés déjà pris</span>
             <input type="number" id="conges-pris" min="0" step="0.5" value="0" required />
+          </label>
+
+          <label>
+            <span data-i18n="birth_date_label">Date de naissance (JJ/MM)</span>
+            <input type="text" id="birth-date-employe" inputmode="numeric" maxlength="5" placeholder="18/03" data-i18n-placeholder="birth_date_placeholder" required />
           </label>
 
           <button type="submit" data-i18n="add_employee_button">Ajouter employé</button>
