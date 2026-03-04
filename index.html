@@ -122,22 +122,31 @@ initializeApp(firebaseConfig);
       </section>
 
       <section class="carte">
-        <h2 data-i18n="archived_employees_title">Employés archivés</h2>
-        <table>
-          <thead>
-            <tr>
-              <th data-i18n="employee_col">Employé</th>
-              <th data-i18n="team_col">Equipe</th>
-              <th data-i18n="hire_date_col">Date embauche</th>
-              <th data-i18n="action_col">Action</th>
-            </tr>
-          </thead>
-          <tbody id="liste-employes-archives">
-            <tr>
-              <td colspan="4" class="vide" data-i18n="no_archived_employee">Aucun employé archivé</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="archived-section">
+          <button type="button" id="toggleArchived" class="archived-toggle">
+            <span data-i18n="archived_employees_title">Employés archivés</span>
+            (<span id="archivedCount">0</span>)
+            <span id="archivedToggleLabel">▼ afficher</span>
+          </button>
+
+          <div id="archivedList" style="display:none;">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="employee_col">Employé</th>
+                  <th data-i18n="team_col">Equipe</th>
+                  <th data-i18n="hire_date_col">Date embauche</th>
+                  <th data-i18n="action_col">Action</th>
+                </tr>
+              </thead>
+              <tbody id="liste-employes-archives">
+                <tr>
+                  <td colspan="4" class="vide" data-i18n="no_archived_employee">Aucun employé archivé</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
       <section class="carte">

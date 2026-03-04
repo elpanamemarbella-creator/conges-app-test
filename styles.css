@@ -124,6 +124,21 @@ body {
   width: fit-content;
 }
 
+.archived-section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.archived-toggle {
+  width: fit-content;
+  background: #eef2f7;
+  color: #1f2d3d;
+}
+
+.archived-toggle:hover {
+  background: #dde5ef;
+}
+
 .grille-formulaire {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
