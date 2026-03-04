@@ -76,7 +76,9 @@ const TRADUCTIONS = {
     kpi_employees: "Employés",
     kpi_pending_requests: "Demandes en attente",
     kpi_on_leave_today: "En congé aujourd'hui",
-    archived_employees_title: "Employés archivés",
+    archived_employees_title: "Salariés archivés",
+    archived_show: "▼ afficher",
+    archived_hide: "▲ masquer",
     no_archived_employee: "Aucun employé archivé",
     reactivate: "Réactiver",
   },
@@ -136,6 +138,8 @@ const TRADUCTIONS = {
     kpi_pending_requests: "Solicitudes pendientes",
     kpi_on_leave_today: "De vacaciones hoy",
     archived_employees_title: "Empleados archivados",
+    archived_show: "▼ mostrar",
+    archived_hide: "▲ ocultar",
     no_archived_employee: "Ningún empleado archivado",
     reactivate: "Reactivar",
   },
@@ -175,6 +179,10 @@ const boutonSoumettreDemande = formulaireDemandeConge?.querySelector('button[typ
 
 const listeResume = document.getElementById("liste-resume");
 const listeEmployesArchives = document.getElementById("liste-employes-archives");
+const boutonBasculerArchives = document.getElementById("toggleArchived");
+const archiveCount = document.getElementById("archivedCount");
+const archivedList = document.getElementById("archivedList");
+const archivedToggleLabel = document.getElementById("archivedToggleLabel");
 const filtreEquipeSelect = document.getElementById("filtre-equipe");
 const rechercheEmployeInput = document.getElementById("recherche-employe");
 const tableauBord = document.getElementById("tableau-bord");
@@ -194,6 +202,7 @@ let conges = [];
 let employesFiltres = [];
 let employesActifs = [];
 let employesArchives = [];
+let archivesOuvertes = false;
 let langueCourante = "fr";
 
 function t(cle) {
@@ -222,6 +231,7 @@ function changerLangue(langue) {
   langueCourante = langue;
   appliquerTraductionsStatiques();
   afficherEmployes();
+  mettreAJourLibelleArchives();
   afficherBlocDemandeConge();
   afficherDemandesEnAttente();
   afficherResume();
@@ -381,6 +391,7 @@ async function rafraichirDonnees() {
   conges = congesCharges;
 
   afficherEmployes();
+  mettreAJourLibelleArchives();
   afficherBlocDemandeConge();
   afficherDemandesEnAttente();
   afficherResume();
@@ -424,6 +435,11 @@ boutonExportExcel?.addEventListener("click", () => {
   exporterEmployesExcel();
 });
 
+boutonBasculerArchives?.addEventListener("click", () => {
+  basculerArchives();
+});
+
+mettreAJourLibelleArchives();
 
 listeEmployes.addEventListener("click", async (e) => {
   const btn = e.target.closest("[data-supprimer-id]");
@@ -935,9 +951,32 @@ function afficherEmployes() {
   afficherEmployesArchives();
 }
 
+
+function mettreAJourLibelleArchives() {
+  if (!archivedToggleLabel) {
+    return;
+  }
+
+  archivedToggleLabel.textContent = archivesOuvertes ? t("archived_hide") : t("archived_show");
+}
+
+function basculerArchives() {
+  if (!archivedList) {
+    return;
+  }
+
+  archivesOuvertes = !archivesOuvertes;
+  archivedList.style.display = archivesOuvertes ? "block" : "none";
+  mettreAJourLibelleArchives();
+}
+
 function afficherEmployesArchives() {
   if (!listeEmployesArchives) {
     return;
+  }
+
+  if (archiveCount) {
+    archiveCount.textContent = String(employesArchives.length);
   }
 
   if (!employesArchives.length) {
