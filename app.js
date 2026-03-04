@@ -1337,19 +1337,24 @@ function afficherTableauBord() {
 function calculerEmployesEnCongeAujourdHui() {
   const aujourdHui = new Date();
   aujourdHui.setHours(0, 0, 0, 0);
-
   const ids = new Set();
 
-  conges
-    .filter((conge) => conge.statut === "valide")
-    .forEach((conge) => {
-      const debut = new Date(`${conge.dateDebut}T00:00:00`);
-      const fin = new Date(`${conge.dateFin}T00:00:00`);
+  conges.forEach((conge) => {
+    if (conge.statut !== "valide") {
+      return;
+    }
 
-      if (aujourdHui >= debut && aujourdHui <= fin) {
-        ids.add(conge.idEmploye);
-      }
-    });
+    const debut = dateLocaleDepuisTexte(conge.dateDebut);
+    const fin = dateLocaleDepuisTexte(conge.dateFin);
+
+    if (!debut || !fin) {
+      return;
+    }
+
+    if (aujourdHui >= debut && aujourdHui <= fin) {
+      ids.add(conge.idEmploye);
+    }
+  });
 
   return ids.size;
 }
@@ -1605,11 +1610,28 @@ function afficherHistorique(historiqueConges) {
 }
 
 function formaterDateFr(dateBrute) {
-  const date = new Date(`${dateBrute}T00:00:00`);
+  const date = dateLocaleDepuisTexte(dateBrute);
+  if (!date) {
+    return "";
+  }
   const jour = String(date.getDate()).padStart(2, "0");
   const mois = String(date.getMonth() + 1).padStart(2, "0");
   const annee = date.getFullYear();
   return `${jour}/${mois}/${annee}`;
+}
+
+function dateLocaleDepuisTexte(dateBrute) {
+  const texte = String(dateBrute || "").split("T")[0];
+  const [anneeTexte, moisTexte, jourTexte] = texte.split("-");
+  const annee = Number(anneeTexte);
+  const mois = Number(moisTexte);
+  const jour = Number(jourTexte);
+
+  if (!annee || !mois || !jour) {
+    return null;
+  }
+
+  return new Date(annee, mois - 1, jour);
 }
 
 function echapperHtml(valeur) {
