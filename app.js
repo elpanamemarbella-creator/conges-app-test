@@ -513,11 +513,29 @@ function normaliserEquipe(equipe) {
 }
 
 function normaliserStatut(statut) {
-  if (statut === "en_attente" || statut === "valide" || statut === "refuse") {
-    return statut;
+  const statutNormalise = String(statut || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  if (["valide", "validee", "approved"].includes(statutNormalise)) {
+    return "valide";
   }
 
-  return "valide";
+  if (["refuse", "refusee", "rejected"].includes(statutNormalise)) {
+    return "refuse";
+  }
+
+  if (["annule", "annulee", "cancelled", "canceled"].includes(statutNormalise)) {
+    return "annule";
+  }
+
+  if (["en_attente", "en attente", "pending"].includes(statutNormalise)) {
+    return "en_attente";
+  }
+
+  return "en_attente";
 }
 
 function normaliserConge(id, conge) {
@@ -1419,26 +1437,28 @@ function afficherTableauBord() {
 function calculerEmployesEnCongeAujourdHui() {
   const aujourdHui = new Date();
   aujourdHui.setHours(0, 0, 0, 0);
-  const ids = new Set();
 
-  conges.forEach((conge) => {
-    if (conge.statut !== "valide") {
-      return;
-    }
+  const employesUniquesEnConge = new Set(
+    conges
+      .filter((conge) => {
+        if (conge.statut !== "valide") {
+          return false;
+        }
 
-    const debut = dateLocaleDepuisTexte(conge.dateDebut);
-    const fin = dateLocaleDepuisTexte(conge.dateFin);
+        const debut = dateLocaleDepuisTexte(conge.dateDebut);
+        const fin = dateLocaleDepuisTexte(conge.dateFin);
 
-    if (!debut || !fin) {
-      return;
-    }
+        if (!debut || !fin) {
+          return false;
+        }
 
-    if (aujourdHui >= debut && aujourdHui <= fin) {
-      ids.add(conge.idEmploye);
-    }
-  });
+        return aujourdHui >= debut && aujourdHui <= fin;
+      })
+      .map((conge) => conge.idEmploye)
+      .filter(Boolean),
+  );
 
-  return ids.size;
+  return employesUniquesEnConge.size;
 }
 
 function exporterEmployesExcel() {
