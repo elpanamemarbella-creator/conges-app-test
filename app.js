@@ -1439,12 +1439,15 @@ function calculerEmployesEnCongeAujourdHui() {
   aujourdHui.setHours(0, 0, 0, 0);
 
   const demandesValidesAujourdhui = conges.filter((demande) => {
-    if (normaliserStatut(demande.statut) !== "valide") {
+    const statut = normaliserStatut(demande.statut || demande.status);
+    if (statut !== "valide") {
       return false;
     }
 
-    const debut = dateLocaleDepuisTexte(demande.dateDebut);
-    const fin = dateLocaleDepuisTexte(demande.dateFin);
+    const debutTexte = demande.dateDebut || demande.date_debut || "";
+    const finTexte = demande.dateFin || demande.date_fin || "";
+    const debut = dateLocaleDepuisTexte(debutTexte);
+    const fin = dateLocaleDepuisTexte(finTexte);
 
     if (!debut || !fin) {
       return false;
@@ -1458,7 +1461,7 @@ function calculerEmployesEnCongeAujourdHui() {
 
   const employesUniquesEnConge = new Set(
     demandesValidesAujourdhui
-      .map((demande) => String(demande.idEmploye || "").trim())
+      .map((demande) => String(demande.idEmploye || demande.employeId || "").trim())
       .filter(Boolean),
   );
 
