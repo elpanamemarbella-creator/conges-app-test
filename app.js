@@ -1438,34 +1438,29 @@ function calculerEmployesEnCongeAujourdHui() {
   const aujourdHui = new Date();
   aujourdHui.setHours(0, 0, 0, 0);
 
-  const employesUniquesEnConge = new Set();
-
-  conges.forEach((conge) => {
-    if (normaliserStatut(conge.statut) !== "valide") {
-      return;
+  const demandesValidesAujourdhui = conges.filter((demande) => {
+    if (normaliserStatut(demande.statut) !== "valide") {
+      return false;
     }
 
-    const debut = dateLocaleDepuisTexte(conge.dateDebut);
-    const fin = dateLocaleDepuisTexte(conge.dateFin);
+    const debut = dateLocaleDepuisTexte(demande.dateDebut);
+    const fin = dateLocaleDepuisTexte(demande.dateFin);
 
-    if (!debut || !fin || aujourdHui < debut || aujourdHui > fin) {
-      return;
+    if (!debut || !fin) {
+      return false;
     }
 
-    const idEmploye = String(conge.idEmploye || "").trim();
-    if (!idEmploye) {
-      return;
-    }
+    debut.setHours(0, 0, 0, 0);
+    fin.setHours(0, 0, 0, 0);
 
-    employesUniquesEnConge.add(idEmploye);
+    return aujourdHui >= debut && aujourdHui <= fin;
   });
 
-  const employesComptes = [...employesUniquesEnConge].map((idEmploye) => {
-    const employe = employes.find((entry) => String(entry.id) === idEmploye);
-    return employe?.nom || idEmploye;
-  });
-
-  console.log("[KPI] Employés en congé aujourd'hui :", employesComptes);
+  const employesUniquesEnConge = new Set(
+    demandesValidesAujourdhui
+      .map((demande) => String(demande.idEmploye || "").trim())
+      .filter(Boolean),
+  );
 
   return employesUniquesEnConge.size;
 }
