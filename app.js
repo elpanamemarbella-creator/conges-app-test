@@ -1438,25 +1438,34 @@ function calculerEmployesEnCongeAujourdHui() {
   const aujourdHui = new Date();
   aujourdHui.setHours(0, 0, 0, 0);
 
-  const employesUniquesEnConge = new Set(
-    conges
-      .filter((conge) => {
-        if (conge.statut !== "valide") {
-          return false;
-        }
+  const employesUniquesEnConge = new Set();
 
-        const debut = dateLocaleDepuisTexte(conge.dateDebut);
-        const fin = dateLocaleDepuisTexte(conge.dateFin);
+  conges.forEach((conge) => {
+    if (normaliserStatut(conge.statut) !== "valide") {
+      return;
+    }
 
-        if (!debut || !fin) {
-          return false;
-        }
+    const debut = dateLocaleDepuisTexte(conge.dateDebut);
+    const fin = dateLocaleDepuisTexte(conge.dateFin);
 
-        return aujourdHui >= debut && aujourdHui <= fin;
-      })
-      .map((conge) => conge.idEmploye)
-      .filter(Boolean),
-  );
+    if (!debut || !fin || aujourdHui < debut || aujourdHui > fin) {
+      return;
+    }
+
+    const idEmploye = String(conge.idEmploye || "").trim();
+    if (!idEmploye) {
+      return;
+    }
+
+    employesUniquesEnConge.add(idEmploye);
+  });
+
+  const employesComptes = [...employesUniquesEnConge].map((idEmploye) => {
+    const employe = employes.find((entry) => String(entry.id) === idEmploye);
+    return employe?.nom || idEmploye;
+  });
+
+  console.log("[KPI] Employés en congé aujourd'hui :", employesComptes);
 
   return employesUniquesEnConge.size;
 }
