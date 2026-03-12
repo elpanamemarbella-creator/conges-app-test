@@ -834,6 +834,17 @@ function demanderCodeManager() {
   return true;
 }
 
+function structurerNote(texte) {
+  const phrases = texte
+    .replace(/[,;]/g, ".")
+    .split(".")
+    .map((phrase) => phrase.trim())
+    .filter((phrase) => phrase.length > 0)
+    .map((phrase) => phrase.charAt(0).toUpperCase() + phrase.slice(1));
+
+  return phrases.join(".\n");
+}
+
 function ouvrirFenetreNote(employe) {
   const modalExistant = document.getElementById("noteModal");
   if (modalExistant) {
@@ -848,6 +859,10 @@ function ouvrirFenetreNote(employe) {
     <div class="noteBox" role="dialog" aria-modal="true" aria-labelledby="noteModalTitle">
       <h3 id="noteModalTitle">Note pour ${echapperHtml(employe.nom)}</h3>
       <textarea id="noteTextarea" class="note-modal__textarea"></textarea>
+      <div class="note-tools">
+        <button id="dictateNote" type="button">🎤 Dicter</button>
+        <button id="structureNote" type="button">✨ Structurer la note</button>
+      </div>
       <div class="buttons note-modal__buttons">
         <button id="saveNote" type="button">Enregistrer</button>
         <button id="cancelNote" type="button" class="note-modal__cancel">Annuler</button>
@@ -858,6 +873,8 @@ function ouvrirFenetreNote(employe) {
   document.body.append(noteModal);
 
   const noteTextarea = noteModal.querySelector("#noteTextarea");
+  const boutonDictee = noteModal.querySelector("#dictateNote");
+  const boutonStructurer = noteModal.querySelector("#structureNote");
   const boutonEnregistrer = noteModal.querySelector("#saveNote");
   const boutonAnnuler = noteModal.querySelector("#cancelNote");
 
@@ -870,6 +887,31 @@ function ouvrirFenetreNote(employe) {
 
   boutonAnnuler.addEventListener("click", fermer);
   noteModal.querySelector(".note-modal__overlay")?.addEventListener("click", fermer);
+
+  boutonDictee?.addEventListener("click", () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("La dictée vocale n'est pas supportée sur ce navigateur. Utilisez le micro du clavier.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = "fr-FR";
+    recognition.continuous = false;
+
+    recognition.onresult = (event) => {
+      const texte = event.results[0][0].transcript;
+      noteTextarea.value += `\n${texte}`;
+    };
+
+    recognition.start();
+  });
+
+  boutonStructurer?.addEventListener("click", () => {
+    noteTextarea.value = structurerNote(noteTextarea.value);
+  });
 
   boutonEnregistrer.addEventListener("click", async () => {
     employe.note = noteTextarea.value;
