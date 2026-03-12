@@ -333,38 +333,26 @@ th {
 
 
 .note-indicator {
-  position: relative;
   display: inline-flex;
   align-items: center;
   margin-left: 0.35rem;
   cursor: help;
 }
 
-.note-tooltip {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 6px);
-  transform: translateX(-50%);
-  min-width: 220px;
-  max-width: 320px;
-  padding: 0.45rem 0.6rem;
-  border-radius: 8px;
-  background: #1f2d3d;
-  color: #fff;
-  font-size: 0.82rem;
-  line-height: 1.35;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.15s ease;
+#noteTooltip {
+  position: fixed;
+  background: #222;
+  color: white;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  max-width: 300px;
   white-space: pre-line;
-  z-index: 20;
+  pointer-events: none;
+  display: none;
+  z-index: 9999;
 }
 
-.note-indicator:hover .note-tooltip {
-  opacity: 1;
-  visibility: visible;
-}
 
 .note-modal {
   position: fixed;

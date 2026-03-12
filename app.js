@@ -413,9 +413,38 @@ const managerCodeInput = document.getElementById("manager-code-input");
 const managerModalErreur = document.getElementById("manager-modal-erreur");
 const managerModalValider = document.getElementById("manager-modal-valider");
 const managerModalAnnuler = document.getElementById("manager-modal-annuler");
+const noteTooltip = document.getElementById("noteTooltip");
 const menuOnglets = document.querySelectorAll(".menu-onglet");
 const zonesOnglets = document.querySelectorAll("[data-zone]");
 const boutonsLangue = document.querySelectorAll("[data-langue]");
+
+if (noteTooltip) {
+  document.addEventListener("mouseover", (event) => {
+    const icon = event.target.closest(".note-icon");
+
+    if (!icon) {
+      return;
+    }
+
+    noteTooltip.textContent = icon.dataset.note || "";
+    noteTooltip.style.display = "block";
+  });
+
+  document.addEventListener("mousemove", (event) => {
+    if (noteTooltip.style.display !== "block") {
+      return;
+    }
+
+    noteTooltip.style.left = `${event.clientX + 15}px`;
+    noteTooltip.style.top = `${event.clientY + 15}px`;
+  });
+
+  document.addEventListener("mouseout", (event) => {
+    if (event.target.closest(".note-icon")) {
+      noteTooltip.style.display = "none";
+    }
+  });
+}
 
 let employes = [];
 let conges = [];
@@ -1426,7 +1455,7 @@ function afficherEmployes() {
             ${echapperHtml(employe.nom)}
             ${
               employe.note
-                ? `<span class="note-indicator" aria-label="Note">📝<span class="note-tooltip">${echapperHtml(employe.note)}</span></span>`
+                ? `<span class="note-indicator note-icon" aria-label="Note" data-note="${echapperHtml(employe.note)}">📝</span>`
                 : ""
             }
           </td>
