@@ -362,6 +362,7 @@ const CLES_EQUIPE = {
 };
 const PALETTE_COULEURS = ["#2f80ed", "#eb5757", "#27ae60", "#f2994a", "#9b51e0", "#00b8d9", "#e84393", "#6c5ce7"];
 const CODE_MANAGER = "2005";
+const CODE_MANAGER_CONGES_MANUEL = "1973";
 
 const EMAILJS_PUBLIC_KEY = "cBFH1mPW-cT8LzOBh";
 
@@ -623,6 +624,7 @@ function fusionnerEmployesEtConges(employesBruts, congesCharges) {
       equipe,
       historiqueConges,
       congesPris: arrondir1Decimale(congesInitial + congesDepuisDemandes),
+      note: typeof employe.note === "string" ? employe.note : "",
       couleur: employe.couleur || "",
     };
   });
@@ -747,6 +749,37 @@ boutonBasculerArchives?.addEventListener("click", () => {
 mettreAJourLibelleArchives();
 
 listeEmployes.addEventListener("click", async (event) => {
+  const celluleCongesPris = event.target.closest(".cellule-conges-pris");
+  if (celluleCongesPris) {
+    const ligneCible = celluleCongesPris.closest(".ligne-employe[data-employe-id]");
+    const employe = employes.find((entry) => entry.id === ligneCible?.dataset.employeId);
+
+    if (!employe) {
+      return;
+    }
+
+    const codeManager = window.prompt("Entrer le code manager :");
+    if (codeManager !== CODE_MANAGER_CONGES_MANUEL) {
+      alert("Code manager incorrect");
+      return;
+    }
+
+    const nouveau = window.prompt("Modifier les congés pris :", employe.congesPris);
+    if (nouveau === null) {
+      return;
+    }
+
+    const congesPris = Number(nouveau);
+    if (Number.isNaN(congesPris)) {
+      return;
+    }
+
+    employe.congesPris = congesPris;
+    await sauvegarderEmployes(employe);
+    afficherEmployes();
+    return;
+  }
+
   const boutonSuppression = event.target.closest("[data-supprimer-id]");
   if (boutonSuppression) {
     const id = boutonSuppression.dataset.supprimerId;
@@ -773,6 +806,27 @@ listeEmployes.addEventListener("click", async (event) => {
   employeSelectionneId = ligneEmploye.dataset.employeId || "";
   afficherEmployes();
   afficherHistoriqueSalarieSelectionne();
+});
+
+listeEmployes.addEventListener("dblclick", async (event) => {
+  const ligneEmploye = event.target.closest(".ligne-employe[data-employe-id]");
+  if (!ligneEmploye) {
+    return;
+  }
+
+  const employe = employes.find((entry) => entry.id === ligneEmploye.dataset.employeId);
+  if (!employe) {
+    return;
+  }
+
+  const note = window.prompt("Note pour cet employé :", employe.note || "");
+  if (note === null) {
+    return;
+  }
+
+  employe.note = note;
+  await sauvegarderEmployes(employe);
+  afficherEmployes();
 });
 
 listeEmployesArchives?.addEventListener("click", async (event) => {
@@ -900,6 +954,7 @@ formulaireEmploye.addEventListener("submit", async (event) => {
     congesPris: Number(document.getElementById("conges-pris").value),
     birthCode,
     historiqueConges: [],
+    note: "",
     couleur: "",
     actif: true,
   };
@@ -1256,6 +1311,21 @@ async function reactiverEmploye(id) {
   );
 }
 
+async function sauvegarderEmployes(employe) {
+  if (!employe?.id) {
+    return;
+  }
+
+  await setDoc(
+    doc(db, "employes", employe.id),
+    {
+      congesPris: Number(employe.congesPris) || 0,
+      note: employe.note || "",
+    },
+    { merge: true },
+  );
+}
+
 function calculJoursCalendaires(startDate, endDate) {
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -1336,11 +1406,14 @@ function afficherEmployes() {
             : ""
         }
         <tr class="ligne-employe equipe-${classeEquipe} ${employeSelectionneId === employe.id ? "selectionne" : ""}" data-employe-id="${employe.id}">
-          <td data-label="${t("employee_col")}">${echapperHtml(employe.nom)}</td>
+          <td data-label="${t("employee_col")}">
+            ${echapperHtml(employe.nom)}
+            ${employe.note ? `<span title="${echapperHtml(employe.note)}">📝</span>` : ""}
+          </td>
           <td data-label="${t("team_col")}"><span class="badge-equipe equipe-${classeEquipe}">${echapperHtml(tEquipe(employe.equipe))}</span></td>
           <td data-label="${t("hire_date_col")}">${formaterDateFr(employe.dateEmbauche)}</td>
           <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
-          <td data-label="${t("taken_leave_col")}">${congesPris.toFixed(1)}</td>
+          <td data-label="${t("taken_leave_col")}" class="cellule-conges-pris">${congesPris.toFixed(1)}</td>
           <td data-label="${t("remaining_leave_col")}">${congesRestants.toFixed(1)}</td>
           <td data-label="${t("leave_history_col")}">${afficherHistorique(employe.historiqueConges)}</td>
           <td data-label="${t("status_col")}"><span class="pastille ${classeStatut}">${libelleStatut}</span></td>
