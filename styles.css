@@ -331,6 +331,104 @@ th {
   color: #a51f1f;
 }
 
+
+.note-indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.35rem;
+  cursor: help;
+}
+
+.note-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  min-width: 220px;
+  max-width: 320px;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #1f2d3d;
+  color: #fff;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+  white-space: pre-line;
+  z-index: 20;
+}
+
+.note-indicator:hover .note-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.note-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+}
+
+.note-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 33, 52, 0.4);
+}
+
+.noteBox {
+  position: relative;
+  z-index: 1;
+  width: min(92vw, 460px);
+  background: #fff;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.noteBox h3 {
+  margin: 0;
+}
+
+.note-modal__textarea {
+  width: 100%;
+  min-height: 150px;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  padding: 0.6rem 0.7rem;
+  font: inherit;
+  resize: vertical;
+}
+
+.note-modal__textarea:focus {
+  outline: 2px solid #a8c0ff;
+  border-color: var(--primaire);
+}
+
+.note-modal__buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.note-modal__buttons button {
+  min-height: 40px;
+}
+
+.note-modal__cancel {
+  background: #7d8b9c;
+}
+
+.note-modal__cancel:hover {
+  background: #6c7988;
+}
+
 .ligne-historique {
   margin-bottom: 0.3rem;
   white-space: nowrap;

@@ -834,6 +834,51 @@ function demanderCodeManager() {
   return true;
 }
 
+function ouvrirFenetreNote(employe) {
+  const modalExistant = document.getElementById("noteModal");
+  if (modalExistant) {
+    modalExistant.remove();
+  }
+
+  const noteModal = document.createElement("div");
+  noteModal.id = "noteModal";
+  noteModal.className = "note-modal";
+  noteModal.innerHTML = `
+    <div class="note-modal__overlay"></div>
+    <div class="noteBox" role="dialog" aria-modal="true" aria-labelledby="noteModalTitle">
+      <h3 id="noteModalTitle">Note pour ${echapperHtml(employe.nom)}</h3>
+      <textarea id="noteTextarea" class="note-modal__textarea"></textarea>
+      <div class="buttons note-modal__buttons">
+        <button id="saveNote" type="button">Enregistrer</button>
+        <button id="cancelNote" type="button" class="note-modal__cancel">Annuler</button>
+      </div>
+    </div>
+  `;
+
+  document.body.append(noteModal);
+
+  const noteTextarea = noteModal.querySelector("#noteTextarea");
+  const boutonEnregistrer = noteModal.querySelector("#saveNote");
+  const boutonAnnuler = noteModal.querySelector("#cancelNote");
+
+  noteTextarea.value = employe.note || "";
+  noteTextarea.focus();
+
+  const fermer = () => {
+    noteModal.remove();
+  };
+
+  boutonAnnuler.addEventListener("click", fermer);
+  noteModal.querySelector(".note-modal__overlay")?.addEventListener("click", fermer);
+
+  boutonEnregistrer.addEventListener("click", async () => {
+    employe.note = noteTextarea.value;
+    await sauvegarderEmployes(employe);
+    afficherEmployes();
+    fermer();
+  });
+}
+
 listeDemandesEnAttente.addEventListener("click", async (event) => {
   const boutonValidation = event.target.closest("[data-valider-id]");
   const boutonRefus = event.target.closest("[data-refuser-id]");
@@ -1337,7 +1382,11 @@ function afficherEmployes() {
         <tr class="ligne-employe equipe-${classeEquipe} ${employeSelectionneId === employe.id ? "selectionne" : ""}" data-employe-id="${employe.id}">
           <td data-label="${t("employee_col")}">
             ${echapperHtml(employe.nom)}
-            ${employe.note ? `<span title="${echapperHtml(employe.note)}">📝</span>` : ""}
+            ${
+              employe.note
+                ? `<span class="note-indicator" aria-label="Note">📝<span class="note-tooltip">${echapperHtml(employe.note)}</span></span>`
+                : ""
+            }
           </td>
           <td data-label="${t("team_col")}"><span class="badge-equipe equipe-${classeEquipe}">${echapperHtml(tEquipe(employe.equipe))}</span></td>
           <td data-label="${t("hire_date_col")}">${formaterDateFr(employe.dateEmbauche)}</td>
@@ -1362,19 +1411,12 @@ function afficherEmployes() {
     }
 
     ligne.addEventListener("dblclick", async () => {
-      const code = prompt("Code manager requis");
-      if (code !== CODE_MANAGER) {
-        alert("Code manager incorrect");
+      const codeValide = demanderCodeManager();
+      if (!codeValide) {
         return;
       }
 
-      const nouvelleNote = prompt(`Note pour ${employe.nom}`, employe.note || "");
-
-      if (nouvelleNote !== null) {
-        employe.note = nouvelleNote;
-        await sauvegarderEmployes(employe);
-        afficherEmployes();
-      }
+      ouvrirFenetreNote(employe);
     });
   });
 
