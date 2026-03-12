@@ -641,7 +641,10 @@ async function chargerEmployes() {
     });
   });
 
-  return liste;
+  return liste.map((emp) => ({
+    ...emp,
+    note: typeof emp.note === "string" ? emp.note : "",
+  }));
 }
 
 async function garantirCouleursEmployes(employesCharges) {
@@ -806,33 +809,6 @@ listeEmployes.addEventListener("click", async (event) => {
   employeSelectionneId = ligneEmploye.dataset.employeId || "";
   afficherEmployes();
   afficherHistoriqueSalarieSelectionne();
-});
-
-listeEmployes.addEventListener("dblclick", async (event) => {
-  const ligneEmploye = event.target.closest(".ligne-employe[data-employe-id]");
-  if (!ligneEmploye) {
-    return;
-  }
-
-  const employe = employes.find((entry) => entry.id === ligneEmploye.dataset.employeId);
-  if (!employe) {
-    return;
-  }
-
-  const code = prompt("Code manager requis");
-  if (code !== CODE_MANAGER) {
-    alert("Code manager incorrect");
-    return;
-  }
-
-  const note = window.prompt(`Note pour ${employe.nom}`, employe.note || "");
-  if (note === null) {
-    return;
-  }
-
-  employe.note = note;
-  await sauvegarderEmployes(employe);
-  afficherEmployes();
 });
 
 listeEmployesArchives?.addEventListener("click", async (event) => {
@@ -1377,6 +1353,30 @@ function afficherEmployes() {
       `;
     })
     .join("");
+
+  const lignesEmployes = listeEmployes.querySelectorAll(".ligne-employe[data-employe-id]");
+  lignesEmployes.forEach((ligne) => {
+    const employe = employes.find((entry) => entry.id === ligne.dataset.employeId);
+    if (!employe) {
+      return;
+    }
+
+    ligne.addEventListener("dblclick", async () => {
+      const code = prompt("Code manager requis");
+      if (code !== CODE_MANAGER) {
+        alert("Code manager incorrect");
+        return;
+      }
+
+      const nouvelleNote = prompt(`Note pour ${employe.nom}`, employe.note || "");
+
+      if (nouvelleNote !== null) {
+        employe.note = nouvelleNote;
+        await sauvegarderEmployes(employe);
+        afficherEmployes();
+      }
+    });
+  });
 
   if (employeSelectionneId && !employesTries.some((employe) => employe.id === employeSelectionneId)) {
     employeSelectionneId = "";
