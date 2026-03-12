@@ -1438,34 +1438,37 @@ function calculerEmployesEnCongeAujourdHui() {
   const aujourdHui = new Date();
   aujourdHui.setHours(0, 0, 0, 0);
 
-  const demandesValidesAujourdhui = conges.filter((demande) => {
-    const statut = normaliserStatut(demande.statut || demande.status);
-    if (statut !== "valide") {
-      return false;
+  let compteur = 0;
+
+  employes.forEach((employe) => {
+    if (!Array.isArray(employe.historiqueConges)) {
+      return;
     }
 
-    const debutTexte = demande.dateDebut || demande.date_debut || "";
-    const finTexte = demande.dateFin || demande.date_fin || "";
-    const debut = dateLocaleDepuisTexte(debutTexte);
-    const fin = dateLocaleDepuisTexte(finTexte);
+    const estEnCongeAujourdHui = employe.historiqueConges.some((conge) => {
+      if (!conge || !conge.dateDebut || !conge.dateFin) {
+        return false;
+      }
 
-    if (!debut || !fin) {
-      return false;
+      const debut = new Date(`${conge.dateDebut}T00:00:00`);
+      const fin = new Date(`${conge.dateFin}T00:00:00`);
+
+      if (Number.isNaN(debut.getTime()) || Number.isNaN(fin.getTime())) {
+        return false;
+      }
+
+      debut.setHours(0, 0, 0, 0);
+      fin.setHours(0, 0, 0, 0);
+
+      return aujourdHui >= debut && aujourdHui <= fin;
+    });
+
+    if (estEnCongeAujourdHui) {
+      compteur++;
     }
-
-    debut.setHours(0, 0, 0, 0);
-    fin.setHours(0, 0, 0, 0);
-
-    return aujourdHui >= debut && aujourdHui <= fin;
   });
 
-  const employesUniquesEnConge = new Set(
-    demandesValidesAujourdhui
-      .map((demande) => String(demande.idEmploye || demande.employeId || "").trim())
-      .filter(Boolean),
-  );
-
-  return employesUniquesEnConge.size;
+  return compteur;
 }
 
 function exporterEmployesExcel() {
