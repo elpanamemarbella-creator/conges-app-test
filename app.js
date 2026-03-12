@@ -8,6 +8,8 @@ import {
   getDocs,
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
+const CODE_MANAGER = "2005";
+
 const firebaseConfig = {
   apiKey: "AIzaSyAEtBkoWO_vfn_MgINrumqCqhBmwKU-Sl4",
   authDomain: "conges-paname.firebaseapp.com",
@@ -361,8 +363,6 @@ const CLES_EQUIPE = {
   "Nettoyage et entretien": "team_cleaning",
 };
 const PALETTE_COULEURS = ["#2f80ed", "#eb5757", "#27ae60", "#f2994a", "#9b51e0", "#00b8d9", "#e84393", "#6c5ce7"];
-const CODE_MANAGER = "2005";
-const CODE_MANAGER_CONGES_MANUEL = "1973";
 
 const EMAILJS_PUBLIC_KEY = "cBFH1mPW-cT8LzOBh";
 
@@ -758,8 +758,8 @@ listeEmployes.addEventListener("click", async (event) => {
       return;
     }
 
-    const codeManager = window.prompt("Entrer le code manager :");
-    if (codeManager !== CODE_MANAGER_CONGES_MANUEL) {
+    const code = prompt("Code manager requis");
+    if (code !== CODE_MANAGER) {
       alert("Code manager incorrect");
       return;
     }
@@ -819,7 +819,13 @@ listeEmployes.addEventListener("dblclick", async (event) => {
     return;
   }
 
-  const note = window.prompt("Note pour cet employé :", employe.note || "");
+  const code = prompt("Code manager requis");
+  if (code !== CODE_MANAGER) {
+    alert("Code manager incorrect");
+    return;
+  }
+
+  const note = window.prompt(`Note pour ${employe.nom}`, employe.note || "");
   if (note === null) {
     return;
   }
@@ -843,65 +849,13 @@ listeEmployesArchives?.addEventListener("click", async (event) => {
 });
 
 function demanderCodeManager() {
-  return new Promise((resolve) => {
-    if (!managerModal || !managerCodeInput || !managerModalErreur || !managerModalValider || !managerModalAnnuler) {
-      resolve(false);
-      return;
-    }
+  const code = prompt("Code manager requis");
+  if (code !== CODE_MANAGER) {
+    alert("Code manager incorrect");
+    return false;
+  }
 
-    const fermer = (resultat) => {
-      managerModal.hidden = true;
-      managerCodeInput.value = "";
-      managerModalErreur.hidden = true;
-      managerCodeInput.removeEventListener("keydown", gererClavier);
-      managerModalValider.removeEventListener("click", valider);
-      managerModalAnnuler.removeEventListener("click", annuler);
-      managerModal.removeEventListener("click", gererFermetureOverlay);
-      resolve(resultat);
-    };
-
-    const valider = () => {
-      if (managerCodeInput.value === CODE_MANAGER) {
-        fermer(true);
-        return;
-      }
-
-      managerModalErreur.hidden = false;
-      managerCodeInput.focus();
-      managerCodeInput.select();
-    };
-
-    const annuler = () => {
-      fermer(false);
-    };
-
-    const gererClavier = (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        valider();
-      }
-
-      if (event.key === "Escape") {
-        event.preventDefault();
-        annuler();
-      }
-    };
-
-    const gererFermetureOverlay = (event) => {
-      if (event.target.hasAttribute("data-modal-close")) {
-        annuler();
-      }
-    };
-
-    managerModal.hidden = false;
-    managerCodeInput.value = "";
-    managerModalErreur.hidden = true;
-    managerModalValider.addEventListener("click", valider);
-    managerModalAnnuler.addEventListener("click", annuler);
-    managerCodeInput.addEventListener("keydown", gererClavier);
-    managerModal.addEventListener("click", gererFermetureOverlay);
-    managerCodeInput.focus();
-  });
+  return true;
 }
 
 listeDemandesEnAttente.addEventListener("click", async (event) => {
@@ -914,10 +868,9 @@ listeDemandesEnAttente.addEventListener("click", async (event) => {
   }
 
   const nouveauStatut = boutonValidation ? "valide" : "refuse";
-  const codeSaisi = window.prompt(t("manager_prompt"));
-
-  if (codeSaisi !== CODE_MANAGER) {
-    alert(t("wrong_code"));
+  const code = prompt("Code manager requis");
+  if (code !== CODE_MANAGER) {
+    alert("Code manager incorrect");
     return;
   }
 
