@@ -996,6 +996,10 @@ listeEmployes.addEventListener("click", async (event) => {
 
   const celluleEquipe = event.target.closest(".employee-team[data-id]");
   if (celluleEquipe) {
+    if (event.target.closest("select")) {
+      return;
+    }
+
     const empId = celluleEquipe.dataset.id;
     const employe = employes.find((entry) => entry.id === empId);
 
@@ -1003,19 +1007,46 @@ listeEmployes.addEventListener("click", async (event) => {
       return;
     }
 
-    const choix = window.prompt("Changer l'équipe :", employe.equipe);
-    if (!choix) {
-      return;
-    }
+    const select = document.createElement("select");
+    select.className = "select-team-inline";
 
-    const nouvelleEquipe = normaliserEquipe(choix);
-    if (TEAMS[nouvelleEquipe]) {
-      employe.equipe = nouvelleEquipe;
+    TEAM_ORDER.forEach((team) => {
+      const option = document.createElement("option");
+      option.value = team;
+      option.textContent = tEquipe(team);
+
+      if (team === employe.equipe) {
+        option.selected = true;
+      }
+
+      select.appendChild(option);
+    });
+
+    celluleEquipe.innerHTML = "";
+    celluleEquipe.appendChild(select);
+    select.focus();
+
+    select.addEventListener("change", async () => {
+      employe.equipe = select.value;
       await sauvegarderEmployes(employe);
       afficherEmployes();
       renderPlanning(currentWeek);
       renderCoverageToday();
-    }
+    });
+
+    select.addEventListener("blur", () => {
+      if (!celluleEquipe.contains(select)) {
+        return;
+      }
+
+      afficherEmployes();
+    });
+
+    select.addEventListener("keydown", (keyEvent) => {
+      if (keyEvent.key === "Escape") {
+        select.blur();
+      }
+    });
 
     return;
   }
