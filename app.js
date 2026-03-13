@@ -373,32 +373,64 @@ const TRADUCTIONS = {
   },
 };
 
-const ORDRE_EQUIPES = ["Bar matin", "Salle matin", "Bar soir", "Salle soir", "Cuisine", "Extra", "Nettoyage et entretien"];
-const TEAM_ORDER = ["nettoyage-entretien", "bar matin", "salle matin", "cuisine", "salle soir", "bar soir"];
+const TEAM_ORDER = [
+  "nettoyage-entretien",
+  "bar matin",
+  "salle matin",
+  "cuisine matin",
+  "cuisine soir",
+  "salle soir",
+  "bar soir",
+  "chicha",
+  "dj",
+  "rp",
+  "portier",
+  "extra",
+];
+const TEAMS = {
+  "nettoyage-entretien": { fr: "Nettoyage / Entretien", es: "Limpieza / Mantenimiento", en: "Cleaning / Maintenance" },
+  "bar matin": { fr: "Bar matin", es: "Bar mañana", en: "Morning bar" },
+  "salle matin": { fr: "Salle matin", es: "Sala mañana", en: "Morning floor" },
+  "cuisine matin": { fr: "Cuisine matin", es: "Cocina mañana", en: "Morning kitchen" },
+  "cuisine soir": { fr: "Cuisine soir", es: "Cocina noche", en: "Evening kitchen" },
+  "salle soir": { fr: "Salle soir", es: "Sala noche", en: "Evening floor" },
+  "bar soir": { fr: "Bar soir", es: "Bar noche", en: "Evening bar" },
+  chicha: { fr: "Chicha", es: "Shisha", en: "Shisha" },
+  dj: { fr: "DJ", es: "DJ", en: "DJ" },
+  rp: { fr: "RP", es: "RRPP", en: "PR" },
+  portier: { fr: "Portier", es: "Portero", en: "Doorman" },
+  extra: { fr: "Extra", es: "Extra", en: "Extra" },
+};
 const TEAM_COLORS = {
   "nettoyage-entretien": "#e0f2fe",
   "bar matin": "#dcfce7",
   "salle matin": "#fde68a",
-  cuisine: "#fecaca",
+  "cuisine matin": "#fecaca",
+  "cuisine soir": "#fecdd3",
   "salle soir": "#fbcfe8",
   "bar soir": "#ddd6fe",
+  chicha: "#d9f99d",
+  dj: "#c4b5fd",
+  rp: "#a7f3d0",
+  portier: "#fdba74",
+  extra: "#e5e7eb",
 };
 const TEAM_KEYS = {
+  "Nettoyage / Entretien": "nettoyage-entretien",
   "Nettoyage et entretien": "nettoyage-entretien",
   "Bar matin": "bar matin",
   "Salle matin": "salle matin",
-  Cuisine: "cuisine",
+  "Cuisine matin": "cuisine matin",
+  "Cuisine soir": "cuisine soir",
+  Cuisine: "cuisine soir",
   "Salle soir": "salle soir",
   "Bar soir": "bar soir",
-};
-const CLES_EQUIPE = {
-  "Bar matin": "team_bar_morning",
-  "Salle matin": "team_floor_morning",
-  "Bar soir": "team_bar_evening",
-  "Salle soir": "team_floor_evening",
-  Cuisine: "team_kitchen",
-  Extra: "team_extra",
-  "Nettoyage et entretien": "team_cleaning",
+  Chicha: "chicha",
+  DJ: "dj",
+  RP: "rp",
+  Portier: "portier",
+  Extra: "extra",
+  Extras: "extra",
 };
 const PALETTE_COULEURS = ["#2f80ed", "#eb5757", "#27ae60", "#f2994a", "#9b51e0", "#00b8d9", "#e84393", "#6c5ce7"];
 const WEEKLY_REST_OPTIONS = [
@@ -421,13 +453,32 @@ if (window.emailjs && !window.__emailjsInitialized) {
 window.__sendingEmail = false;
 
 const CLASSES_EQUIPE = {
+  "bar matin": "bar-matin",
+  "salle matin": "salle-matin",
+  "bar soir": "bar-soir",
+  "salle soir": "salle-soir",
+  "cuisine matin": "cuisine",
+  "cuisine soir": "cuisine",
+  "nettoyage-entretien": "nettoyage-entretien",
+  chicha: "chicha",
+  dj: "dj",
+  rp: "rp",
+  portier: "portier",
+  extra: "extras",
   "Bar matin": "bar-matin",
   "Salle matin": "salle-matin",
   "Bar soir": "bar-soir",
   "Salle soir": "salle-soir",
-  Cuisine: "cuisine",
+  "Cuisine matin": "cuisine",
+  "Cuisine soir": "cuisine",
   Extra: "extras",
   "Nettoyage et entretien": "nettoyage-entretien",
+  "Nettoyage / Entretien": "nettoyage-entretien",
+  Chicha: "chicha",
+  DJ: "dj",
+  RP: "rp",
+  Portier: "portier",
+  extra: "extras",
 };
 
 const formulaireEmploye = document.getElementById("formulaire-employe");
@@ -463,7 +514,7 @@ const managerModalAnnuler = document.getElementById("manager-modal-annuler");
 const openPlanningButton = document.getElementById("openPlanning");
 const planningView = document.getElementById("planningView");
 const planningBody = document.getElementById("planningBody");
-const teamCoverage = document.getElementById("teamCoverage");
+const coverageContent = document.getElementById("coverageContent");
 const weekLabel = document.getElementById("weekLabel");
 const prevWeekButton = document.getElementById("prevWeek");
 const nextWeekButton = document.getElementById("nextWeek");
@@ -523,8 +574,12 @@ function t(cle) {
   return TRADUCTIONS[langueCourante]?.[cle] || TRADUCTIONS.fr[cle] || cle;
 }
 
+function teamLabel(team) {
+  return TEAMS[team]?.[langueCourante] || team;
+}
+
 function tEquipe(equipe) {
-  return t(CLES_EQUIPE[equipe] || "team_extra");
+  return teamLabel(normaliserEquipe(equipe));
 }
 
 function detecterLangueInitiale() {
@@ -591,6 +646,7 @@ function changerLangue(langue) {
   afficherResume();
   afficherTableauBord();
   afficherCalendrierMensuel();
+  renderCoverageToday();
   afficherHistoriqueSalarieSelectionne();
   renderPlanning(currentWeek);
 }
@@ -601,10 +657,16 @@ function recupererLangueActive() {
 }
 
 function normaliserEquipe(equipe) {
-  if (equipe === "Extras") {
-    return "Extra";
+  const brute = String(equipe || "").trim();
+  if (!brute) {
+    return "extra";
   }
-  return ORDRE_EQUIPES.includes(equipe) ? equipe : "Extra";
+
+  if (TEAM_ORDER.includes(brute)) {
+    return brute;
+  }
+
+  return TEAM_KEYS[brute] || "extra";
 }
 
 function normaliserStatut(statut) {
@@ -804,6 +866,7 @@ async function rafraichirDonnees() {
   afficherResume();
   afficherTableauBord();
   afficherCalendrierMensuel();
+  renderCoverageToday();
   afficherHistoriqueSalarieSelectionne();
   renderPlanning(currentWeek);
 }
@@ -928,6 +991,32 @@ listeEmployes.addEventListener("click", async (event) => {
     employe.congesPris = congesPris;
     await sauvegarderEmployes(employe);
     afficherEmployes();
+    return;
+  }
+
+  const celluleEquipe = event.target.closest(".employee-team[data-id]");
+  if (celluleEquipe) {
+    const empId = celluleEquipe.dataset.id;
+    const employe = employes.find((entry) => entry.id === empId);
+
+    if (!employe) {
+      return;
+    }
+
+    const choix = window.prompt("Changer l'équipe :", employe.equipe);
+    if (!choix) {
+      return;
+    }
+
+    const nouvelleEquipe = normaliserEquipe(choix);
+    if (TEAMS[nouvelleEquipe]) {
+      employe.equipe = nouvelleEquipe;
+      await sauvegarderEmployes(employe);
+      afficherEmployes();
+      renderPlanning(currentWeek);
+      renderCoverageToday();
+    }
+
     return;
   }
 
@@ -1485,7 +1574,7 @@ function validerEmploye(employe) {
     return false;
   }
 
-  if (!ORDRE_EQUIPES.includes(employe.equipe)) {
+  if (!TEAM_ORDER.includes(normaliserEquipe(employe.equipe))) {
     alert(t("valid_team_error"));
     return false;
   }
@@ -1572,6 +1661,7 @@ async function sauvegarderEmployes(employe) {
     doc(db, "employes", employe.id),
     {
       congesPris: Number(employe.congesPris) || 0,
+      equipe: normaliserEquipe(employe.equipe),
       note: employe.note || "",
       restDaysWeekly: Array.isArray(employe.restDaysWeekly) ? employe.restDaysWeekly : [],
       planningExceptions: Array.isArray(employe.planningExceptions) ? employe.planningExceptions : [],
@@ -1612,8 +1702,8 @@ function calculJoursCalendaires(startDate, endDate) {
 
 function trierEmployesParEquipe() {
   return [...employesActifs].sort((a, b) => {
-    const indexA = ORDRE_EQUIPES.indexOf(a.equipe);
-    const indexB = ORDRE_EQUIPES.indexOf(b.equipe);
+    const indexA = getTeamOrderIndex(a.equipe);
+    const indexB = getTeamOrderIndex(b.equipe);
 
     if (indexA !== indexB) {
       return indexA - indexB;
@@ -1684,7 +1774,7 @@ function afficherEmployes() {
                 : ""
             }
           </td>
-          <td data-label="${t("team_col")}"><span class="badge-equipe equipe-${classeEquipe}">${echapperHtml(tEquipe(employe.equipe))}</span></td>
+          <td data-label="${t("team_col")}" class="employee-team" data-id="${employe.id}"><span class="badge-equipe equipe-${classeEquipe}">${echapperHtml(tEquipe(employe.equipe))}</span></td>
           <td data-label="${t("hire_date_col")}">${formaterDateFr(employe.dateEmbauche)}</td>
           <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
           <td data-label="${t("taken_leave_col")}" class="cellule-conges-pris">${congesPris.toFixed(1)}</td>
@@ -2080,7 +2170,7 @@ function estJourVacances(employe, jour) {
 }
 
 function getTeamKey(equipe) {
-  return TEAM_KEYS[equipe] || equipe.toLowerCase();
+  return normaliserEquipe(equipe);
 }
 
 function getTeamOrderIndex(equipe) {
@@ -2088,15 +2178,18 @@ function getTeamOrderIndex(equipe) {
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;
 }
 
-function renderCoverage(semaine) {
-  if (!teamCoverage) {
+function renderCoverageToday() {
+  if (!coverageContent) {
     return;
   }
+
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
 
   const coverage = {};
 
   TEAM_ORDER.forEach((team) => {
-    coverage[team] = 0;
+    coverage[team] = [];
   });
 
   employesActifs.forEach((emp) => {
@@ -2111,24 +2204,24 @@ function renderCoverage(semaine) {
       debut.setHours(0, 0, 0, 0);
       fin.setHours(23, 59, 59, 999);
 
-      return semaine >= debut && semaine <= fin;
+      return today >= debut && today <= fin;
     });
 
     if (isWorking) {
       const teamKey = getTeamKey(emp.equipe);
       if (teamKey in coverage) {
-        coverage[teamKey] += 1;
+        coverage[teamKey].push(emp.nom);
       }
     }
   });
 
-  let html = "<h3>Couverture équipe</h3>";
+  let html = "";
 
   TEAM_ORDER.forEach((team) => {
-    html += `<div>${echapperHtml(team)} : ${coverage[team]} présent(s)</div>`;
+    html += `<div><strong>${echapperHtml(teamLabel(team))}</strong> : ${echapperHtml(coverage[team].join(", ") || "-")}</div>`;
   });
 
-  teamCoverage.innerHTML = html;
+  coverageContent.innerHTML = html;
 }
 
 function renderPlanning(semaine) {
@@ -2138,7 +2231,7 @@ function renderPlanning(semaine) {
 
   planningBody.innerHTML = "";
   weekLabel.textContent = formaterLibelleSemaine(semaine);
-  renderCoverage(semaine);
+  renderCoverageToday();
 
   const employesPlanning = [...employesActifs].sort((a, b) => {
     const teamDiff = getTeamOrderIndex(a.equipe) - getTeamOrderIndex(b.equipe);
