@@ -78,7 +78,7 @@ const TRADUCTIONS = {
     entry_date_col: "Date d'entrée",
     save_title: "Sauvegarde",
     save_auto_message: "La sauvegarde est gérée automatiquement par le système existant.",
-    calendar_title: "Calendrier des congés",
+    calendar_title: "Calendrier des vacances",
     no_validated_leave_month: "Aucun congé validé sur le mois en cours.",
     no_leave: "Aucun congé",
     day_singular: "jour",
@@ -2186,18 +2186,73 @@ function formaterLibelleSemaine(semaine) {
 }
 
 function estJourVacances(employe, jour) {
-  return employe.historiqueConges.some((conge) => {
-    const debut = dateLocaleDepuisTexte(conge.dateDebut);
-    const fin = dateLocaleDepuisTexte(conge.dateFin);
-    if (!debut || !fin) {
-      return false;
+  return getEmployeeStatusForDate(employe, jour) === "vacation";
+}
+
+function getEmployeeStatusForDate(employe, date) {
+  const target = date instanceof Date ? new Date(date) : new Date(`${date}T12:00:00`);
+
+  if (Number.isNaN(target.getTime())) {
+    return "work";
+  }
+
+  target.setHours(0, 0, 0, 0);
+
+  if (Array.isArray(employe.historiqueConges)) {
+    const enVacances = employe.historiqueConges.some((conge) => {
+      if (!conge?.dateDebut || !conge?.dateFin) {
+        return false;
+      }
+
+      const debut = dateLocaleDepuisTexte(conge.dateDebut);
+      const fin = dateLocaleDepuisTexte(conge.dateFin);
+
+      if (!debut || !fin) {
+        return false;
+      }
+
+      debut.setHours(0, 0, 0, 0);
+      fin.setHours(0, 0, 0, 0);
+
+      return target >= debut && target <= fin;
+    });
+
+    if (enVacances) {
+      return "vacation";
     }
+  }
 
-    debut.setHours(0, 0, 0, 0);
-    fin.setHours(23, 59, 59, 999);
+  if (Array.isArray(employe.planningExceptions)) {
+    const isoDate = formatDateISO(target);
+    const exception = employe.planningExceptions.find((entry) => {
+      if (!entry?.date) {
+        return false;
+      }
 
-    return jour >= debut && jour <= fin;
-  });
+      const exDate = dateLocaleDepuisTexte(entry.date);
+      if (!exDate) {
+        return false;
+      }
+
+      exDate.setHours(0, 0, 0, 0);
+      return formatDateISO(exDate) === isoDate;
+    });
+
+    if (exception?.statut) {
+      return exception.statut;
+    }
+  }
+
+  const day = target.getDay();
+  if (Array.isArray(employe.restDaysWeekly) && employe.restDaysWeekly.includes(day)) {
+    return "rest";
+  }
+
+  if (day === 0 || day === 6) {
+    return "rest";
+  }
+
+  return "work";
 }
 
 function getTeamKey(equipe) {
@@ -2224,21 +2279,9 @@ function renderCoverageToday() {
   });
 
   employesActifs.forEach((emp) => {
-    const isWorking = !emp.historiqueConges.some((c) => {
-      const debut = dateLocaleDepuisTexte(c.dateDebut);
-      const fin = dateLocaleDepuisTexte(c.dateFin);
+    const statut = getEmployeeStatusForDate(emp, today);
 
-      if (!debut || !fin) {
-        return false;
-      }
-
-      debut.setHours(0, 0, 0, 0);
-      fin.setHours(23, 59, 59, 999);
-
-      return today >= debut && today <= fin;
-    });
-
-    if (isWorking) {
+    if (statut === "work") {
       const teamKey = getTeamKey(emp.equipe);
       if (teamKey in coverage) {
         coverage[teamKey].push(emp.nom);
@@ -2307,27 +2350,17 @@ function renderPlanning(semaine) {
       td.dataset.employeId = emp.id;
       td.dataset.date = dateIso;
 
-      const estVacances = estJourVacances(emp, jour);
-      const exception = trouverExceptionPlanning(emp, dateIso);
-      const jourSemaine = jour.getDay();
-      const estReposHebdo = Array.isArray(emp.restDaysWeekly) && emp.restDaysWeekly.includes(jourSemaine);
-      const estWeekend = i >= 5;
+      const statut = getEmployeeStatusForDate(emp, jour);
 
-      if (estVacances) {
+      if (statut === "vacation") {
         td.className = "vacation-day";
         td.textContent = "V";
-      } else if (exception?.statut === "rest") {
+      } else if (statut === "rest") {
         td.className = "rest-day";
         td.textContent = "R";
-      } else if (exception?.statut === "work") {
+      } else if (statut === "work") {
         td.className = "work-day";
         td.textContent = "";
-      } else if (estReposHebdo) {
-        td.className = "rest-day";
-        td.textContent = "R";
-      } else if (estWeekend) {
-        td.className = "rest-day";
-        td.textContent = "R";
       } else {
         td.className = "work-day";
         td.textContent = "";
