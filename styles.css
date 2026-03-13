@@ -356,6 +356,49 @@ th {
   color: #1d4ed8;
 }
 
+
+.setEmployeePin {
+  background: transparent;
+  color: var(--primaire);
+  padding: 0;
+  text-align: left;
+  min-height: auto;
+}
+
+.setEmployeePin:hover {
+  background: transparent;
+  color: #1d4ed8;
+}
+
+.pin-edit-box {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.pin-edit-label {
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+.pin-input {
+  width: 70px;
+  text-align: center;
+  font-size: 14px;
+  letter-spacing: 3px;
+  padding: 4px;
+}
+
+.pin-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.pin-actions button {
+  min-height: 28px;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.75rem;
+}
+
 .weekly-rest-modal {
   position: fixed;
   inset: 0;
