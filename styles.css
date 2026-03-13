@@ -748,20 +748,29 @@ th {
   padding: 8px;
 }
 
-.work-day {
-  background: #dcfce7;
+.status-travail {
+  background-color: #e6f6ea;
+  color: #1e7e34;
+  font-weight: 500;
+  text-align: center;
 }
 
-.vacation-day {
-  background: #fef3c7;
+.status-vacances {
+  background-color: #fff3cd;
+  color: #856404;
+  font-weight: 500;
+  text-align: center;
 }
 
 .sick-day {
   background: #fee2e2;
 }
 
-.rest-day {
-  background: #ede9fe;
+.status-repos {
+  background-color: #f1f1f4;
+  color: #555;
+  font-weight: 500;
+  text-align: center;
 }
 
 .planning-row:hover td {
@@ -772,16 +781,8 @@ th {
   background: #dbeafe;
 }
 
-.planning-row:hover td.weekend-column {
-  background: #eceff3;
-}
-
 .today-column {
   background: #dbeafe;
-}
-
-.weekend-column {
-  background: #f3f4f6;
 }
 
 @media (max-width: 940px) {
