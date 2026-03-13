@@ -445,6 +445,25 @@ const noteViewerText = document.getElementById("noteViewerText");
 const closeNoteViewerButton = document.getElementById("closeNoteViewer");
 
 document.addEventListener("click", (event) => {
+  const cell = event.target.closest(".vacation-history");
+  if (cell) {
+    const historique = JSON.parse(cell.dataset.history || "[]");
+
+    if (!historique.length) {
+      alert("Aucun congé enregistré.");
+      return;
+    }
+
+    let texte = "Historique complet des congés\n\n";
+
+    historique.forEach((conge) => {
+      texte += `${formaterDateFr(conge.dateDebut)} → ${formaterDateFr(conge.dateFin)}\n`;
+    });
+
+    alert(texte);
+    return;
+  }
+
   const icon = event.target.closest(".note-icon");
   if (!icon || !noteViewer || !noteViewerTitle || !noteViewerText) {
     return;
@@ -1498,7 +1517,7 @@ function afficherEmployes() {
         }
         <tr class="ligne-employe equipe-${classeEquipe} ${employeSelectionneId === employe.id ? "selectionne" : ""}" data-employe-id="${employe.id}">
           <td data-label="${t("employee_col")}">
-            ${echapperHtml(employe.nom)}
+            <span class="employee-name">${echapperHtml(employe.nom)}</span>
             ${
               employe.note
                 ? `<span class="note-indicator note-icon" aria-label="${t("note_aria_label")}" data-nom="${echapperHtml(employe.nom)}" data-note="${echapperHtml(employe.note)}">📝</span>`
@@ -1510,7 +1529,7 @@ function afficherEmployes() {
           <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
           <td data-label="${t("taken_leave_col")}" class="cellule-conges-pris">${congesPris.toFixed(1)}</td>
           <td data-label="${t("remaining_leave_col")}">${congesRestants.toFixed(1)}</td>
-          <td data-label="${t("leave_history_col")}">${afficherHistorique(employe.historiqueConges)}</td>
+          <td class="vacation-history" data-label="${t("leave_history_col")}" data-history='${JSON.stringify(employe.historiqueConges)}'>${getDernierConge(employe.historiqueConges)}</td>
           <td data-label="${t("status_col")}"><span class="pastille ${classeStatut}">${libelleStatut}</span></td>
           <td data-label="${t("action_col")}" class="cellule-actions">
             <button class="bouton-supprimer" data-supprimer-id="${employe.id}">${t("delete")}</button>
@@ -1893,17 +1912,14 @@ function afficherResume() {
     .join("");
 }
 
-function afficherHistorique(historiqueConges) {
-  if (!historiqueConges.length) {
-    return `<span class="historique-vide">${t("no_leave")}</span>`;
+function getDernierConge(historiqueConges) {
+  if (!historiqueConges || historiqueConges.length === 0) {
+    return "Aucun congé";
   }
 
-  return historiqueConges
-    .map(
-      (conge) =>
-        `<div class="ligne-historique">${formaterDateFr(conge.dateDebut)} → ${formaterDateFr(conge.dateFin)} (${conge.jours} ${conge.jours > 1 ? t("day_plural") : t("day_singular")})</div>`,
-    )
-    .join("");
+  const dernier = historiqueConges[historiqueConges.length - 1];
+
+  return `${formaterDateFr(dernier.dateDebut)} → ${formaterDateFr(dernier.dateFin)}`;
 }
 
 function formaterDateFr(dateBrute) {
