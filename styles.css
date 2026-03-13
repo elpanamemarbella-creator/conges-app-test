@@ -241,23 +241,23 @@ th {
 }
 
 .team-nettoyage-entretien {
-  background: rgba(54, 162, 235, 0.1);
+  background-color: rgba(54, 162, 235, 0.12);
 }
 
 .team-bar-matin {
-  background: rgba(153, 102, 255, 0.1);
+  background-color: rgba(153, 102, 255, 0.12);
 }
 
 .team-salle-matin {
-  background: rgba(75, 192, 192, 0.1);
+  background-color: rgba(75, 192, 192, 0.12);
 }
 
 .team-cuisine-matin {
-  background: rgba(255, 159, 64, 0.1);
+  background-color: rgba(255, 159, 64, 0.12);
 }
 
 .team-cuisine-soir {
-  background: rgba(255, 99, 132, 0.1);
+  background-color: rgba(255, 99, 132, 0.12);
 }
 
 .team-salle-soir {
@@ -698,6 +698,17 @@ th {
 #coverageContent {
   display: grid;
   gap: 0.35rem;
+}
+
+.team-line {
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.team-line strong {
+  font-weight: 700;
 }
 
 #weekLabel {

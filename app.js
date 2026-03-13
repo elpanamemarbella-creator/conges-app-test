@@ -2320,7 +2320,7 @@ function renderCoverageToday() {
   let html = "";
 
   TEAM_ORDER.forEach((team) => {
-    html += `<div>${echapperHtml(teamLabel(team))} : ${echapperHtml(coverage[team].join(", ") || "-")}</div>`;
+    html += `<div class="team-line ${echapperHtml(getTeamRowClass(team))}"><strong>${echapperHtml(teamLabel(team))}</strong> : ${echapperHtml(coverage[team].join(", ") || "-")}</div>`;
   });
 
   coverageContent.innerHTML = html;
