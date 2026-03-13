@@ -1292,16 +1292,13 @@ function ouvrirFenetreReposHebdomadaire(employe) {
 
     const joursHebdo = [...new Set(joursSelectionnes)].sort((a, b) => a - b);
 
-    const exceptionsExistantes = Array.isArray(employe.planningExceptions) ? employe.planningExceptions : [];
-    const exceptionsConservees = exceptionsExistantes.filter(
-      (exception) => exception?.statut && exception.statut !== "rest" && exception.statut !== "work",
-    );
-
-    employe.restDaysWeekly = joursHebdo;
-    employe.planningExceptions = exceptionsConservees;
+    reinitialiserReposHebdomadaireEmploye(employe);
+    appliquerReposHebdomadaireEmploye(employe, joursHebdo);
     await sauvegarderEmployes(employe);
+
+    regenererLignePlanningEmploye(employe);
     fermer();
-    renderPlanning(currentWeek);
+    afficherEmployes();
   });
 }
 
@@ -1750,6 +1747,60 @@ function mettreAJourExceptionPlanning(employe, dateIso, statut) {
   const autresExceptions = base.filter((exception) => exception.date !== dateIso);
 
   employe.planningExceptions = [...autresExceptions, { date: dateIso, statut }];
+}
+
+function reinitialiserReposHebdomadaireEmploye(employe) {
+  const exceptionsExistantes = Array.isArray(employe.planningExceptions) ? employe.planningExceptions : [];
+  const exceptionsConservees = exceptionsExistantes.filter(
+    (exception) => exception?.statut && exception.statut !== "rest" && exception.statut !== "work",
+  );
+
+  employe.restDaysWeekly = [];
+  employe.planningExceptions = exceptionsConservees;
+}
+
+function appliquerReposHebdomadaireEmploye(employe, joursHebdo) {
+  employe.restDaysWeekly = Array.isArray(joursHebdo) ? [...joursHebdo] : [];
+}
+
+function regenererLignePlanningEmploye(employe) {
+  const row = planningBody?.querySelector(`tr td[data-employe-id="${employe.id}"]`)?.closest("tr");
+  if (!row) {
+    renderPlanning(currentWeek);
+    return;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  [...row.querySelectorAll("td[data-date]")].forEach((cell) => {
+    const jour = new Date(`${cell.dataset.date}T12:00:00`);
+    const statut = getEmployeeStatusForDate(employe, jour);
+
+    cell.classList.remove("status-vacances", "sick-day", "status-repos", "status-travail", "today-column");
+
+    const dayKey = new Date(jour);
+    dayKey.setHours(0, 0, 0, 0);
+    if (dayKey.getTime() === today.getTime()) {
+      cell.classList.add("today-column");
+    }
+
+    if (statut === "vacation") {
+      cell.classList.add("status-vacances");
+      cell.textContent = t("planning_status_vacation");
+    } else if (statut === "sick") {
+      cell.classList.add("sick-day");
+      cell.textContent = t("planning_status_sick");
+    } else if (statut === "rest") {
+      cell.classList.add("status-repos");
+      cell.textContent = t("planning_status_rest");
+    } else {
+      cell.classList.add("status-travail");
+      cell.textContent = t("planning_status_work");
+    }
+  });
+
+  renderCoverageToday();
 }
 
 function calculJoursCalendaires(startDate, endDate) {
