@@ -437,14 +437,7 @@ const managerModalAnnuler = document.getElementById("manager-modal-annuler");
 const menuOnglets = document.querySelectorAll(".menu-onglet");
 const zonesOnglets = document.querySelectorAll("[data-zone]");
 const boutonsLangue = document.querySelectorAll("[data-langue]");
-const isMobile = window.matchMedia("(pointer: coarse)").matches;
-
-const noteViewer = document.getElementById("noteViewer");
-const noteViewerTitle = document.getElementById("noteViewerTitle");
-const noteViewerText = document.getElementById("noteViewerText");
-const closeNoteViewerButton = document.getElementById("closeNoteViewer");
-
-document.addEventListener("click", (event) => {
+document.addEventListener("click", async (event) => {
   const cell = event.target.closest(".vacation-history");
   if (cell) {
     const historique = JSON.parse(cell.dataset.history || "[]");
@@ -465,26 +458,22 @@ document.addEventListener("click", (event) => {
   }
 
   const icon = event.target.closest(".note-icon");
-  if (!icon || !noteViewer || !noteViewerTitle || !noteViewerText) {
+  if (!icon) {
     return;
   }
 
-  const nom = icon.dataset.nom || "";
-  const note = icon.dataset.note || "";
-
-  noteViewerTitle.textContent = `${t("noteTitle")} ${nom}`;
-  noteViewerText.textContent = note;
-  noteViewer.classList.remove("hidden");
-  noteViewer.setAttribute("aria-hidden", "false");
-});
-
-closeNoteViewerButton?.addEventListener("click", () => {
-  if (!noteViewer) {
+  const ligneEmploye = icon.closest(".ligne-employe[data-employe-id]");
+  const employe = employes.find((entry) => entry.id === ligneEmploye?.dataset.employeId);
+  if (!employe) {
     return;
   }
 
-  noteViewer.classList.add("hidden");
-  noteViewer.setAttribute("aria-hidden", "true");
+  const codeValide = await demanderCodeManager();
+  if (!codeValide) {
+    return;
+  }
+
+  ouvrirFenetreNote(employe);
 });
 
 let employes = [];
@@ -1547,7 +1536,7 @@ function afficherEmployes() {
     }
 
     ligne.addEventListener("dblclick", async () => {
-      const codeValide = demanderCodeManager();
+      const codeValide = await demanderCodeManager();
       if (!codeValide) {
         return;
       }
