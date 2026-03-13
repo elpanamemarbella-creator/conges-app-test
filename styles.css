@@ -236,30 +236,6 @@ th {
   letter-spacing: 0.02em;
 }
 
-.ligne-employe.equipe-bar-matin {
-  background: #eef6ff;
-}
-
-.ligne-employe.equipe-salle-matin {
-  background: #f0fbf3;
-}
-
-.ligne-employe.equipe-bar-soir {
-  background: #f6f1ff;
-}
-
-.ligne-employe.equipe-salle-soir {
-  background: #fff5ea;
-}
-
-.ligne-employe.equipe-cuisine {
-  background: #f2f2f2;
-}
-
-.ligne-employe.equipe-extras {
-  background: #fffdeb;
-}
-
 .ligne-employe.selectionne {
   outline: 2px solid var(--primaire);
 }
@@ -269,30 +245,6 @@ th {
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
   font-weight: 700;
-}
-
-.badge-equipe.equipe-bar-matin {
-  background: #cfe6ff;
-}
-
-.badge-equipe.equipe-salle-matin {
-  background: #d6f6de;
-}
-
-.badge-equipe.equipe-bar-soir {
-  background: #e4d7ff;
-}
-
-.badge-equipe.equipe-salle-soir {
-  background: #ffe3be;
-}
-
-.badge-equipe.equipe-cuisine {
-  background: #e1e1e1;
-}
-
-.badge-equipe.equipe-extras {
-  background: #fff3ad;
 }
 
 .pastille {
@@ -323,6 +275,14 @@ th {
 .employee-name,
 .vacation-history {
   cursor: pointer;
+}
+
+.employee-name {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-weight: 600;
 }
 
 .note-icon:hover,
@@ -763,6 +723,60 @@ th {
 
 .rest-day {
   background: #ede9fe;
+}
+
+.planning-row:hover td {
+  background: #f9fafb;
+}
+
+.planning-row:hover td.today-column {
+  background: #dbeafe;
+}
+
+.today-column {
+  background: #dbeafe;
+}
+
+.weekend-column {
+  background: #f3f4f6;
+}
+
+.planning-employee-name {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.12rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.status-vacation {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-sick {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-rest {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.status-work {
+  background: #dcfce7;
+  color: #166534;
 }
 
 @media (max-width: 940px) {
