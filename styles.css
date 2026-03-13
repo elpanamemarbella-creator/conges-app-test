@@ -613,6 +613,61 @@ th {
   background: #6c7988;
 }
 
+
+
+.menu-principal {
+  margin-top: 0.9rem;
+}
+
+.planning-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-bottom: 0.8rem;
+}
+
+#weekLabel {
+  font-weight: 700;
+  color: #1f2d3d;
+}
+
+.planning-table-wrapper {
+  overflow-x: auto;
+}
+
+.planning-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 620px;
+}
+
+.planning-table td,
+.planning-table th {
+  padding: 6px;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+}
+
+.planning-table th:first-child,
+.planning-table td:first-child {
+  text-align: left;
+  font-weight: bold;
+}
+
+.work-day {
+  background: #dcfce7;
+}
+
+.vacation-day {
+  background: #fecaca;
+}
+
+.rest-day {
+  background: #fde68a;
+}
+
 @media (max-width: 940px) {
   table,
   thead,
@@ -680,5 +735,46 @@ th {
 
   .ligne-calendrier {
     grid-template-columns: 1fr;
+  }
+
+  .planning-header {
+    justify-content: flex-start;
+  }
+
+  .planning-table,
+  .planning-table thead,
+  .planning-table tbody,
+  .planning-table tr,
+  .planning-table th,
+  .planning-table td {
+    display: table-cell;
+  }
+
+  .planning-table {
+    display: table;
+  }
+
+  .planning-table thead {
+    display: table-header-group;
+  }
+
+  .planning-table tbody {
+    display: table-row-group;
+  }
+
+  .planning-table tr {
+    display: table-row;
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .planning-table td {
+    border: 1px solid #e5e7eb;
+    justify-content: initial;
+  }
+
+  .planning-table td::before {
+    content: none;
   }
 }

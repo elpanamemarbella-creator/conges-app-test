@@ -32,6 +32,9 @@ initializeApp(firebaseConfig);
         <button type="button" class="langue-btn" data-langue="en">EN</button>
       </div>
       <h1 data-i18n="app_title">Gestion des congés employés</h1>
+      <div class="menu-principal">
+        <button type="button" id="openPlanning">📅 Planning semaine</button>
+      </div>
     </header>
 
     <section class="zone-onglet" data-zone="employes">
@@ -239,6 +242,34 @@ initializeApp(firebaseConfig);
       <section class="carte" data-zone="sauvegarde">
         <h2 data-i18n="save_title">Sauvegarde</h2>
         <p class="message-vide" data-i18n="save_auto_message">La sauvegarde est gérée automatiquement par le système existant.</p>
+      </section>
+
+      <section class="carte hidden" id="planningView">
+        <h2>Planning semaine</h2>
+
+        <div class="planning-header">
+          <button type="button" id="prevWeek">←</button>
+          <span id="weekLabel"></span>
+          <button type="button" id="nextWeek">→</button>
+        </div>
+
+        <div class="planning-table-wrapper">
+          <table class="planning-table">
+            <thead>
+              <tr>
+                <th>Employé</th>
+                <th>Lun</th>
+                <th>Mar</th>
+                <th>Mer</th>
+                <th>Jeu</th>
+                <th>Ven</th>
+                <th>Sam</th>
+                <th>Dim</th>
+              </tr>
+            </thead>
+            <tbody id="planningBody"></tbody>
+          </table>
+        </div>
       </section>
 
     </section>

@@ -434,6 +434,12 @@ const managerCodeInput = document.getElementById("manager-code-input");
 const managerModalErreur = document.getElementById("manager-modal-erreur");
 const managerModalValider = document.getElementById("manager-modal-valider");
 const managerModalAnnuler = document.getElementById("manager-modal-annuler");
+const openPlanningButton = document.getElementById("openPlanning");
+const planningView = document.getElementById("planningView");
+const planningBody = document.getElementById("planningBody");
+const weekLabel = document.getElementById("weekLabel");
+const prevWeekButton = document.getElementById("prevWeek");
+const nextWeekButton = document.getElementById("nextWeek");
 const menuOnglets = document.querySelectorAll(".menu-onglet");
 const zonesOnglets = document.querySelectorAll("[data-zone]");
 const boutonsLangue = document.querySelectorAll("[data-langue]");
@@ -484,6 +490,7 @@ let employesArchives = [];
 let archivesOuvertes = false;
 let langueCourante = detecterLangueInitiale();
 let employeSelectionneId = "";
+let currentWeek = getStartOfWeek(new Date());
 
 function t(cle) {
   return TRADUCTIONS[langueCourante]?.[cle] || TRADUCTIONS.fr[cle] || cle;
@@ -558,6 +565,7 @@ function changerLangue(langue) {
   afficherTableauBord();
   afficherCalendrierMensuel();
   afficherHistoriqueSalarieSelectionne();
+  renderPlanning(currentWeek);
 }
 
 function recupererLangueActive() {
@@ -766,6 +774,7 @@ async function rafraichirDonnees() {
   afficherTableauBord();
   afficherCalendrierMensuel();
   afficherHistoriqueSalarieSelectionne();
+  renderPlanning(currentWeek);
 }
 
 async function initApp() {
@@ -790,6 +799,21 @@ menuOnglets.forEach((onglet) => {
   onglet.addEventListener("click", () => {
     afficherOnglet(onglet.dataset.onglet || "employes");
   });
+});
+
+openPlanningButton?.addEventListener("click", () => {
+  planningView?.classList.toggle("hidden");
+  renderPlanning(currentWeek);
+});
+
+prevWeekButton?.addEventListener("click", () => {
+  currentWeek.setDate(currentWeek.getDate() - 7);
+  renderPlanning(currentWeek);
+});
+
+nextWeekButton?.addEventListener("click", () => {
+  currentWeek.setDate(currentWeek.getDate() + 7);
+  renderPlanning(currentWeek);
 });
 
 filtreEquipeSelect?.addEventListener("change", () => {
@@ -1870,6 +1894,89 @@ function afficherOnglet() {
   zonesOnglets.forEach((zone) => {
     zone.hidden = false;
   });
+}
+
+function getStartOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay() || 7;
+
+  if (day !== 1) {
+    d.setHours(-24 * (day - 1));
+  }
+
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function formaterLibelleSemaine(semaine) {
+  const debut = new Date(semaine);
+  const fin = new Date(semaine);
+  fin.setDate(fin.getDate() + 6);
+
+  return `${formaterDateFr(debut)} → ${formaterDateFr(fin)}`;
+}
+
+function estJourVacances(employe, jour) {
+  return employe.historiqueConges.some((conge) => {
+    const debut = dateLocaleDepuisTexte(conge.dateDebut);
+    const fin = dateLocaleDepuisTexte(conge.dateFin);
+    if (!debut || !fin) {
+      return false;
+    }
+
+    debut.setHours(0, 0, 0, 0);
+    fin.setHours(23, 59, 59, 999);
+
+    return jour >= debut && jour <= fin;
+  });
+}
+
+function renderPlanning(semaine) {
+  if (!planningBody || !weekLabel) {
+    return;
+  }
+
+  planningBody.innerHTML = "";
+  weekLabel.textContent = formaterLibelleSemaine(semaine);
+
+  const employesPlanning = [...employesActifs].sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
+
+  employesPlanning.forEach((emp) => {
+    const tr = document.createElement("tr");
+
+    const name = document.createElement("td");
+    name.textContent = emp.nom;
+    tr.appendChild(name);
+
+    for (let i = 0; i < 7; i += 1) {
+      const td = document.createElement("td");
+      const jour = new Date(semaine);
+      jour.setDate(jour.getDate() + i);
+      jour.setHours(12, 0, 0, 0);
+
+      const estVacances = estJourVacances(emp, jour);
+      const estWeekend = i >= 5;
+
+      if (estVacances) {
+        td.className = "vacation-day";
+        td.textContent = "V";
+      } else if (estWeekend) {
+        td.className = "rest-day";
+        td.textContent = "R";
+      } else {
+        td.className = "work-day";
+        td.textContent = "";
+      }
+
+      tr.appendChild(td);
+    }
+
+    planningBody.appendChild(tr);
+  });
+
+  if (!employesPlanning.length) {
+    planningBody.innerHTML = '<tr><td colspan="8" class="vide">Aucun employé enregistré</td></tr>';
+  }
 }
 
 afficherOnglet();
