@@ -106,9 +106,12 @@ const TRADUCTIONS = {
     dictate_not_supported: "La dictée vocale n'est pas supportée sur ce navigateur. Utilisez le micro du clavier.",
     edit_taken_leave_prompt: "Modifier les congés pris :",
     note_aria_label: "Note",
+    pin_code_label: "Code PIN",
+    edit_pin: "PIN",
     manager_code_required: "Code manager requis",
     cancel: "Annuler",
     wrong_code: "Code incorrect",
+    invalid_pin_code_error: "Le code PIN doit contenir exactement 4 chiffres.",
     leave_update_error: "Impossible de mettre à jour la demande de congé.",
     add_employee_error: "Impossible d'ajouter l'employé.",
     select_employee_error: "Veuillez choisir un employé.",
@@ -226,9 +229,12 @@ const TRADUCTIONS = {
     dictate_not_supported: "El dictado por voz no es compatible con este navegador. Utiliza el micrófono del teclado.",
     edit_taken_leave_prompt: "Modificar vacaciones disfrutadas:",
     note_aria_label: "Nota",
+    pin_code_label: "Código PIN",
+    edit_pin: "PIN",
     manager_code_required: "Código de manager requerido",
     cancel: "Cancelar",
     wrong_code: "Código incorrecto",
+    invalid_pin_code_error: "El código PIN debe contener exactamente 4 dígitos.",
     leave_update_error: "No se puede actualizar la solicitud de vacaciones.",
     add_employee_error: "No se puede añadir el empleado.",
     select_employee_error: "Seleccione un empleado.",
@@ -346,9 +352,12 @@ const TRADUCTIONS = {
     dictate_not_supported: "Voice dictation is not supported in this browser. Use your keyboard microphone.",
     edit_taken_leave_prompt: "Edit taken leave:",
     note_aria_label: "Note",
+    pin_code_label: "PIN code",
+    edit_pin: "PIN",
     manager_code_required: "Manager code required",
     cancel: "Cancel",
     wrong_code: "Wrong code",
+    invalid_pin_code_error: "The PIN code must contain exactly 4 digits.",
     leave_update_error: "Unable to update leave request.",
     add_employee_error: "Unable to add employee.",
     select_employee_error: "Please select an employee.",
@@ -566,6 +575,7 @@ let archivesOuvertes = false;
 let langueCourante = detecterLangueInitiale();
 let employeSelectionneId = "";
 let currentWeek = getStartOfWeek(new Date());
+let pinEditionEmployeId = "";
 
 function t(cle) {
   return TRADUCTIONS[langueCourante]?.[cle] || TRADUCTIONS.fr[cle] || cle;
@@ -866,6 +876,7 @@ async function chargerEmployes() {
       teamId: getEmployeeTeamId(emp),
       equipe: getEmployeeTeamId(emp),
       note: typeof emp.note === "string" ? emp.note : "",
+      pinCode: normaliserCodePin(emp.pinCode),
     }),
   );
 }
@@ -1142,14 +1153,63 @@ listeEmployes.addEventListener("click", async (event) => {
     return;
   }
 
+  const boutonEditPin = event.target.closest("[data-edit-pin-id]");
+  if (boutonEditPin) {
+    pinEditionEmployeId = boutonEditPin.dataset.editPinId || "";
+    afficherEmployes();
+    return;
+  }
+
+  const boutonEnregistrerPin = event.target.closest("[data-save-pin-id]");
+  if (boutonEnregistrerPin) {
+    const empId = boutonEnregistrerPin.dataset.savePinId;
+    const employe = employes.find((entry) => entry.id === empId);
+    const ligne = boutonEnregistrerPin.closest(".ligne-employe[data-employe-id]");
+    const inputPin = ligne?.querySelector(".pin-input");
+
+    if (!employe || !inputPin) {
+      return;
+    }
+
+    const pinCode = normaliserCodePin(inputPin.value);
+    if (!pinCode) {
+      alert(t("invalid_pin_code_error"));
+      inputPin.focus();
+      return;
+    }
+
+    employe.pinCode = pinCode;
+    await sauvegarderEmployes(employe);
+    pinEditionEmployeId = "";
+    afficherEmployes();
+    return;
+  }
+
+  const boutonAnnulerPin = event.target.closest("[data-cancel-pin-id]");
+  if (boutonAnnulerPin) {
+    pinEditionEmployeId = "";
+    afficherEmployes();
+    return;
+  }
+
   const ligneEmploye = event.target.closest(".ligne-employe[data-employe-id]");
   if (!ligneEmploye) {
     return;
   }
 
+  pinEditionEmployeId = "";
   employeSelectionneId = ligneEmploye.dataset.employeId || "";
   afficherEmployes();
   afficherHistoriqueSalarieSelectionne();
+});
+
+listeEmployes.addEventListener("input", (event) => {
+  const inputPin = event.target.closest(".pin-input");
+  if (!inputPin) {
+    return;
+  }
+
+  inputPin.value = String(inputPin.value || "").replace(/\D/g, "").slice(0, 4);
 });
 
 listeEmployesArchives?.addEventListener("click", async (event) => {
@@ -1391,6 +1451,7 @@ formulaireEmploye.addEventListener("submit", async (event) => {
     dateEmbauche: document.getElementById("date-embauche").value,
     congesPris: Number(document.getElementById("conges-pris").value),
     birthCode,
+    pinCode: "",
     historiqueConges: [],
     note: "",
     team: getTeam(normaliserEquipe(document.getElementById("equipe-employe").value)),
@@ -1630,6 +1691,11 @@ async function sendLeaveRequestEmail(demande) {
     });
 }
 
+function normaliserCodePin(valeur) {
+  const digits = String(valeur || "").replace(/\D/g, "");
+  return /^\d{4}$/.test(digits) ? digits : "";
+}
+
 function normaliserCodeNaissance(valeur) {
   const correspondance = String(valeur || "").trim().match(/^(\d{2})\s*[\/\-\.]?\s*(\d{2})$/);
 
@@ -1770,6 +1836,7 @@ async function sauvegarderEmployes(employe) {
       teamId,
       equipe: teamId,
       note: employe.note || "",
+      pinCode: normaliserCodePin(employe.pinCode),
       team,
       couleur: team.color,
       weeklyRestDays: employe.weeklyRestDays,
@@ -1942,6 +2009,11 @@ function afficherEmployes() {
           <td data-label="${t("status_col")}" class="status-${classeStatut}">${libelleStatut}</td>
           <td data-label="${t("action_col")}" class="cellule-actions">
             <button class="setWeeklyRest" data-weekly-rest-id="${employe.id}">Repos hebdomadaire</button>
+            ${
+              pinEditionEmployeId === employe.id
+                ? `<div class="pin-edit-box"><span class="pin-edit-label">${t("pin_code_label")}</span><input type="password" maxlength="4" inputmode="numeric" pattern="\d{4}" class="pin-input" value="${echapperHtml(employe.pinCode || "")}" /><div class="pin-actions"><button type="button" data-save-pin-id="${employe.id}">${t("save")}</button><button type="button" data-cancel-pin-id="${employe.id}">${t("cancel")}</button></div></div>`
+                : `<button class="setEmployeePin" data-edit-pin-id="${employe.id}">${t("edit_pin")}</button>`
+            }
             <button class="bouton-supprimer" data-supprimer-id="${employe.id}">${t("delete")}</button>
           </td>
         </tr>
