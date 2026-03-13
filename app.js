@@ -138,6 +138,10 @@ const TRADUCTIONS = {
     email_start_label: "Début",
     email_end_label: "Fin",
     email_days_label: "Nombre de jours",
+    planning_status_vacation: "Congé",
+    planning_status_sick: "Maladie",
+    planning_status_rest: "Repos",
+    planning_status_work: "Prévu",
   },
   es: {
     app_title: "Gestión de vacaciones empleados",
@@ -254,6 +258,10 @@ const TRADUCTIONS = {
     email_start_label: "Inicio",
     email_end_label: "Fin",
     email_days_label: "Días",
+    planning_status_vacation: "Vacaciones",
+    planning_status_sick: "Baja médica",
+    planning_status_rest: "Descanso",
+    planning_status_work: "Programado",
   },
   en: {
     app_title: "Employee leave management",
@@ -370,6 +378,10 @@ const TRADUCTIONS = {
     email_start_label: "Start",
     email_end_label: "End",
     email_days_label: "Days",
+    planning_status_vacation: "Vacation",
+    planning_status_sick: "Sick leave",
+    planning_status_rest: "Day off",
+    planning_status_work: "Scheduled",
   },
 };
 
@@ -575,6 +587,14 @@ function getTeamColor(equipe) {
   return getTeam(equipe).color;
 }
 
+function getEmployeeTeamId(employe) {
+  return normaliserEquipe(employe?.teamId || employe?.team?.id || employe?.equipe);
+}
+
+function getEmployeeTeam(employe) {
+  return getTeam(getEmployeeTeamId(employe));
+}
+
 function hexToRgb(hex) {
   const value = String(hex || "").replace("#", "");
   if (value.length !== 6) {
@@ -603,11 +623,7 @@ function getTeamTint(equipe, alpha = 0.18) {
 
 
 function getEmployeeTeamColor(employe) {
-  if (employe?.team?.color) {
-    return employe.team.color;
-  }
-
-  return getTeamColor(employe?.equipe);
+  return getEmployeeTeam(employe).color;
 }
 
 function getEmployeeTeamTint(employe, alpha = 0.18) {
@@ -799,7 +815,8 @@ function fusionnerEmployesEtConges(employesBruts, congesCharges) {
   const congesParEmploye = construireCongesParEmploye(congesValides);
 
   return employesBruts.map((employe) => {
-    const equipe = normaliserEquipe(employe.equipe);
+    const teamId = getEmployeeTeamId(employe);
+    const equipe = teamId;
     const congesEmploye = congesParEmploye[employe.id] || [];
     const historiqueConges = congesEmploye
       .map((conge) => ({
@@ -811,10 +828,11 @@ function fusionnerEmployesEtConges(employesBruts, congesCharges) {
 
     const congesDepuisDemandes = historiqueConges.reduce((total, conge) => total + conge.jours, 0);
     const congesInitial = Number(employe.congesPris) || 0;
-    const team = getTeam(equipe);
+    const team = getTeam(teamId);
 
     return {
       ...employe,
+      teamId,
       equipe,
       team,
       historiqueConges,
@@ -840,6 +858,8 @@ async function chargerEmployes() {
 
   return liste.map((emp) => ({
     ...emp,
+    teamId: getEmployeeTeamId(emp),
+    equipe: getEmployeeTeamId(emp),
     note: typeof emp.note === "string" ? emp.note : "",
     restDaysWeekly: Array.isArray(emp.restDaysWeekly) ? emp.restDaysWeekly : [],
     planningExceptions: Array.isArray(emp.planningExceptions) ? emp.planningExceptions : [],
@@ -1021,8 +1041,9 @@ listeEmployes.addEventListener("click", async (event) => {
     select.focus();
 
     select.addEventListener("change", async () => {
+      employe.teamId = select.value;
       employe.equipe = select.value;
-      const team = getTeam(employe.equipe);
+      const team = getTeam(employe.teamId);
       employe.team = team;
       employe.couleur = team.color;
       await sauvegarderEmployes(employe);
@@ -1316,6 +1337,7 @@ formulaireEmploye.addEventListener("submit", async (event) => {
   const nouvelEmploye = {
     id: "",
     nom: document.getElementById("nom-employe").value.trim(),
+    teamId: normaliserEquipe(document.getElementById("equipe-employe").value),
     equipe: normaliserEquipe(document.getElementById("equipe-employe").value),
     dateEmbauche: document.getElementById("date-embauche").value,
     congesPris: Number(document.getElementById("conges-pris").value),
@@ -1683,14 +1705,18 @@ async function sauvegarderEmployes(employe) {
     return;
   }
 
+  const teamId = getEmployeeTeamId(employe);
+  const team = getTeam(teamId);
+
   await setDoc(
     doc(db, "employes", employe.id),
     {
       congesPris: Number(employe.congesPris) || 0,
-      equipe: normaliserEquipe(employe.equipe),
+      teamId,
+      equipe: teamId,
       note: employe.note || "",
-      team: getTeam(employe.equipe),
-      couleur: getEmployeeTeamColor(employe),
+      team,
+      couleur: team.color,
       restDaysWeekly: Array.isArray(employe.restDaysWeekly) ? employe.restDaysWeekly : [],
       planningExceptions: Array.isArray(employe.planningExceptions) ? employe.planningExceptions : [],
     },
@@ -2011,7 +2037,7 @@ function afficherCalendrierMensuel() {
 
       return `
         <div class="ligne-calendrier">
-          <strong>${echapperHtml(employe.nom)}</strong>
+          <strong><span class="team-tint-label" style="background:${echapperHtml(getEmployeeTeamTint(employe, 0.2))}; color:${echapperHtml(getEmployeeTeamColor(employe))};">${echapperHtml(employe.nom)}</span></strong>
           <div class="barre-conges">${blocs}</div>
         </div>
       `;
@@ -2292,7 +2318,7 @@ function renderCoverageToday() {
   let html = "";
 
   TEAM_ORDER.forEach((team) => {
-    html += `<div><strong style="color:${echapperHtml(getTeamColor(team))};">${echapperHtml(teamLabel(team))}</strong> : ${echapperHtml(coverage[team].join(", ") || "-")}</div>`;
+    html += `<div><span class="team-tint-label" style="background:${echapperHtml(getTeamTint(team, 0.2))}; color:${echapperHtml(getTeamColor(team))};">${echapperHtml(teamLabel(team))}</span> : ${echapperHtml(coverage[team].join(", ") || "-")}</div>`;
   });
 
   coverageContent.innerHTML = html;
@@ -2397,16 +2423,16 @@ function renderPlanning(semaine) {
 
       if (statut === "vacation") {
         badge.classList.add("status-vacation");
-        badge.textContent = "Vacation";
+        badge.textContent = t("planning_status_vacation");
       } else if (statut === "sick") {
         badge.classList.add("status-sick");
-        badge.textContent = "Sick";
+        badge.textContent = t("planning_status_sick");
       } else if (statut === "rest") {
         badge.classList.add("status-rest");
-        badge.textContent = "Day off";
+        badge.textContent = t("planning_status_rest");
       } else {
         badge.classList.add("status-work");
-        badge.textContent = "Working";
+        badge.textContent = t("planning_status_work");
       }
 
       td.appendChild(badge);
@@ -2439,7 +2465,7 @@ function afficherResume() {
 
       return `
         <tr>
-          <td data-label="${t("name_col")}">${echapperHtml(employe.nom)}</td>
+          <td data-label="${t("name_col")}"><span class="team-tint-label" style="background:${echapperHtml(getEmployeeTeamTint(employe, 0.2))}; color:${echapperHtml(getEmployeeTeamColor(employe))};">${echapperHtml(employe.nom)}</span></td>
           <td data-label="${t("entry_date_col")}">${formaterDateFr(employe.dateEmbauche)}</td>
           <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
           <td data-label="${t("taken_leave_col")}">${congesPris.toFixed(1)}</td>
