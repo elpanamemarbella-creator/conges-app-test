@@ -178,11 +178,12 @@ initializeApp(firebaseConfig);
               <th data-i18n="leave_history_col">Historique des congés</th>
               <th data-i18n="status_col">Statut</th>
               <th data-i18n="action_col">Action</th>
+              <th data-i18n="pin_col">PIN</th>
             </tr>
           </thead>
           <tbody id="liste-employes">
             <tr>
-              <td colspan="9" class="vide" data-i18n="no_employee_registered">Aucun employé enregistré</td>
+              <td colspan="10" class="vide" data-i18n="no_employee_registered">Aucun employé enregistré</td>
             </tr>
           </tbody>
         </table>
@@ -296,11 +297,24 @@ initializeApp(firebaseConfig);
     <div class="modal-manager__overlay" data-modal-close></div>
     <div class="modal-manager__carte" role="dialog" aria-modal="true" aria-labelledby="manager-modal-titre">
       <h3 id="manager-modal-titre" data-i18n="manager_code_required">Code manager requis</h3>
-      <input id="manager-code-input" type="password" autocomplete="off" />
-      <p id="manager-modal-erreur" class="modal-manager__erreur" hidden data-i18n="wrong_code">Code incorrect</p>
+      <input id="manager-code-input" type="password" autocomplete="off" data-i18n-placeholder="manager_prompt" placeholder="Entrer le code manager" />
+      <p id="manager-modal-erreur" class="modal-manager__erreur" hidden data-i18n="manager_code_incorrect">Code manager incorrect</p>
       <div class="modal-manager__actions">
-        <button type="button" id="manager-modal-valider" data-i18n="validate">Valider</button>
         <button type="button" id="manager-modal-annuler" class="modal-manager__annuler" data-i18n="cancel">Annuler</button>
+        <button type="button" id="manager-modal-valider" data-i18n="validate">Valider</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pin-modal" class="modal-manager" hidden>
+    <div class="modal-manager__overlay" data-pin-modal-close></div>
+    <div class="modal-manager__carte" role="dialog" aria-modal="true" aria-labelledby="pin-modal-titre">
+      <h3 id="pin-modal-titre" data-i18n="edit_pin_title">Modifier PIN</h3>
+      <label for="pin-modal-input" class="pin-edit-label" data-i18n="pin_code_label">Code PIN</label>
+      <input id="pin-modal-input" type="password" maxlength="4" inputmode="numeric" class="pin-input" autocomplete="off" />
+      <div class="modal-manager__actions">
+        <button type="button" id="pin-modal-annuler" class="modal-manager__annuler" data-i18n="cancel">Annuler</button>
+        <button type="button" id="pin-modal-enregistrer" data-i18n="save">Enregistrer</button>
       </div>
     </div>
   </div>

@@ -52,6 +52,7 @@ const TRADUCTIONS = {
     leave_history_col: "Historique des congés",
     status_col: "Statut",
     action_col: "Action",
+    pin_col: "PIN",
     history_hint: "Cliquer sur un salarié pour afficher l'historique complet de ses demandes.",
     days_col: "Nombre de jours",
     employee_history_title: "Historique des congés - {name}",
@@ -108,7 +109,11 @@ const TRADUCTIONS = {
     note_aria_label: "Note",
     pin_code_label: "Code PIN",
     edit_pin: "PIN",
+    configure_pin_tooltip: "Configurer le code PIN",
+    edit_pin_tooltip: "Modifier le code PIN",
+    edit_pin_title: "Modifier PIN",
     manager_code_required: "Code manager requis",
+    manager_code_incorrect: "Code manager incorrect",
     cancel: "Annuler",
     wrong_code: "Code incorrect",
     invalid_pin_code_error: "Le code PIN doit contenir exactement 4 chiffres.",
@@ -175,6 +180,7 @@ const TRADUCTIONS = {
     leave_history_col: "Historial de vacaciones",
     status_col: "Estado",
     action_col: "Acción",
+    pin_col: "PIN",
     history_hint: "Haz clic en un empleado para mostrar su historial completo de solicitudes.",
     days_col: "Número de días",
     employee_history_title: "Historial de vacaciones - {name}",
@@ -231,7 +237,11 @@ const TRADUCTIONS = {
     note_aria_label: "Nota",
     pin_code_label: "Código PIN",
     edit_pin: "PIN",
+    configure_pin_tooltip: "Configurar el código PIN",
+    edit_pin_tooltip: "Modificar el código PIN",
+    edit_pin_title: "Modificar PIN",
     manager_code_required: "Código de manager requerido",
+    manager_code_incorrect: "Código de manager incorrecto",
     cancel: "Cancelar",
     wrong_code: "Código incorrecto",
     invalid_pin_code_error: "El código PIN debe contener exactamente 4 dígitos.",
@@ -298,6 +308,7 @@ const TRADUCTIONS = {
     leave_history_col: "Leave history",
     status_col: "Status",
     action_col: "Action",
+    pin_col: "PIN",
     history_hint: "Click an employee to display the full request history.",
     days_col: "Number of days",
     employee_history_title: "Leave history - {name}",
@@ -354,7 +365,11 @@ const TRADUCTIONS = {
     note_aria_label: "Note",
     pin_code_label: "PIN code",
     edit_pin: "PIN",
+    configure_pin_tooltip: "Set PIN code",
+    edit_pin_tooltip: "Edit PIN code",
+    edit_pin_title: "Edit PIN",
     manager_code_required: "Manager code required",
+    manager_code_incorrect: "Incorrect manager code",
     cancel: "Cancel",
     wrong_code: "Wrong code",
     invalid_pin_code_error: "The PIN code must contain exactly 4 digits.",
@@ -517,6 +532,10 @@ const managerCodeInput = document.getElementById("manager-code-input");
 const managerModalErreur = document.getElementById("manager-modal-erreur");
 const managerModalValider = document.getElementById("manager-modal-valider");
 const managerModalAnnuler = document.getElementById("manager-modal-annuler");
+const pinModal = document.getElementById("pin-modal");
+const pinModalInput = document.getElementById("pin-modal-input");
+const pinModalAnnuler = document.getElementById("pin-modal-annuler");
+const pinModalEnregistrer = document.getElementById("pin-modal-enregistrer");
 const openPlanningButton = document.getElementById("openPlanning");
 const planningView = document.getElementById("planningView");
 const planningBody = document.getElementById("planningBody");
@@ -575,7 +594,7 @@ let archivesOuvertes = false;
 let langueCourante = detecterLangueInitiale();
 let employeSelectionneId = "";
 let currentWeek = getStartOfWeek(new Date());
-let pinEditionEmployeId = "";
+let pinModalEmployeId = "";
 
 function t(cle) {
   return TRADUCTIONS[langueCourante]?.[cle] || TRADUCTIONS.fr[cle] || cle;
@@ -1155,40 +1174,13 @@ listeEmployes.addEventListener("click", async (event) => {
 
   const boutonEditPin = event.target.closest("[data-edit-pin-id]");
   if (boutonEditPin) {
-    pinEditionEmployeId = boutonEditPin.dataset.editPinId || "";
-    afficherEmployes();
-    return;
-  }
-
-  const boutonEnregistrerPin = event.target.closest("[data-save-pin-id]");
-  if (boutonEnregistrerPin) {
-    const empId = boutonEnregistrerPin.dataset.savePinId;
-    const employe = employes.find((entry) => entry.id === empId);
-    const ligne = boutonEnregistrerPin.closest(".ligne-employe[data-employe-id]");
-    const inputPin = ligne?.querySelector(".pin-input");
-
-    if (!employe || !inputPin) {
+    const empId = boutonEditPin.dataset.editPinId || "";
+    const codeValide = await demanderCodeManager();
+    if (!codeValide) {
       return;
     }
 
-    const pinCode = normaliserCodePin(inputPin.value);
-    if (!pinCode) {
-      alert(t("invalid_pin_code_error"));
-      inputPin.focus();
-      return;
-    }
-
-    employe.pinCode = pinCode;
-    await sauvegarderEmployes(employe);
-    pinEditionEmployeId = "";
-    afficherEmployes();
-    return;
-  }
-
-  const boutonAnnulerPin = event.target.closest("[data-cancel-pin-id]");
-  if (boutonAnnulerPin) {
-    pinEditionEmployeId = "";
-    afficherEmployes();
+    ouvrirModalPin(empId);
     return;
   }
 
@@ -1197,19 +1189,9 @@ listeEmployes.addEventListener("click", async (event) => {
     return;
   }
 
-  pinEditionEmployeId = "";
   employeSelectionneId = ligneEmploye.dataset.employeId || "";
   afficherEmployes();
   afficherHistoriqueSalarieSelectionne();
-});
-
-listeEmployes.addEventListener("input", (event) => {
-  const inputPin = event.target.closest(".pin-input");
-  if (!inputPin) {
-    return;
-  }
-
-  inputPin.value = String(inputPin.value || "").replace(/\D/g, "").slice(0, 4);
 });
 
 listeEmployesArchives?.addEventListener("click", async (event) => {
@@ -1226,13 +1208,123 @@ listeEmployesArchives?.addEventListener("click", async (event) => {
 });
 
 function demanderCodeManager() {
-  const code = prompt(t("manager_code_required"));
-  if (code !== CODE_MANAGER) {
-    alert(t("wrong_code"));
-    return false;
+  if (!managerModal || !managerCodeInput || !managerModalErreur || !managerModalValider || !managerModalAnnuler) {
+    return Promise.resolve(false);
   }
 
-  return true;
+  return new Promise((resolve) => {
+    const fermer = (resultat) => {
+      managerModal.hidden = true;
+      managerCodeInput.value = "";
+      managerModalErreur.hidden = true;
+      managerModalValider.removeEventListener("click", onValider);
+      managerModalAnnuler.removeEventListener("click", onAnnuler);
+      managerModal.querySelector("[data-modal-close]")?.removeEventListener("click", onAnnuler);
+      managerCodeInput.removeEventListener("keydown", onKeydown);
+      resolve(resultat);
+    };
+
+    const onValider = () => {
+      if (managerCodeInput.value === CODE_MANAGER) {
+        fermer(true);
+        return;
+      }
+
+      managerModalErreur.textContent = t("manager_code_incorrect");
+      managerModalErreur.hidden = false;
+      managerCodeInput.focus();
+      managerCodeInput.select();
+    };
+
+    const onAnnuler = () => fermer(false);
+    const onKeydown = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        onValider();
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onAnnuler();
+      }
+    };
+
+    managerModalErreur.hidden = true;
+    managerModal.hidden = false;
+    managerCodeInput.value = "";
+    managerCodeInput.focus();
+    managerModalValider.addEventListener("click", onValider);
+    managerModalAnnuler.addEventListener("click", onAnnuler);
+    managerModal.querySelector("[data-modal-close]")?.addEventListener("click", onAnnuler);
+    managerCodeInput.addEventListener("keydown", onKeydown);
+  });
+}
+
+function ouvrirModalPin(employeId) {
+  const employe = employes.find((entry) => entry.id === employeId);
+  if (!employe || !pinModal || !pinModalInput || !pinModalAnnuler || !pinModalEnregistrer) {
+    return;
+  }
+
+  pinModalEmployeId = employe.id;
+  pinModalInput.value = employe.pinCode || "";
+
+  const fermer = () => {
+    pinModal.hidden = true;
+    pinModalEmployeId = "";
+    pinModalAnnuler.removeEventListener("click", onFermer);
+    pinModal.querySelector("[data-pin-modal-close]")?.removeEventListener("click", onFermer);
+    pinModalEnregistrer.removeEventListener("click", onEnregistrer);
+    pinModalInput.removeEventListener("input", onInput);
+    pinModalInput.removeEventListener("keydown", onKeydown);
+  };
+
+  const onFermer = () => fermer();
+
+  const onInput = () => {
+    pinModalInput.value = String(pinModalInput.value || "").replace(/\D/g, "").slice(0, 4);
+  };
+
+  const onEnregistrer = async () => {
+    const employeCible = employes.find((entry) => entry.id === pinModalEmployeId);
+    if (!employeCible) {
+      fermer();
+      return;
+    }
+
+    const pinCode = normaliserCodePin(pinModalInput.value);
+    if (!pinCode) {
+      alert(t("invalid_pin_code_error"));
+      pinModalInput.focus();
+      return;
+    }
+
+    employeCible.pinCode = pinCode;
+    await sauvegarderEmployes(employeCible);
+    fermer();
+    afficherEmployes();
+  };
+
+  const onKeydown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      onEnregistrer();
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      onFermer();
+    }
+  };
+
+  pinModal.hidden = false;
+  pinModalAnnuler.addEventListener("click", onFermer);
+  pinModal.querySelector("[data-pin-modal-close]")?.addEventListener("click", onFermer);
+  pinModalEnregistrer.addEventListener("click", onEnregistrer);
+  pinModalInput.addEventListener("input", onInput);
+  pinModalInput.addEventListener("keydown", onKeydown);
+  pinModalInput.focus();
+  pinModalInput.select();
 }
 
 function structurerNote(texte) {
@@ -1951,7 +2043,7 @@ function obtenirEmployesFiltres() {
 
 function afficherEmployes() {
   if (!employesActifs.length) {
-    listeEmployes.innerHTML = `<tr><td colspan="9" class="vide">${t("no_employee_registered")}</td></tr>`;
+    listeEmployes.innerHTML = `<tr><td colspan="10" class="vide">${t("no_employee_registered")}</td></tr>`;
     employesFiltres = [];
     employeSelectionneId = "";
     afficherEmployesArchives();
@@ -1963,7 +2055,7 @@ function afficherEmployes() {
   employesFiltres = employesTries;
 
   if (!employesTries.length) {
-    listeEmployes.innerHTML = `<tr><td colspan="9" class="vide">${t("no_employee_matching")}</td></tr>`;
+    listeEmployes.innerHTML = `<tr><td colspan="10" class="vide">${t("no_employee_matching")}</td></tr>`;
     afficherEmployesArchives();
     afficherHistoriqueSalarieSelectionne();
     return;
@@ -1988,7 +2080,7 @@ function afficherEmployes() {
       return `
         ${
           ajouterTitre
-            ? `<tr class="ligne-groupe"><td colspan="9">=== ${echapperHtml(tEquipe(employe.equipe).toUpperCase())} ===</td></tr>`
+            ? `<tr class="ligne-groupe"><td colspan="10">=== ${echapperHtml(tEquipe(employe.equipe).toUpperCase())} ===</td></tr>`
             : ""
         }
         <tr class="ligne-employe ${teamRowClass} equipe-${classeEquipe} ${employeSelectionneId === employe.id ? "selectionne" : ""}" data-employe-id="${employe.id}">
@@ -2009,12 +2101,10 @@ function afficherEmployes() {
           <td data-label="${t("status_col")}" class="status-${classeStatut}">${libelleStatut}</td>
           <td data-label="${t("action_col")}" class="cellule-actions">
             <button class="setWeeklyRest" data-weekly-rest-id="${employe.id}">Repos hebdomadaire</button>
-            ${
-              pinEditionEmployeId === employe.id
-                ? `<div class="pin-edit-box"><span class="pin-edit-label">${t("pin_code_label")}</span><input type="password" maxlength="4" inputmode="numeric" pattern="\d{4}" class="pin-input" value="${echapperHtml(employe.pinCode || "")}" /><div class="pin-actions"><button type="button" data-save-pin-id="${employe.id}">${t("save")}</button><button type="button" data-cancel-pin-id="${employe.id}">${t("cancel")}</button></div></div>`
-                : `<button class="setEmployeePin" data-edit-pin-id="${employe.id}">${t("edit_pin")}</button>`
-            }
             <button class="bouton-supprimer" data-supprimer-id="${employe.id}">${t("delete")}</button>
+          </td>
+          <td data-label="${t("pin_col")}" class="cellule-pin">
+            <span class="pin-icon" data-edit-pin-id="${employe.id}" title="${echapperHtml(employe.pinCode ? t("edit_pin_tooltip") : t("configure_pin_tooltip"))}" aria-label="${echapperHtml(employe.pinCode ? t("edit_pin_tooltip") : t("configure_pin_tooltip"))}">${employe.pinCode ? "🔒" : "⚠"}</span>
           </td>
         </tr>
       `;
