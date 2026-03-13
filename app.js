@@ -2355,6 +2355,9 @@ function renderPlanning(semaine) {
       if (statut === "vacation") {
         td.className = "vacation-day";
         td.textContent = "V";
+      } else if (statut === "sick") {
+        td.className = "sick-day";
+        td.textContent = "M";
       } else if (statut === "rest") {
         td.className = "rest-day";
         td.textContent = "R";
