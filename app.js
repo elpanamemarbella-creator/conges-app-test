@@ -834,7 +834,7 @@ function fusionnerEmployesEtConges(employesBruts, congesCharges) {
     const congesInitial = Number(employe.congesPris) || 0;
     const team = getTeam(teamId);
 
-    return {
+    const employeFusionne = {
       ...employe,
       teamId,
       equipe,
@@ -843,9 +843,9 @@ function fusionnerEmployesEtConges(employesBruts, congesCharges) {
       congesPris: arrondir1Decimale(congesInitial + congesDepuisDemandes),
       note: typeof employe.note === "string" ? employe.note : "",
       couleur: team.color,
-      restDaysWeekly: Array.isArray(employe.restDaysWeekly) ? employe.restDaysWeekly : [],
-      planningExceptions: Array.isArray(employe.planningExceptions) ? employe.planningExceptions : [],
     };
+
+    return normaliserPlanningEmploye(employeFusionne);
   });
 }
 
@@ -860,14 +860,54 @@ async function chargerEmployes() {
     });
   });
 
-  return liste.map((emp) => ({
-    ...emp,
-    teamId: getEmployeeTeamId(emp),
-    equipe: getEmployeeTeamId(emp),
-    note: typeof emp.note === "string" ? emp.note : "",
-    restDaysWeekly: Array.isArray(emp.restDaysWeekly) ? emp.restDaysWeekly : [],
-    planningExceptions: Array.isArray(emp.planningExceptions) ? emp.planningExceptions : [],
-  }));
+  return liste.map((emp) =>
+    normaliserPlanningEmploye({
+      ...emp,
+      teamId: getEmployeeTeamId(emp),
+      equipe: getEmployeeTeamId(emp),
+      note: typeof emp.note === "string" ? emp.note : "",
+    }),
+  );
+}
+
+function normaliserPlanningEmploye(employe) {
+  const weeklyRestDaysBase = Array.isArray(employe.weeklyRestDays)
+    ? employe.weeklyRestDays
+    : Array.isArray(employe.restDaysWeekly)
+      ? employe.restDaysWeekly
+      : [];
+
+  const weeklyRestDays = [...new Set(weeklyRestDaysBase.map((day) => Number(day)).filter((day) => day >= 0 && day <= 6))]
+    .sort((a, b) => a - b);
+
+  const vacations = Array.isArray(employe.historiqueConges)
+    ? employe.historiqueConges
+    : Array.isArray(employe.vacations)
+      ? employe.vacations
+      : [];
+
+  const manualOverrides = {};
+
+  if (employe.manualOverrides && typeof employe.manualOverrides === "object") {
+    Object.entries(employe.manualOverrides).forEach(([date, statut]) => {
+      if (typeof date === "string" && typeof statut === "string") {
+        manualOverrides[date] = statut;
+      }
+    });
+  } else if (Array.isArray(employe.planningExceptions)) {
+    employe.planningExceptions.forEach((exception) => {
+      if (exception?.date && exception?.statut) {
+        manualOverrides[exception.date] = exception.statut;
+      }
+    });
+  }
+
+  return {
+    ...employe,
+    weeklyRestDays,
+    vacations,
+    manualOverrides,
+  };
 }
 
 async function rafraichirDonnees() {
@@ -1264,7 +1304,7 @@ function ouvrirFenetreReposHebdomadaire(employe) {
         ${WEEKLY_REST_OPTIONS.map(
           (jour) => `
             <label class="weekly-rest-option">
-              <input type="checkbox" value="${jour.value}" ${employe.restDaysWeekly.includes(jour.value) ? "checked" : ""} />
+              <input type="checkbox" value="${jour.value}" ${employe.weeklyRestDays.includes(jour.value) ? "checked" : ""} />
               <span>${jour.label}</span>
             </label>
           `,
@@ -1292,7 +1332,7 @@ function ouvrirFenetreReposHebdomadaire(employe) {
 
     const joursHebdo = [...new Set(joursSelectionnes)].sort((a, b) => a - b);
 
-    reinitialiserReposHebdomadaireEmploye(employe);
+    reinitialiserPlanningEmploye(employe);
     appliquerReposHebdomadaireEmploye(employe, joursHebdo);
     await sauvegarderEmployes(employe);
 
@@ -1355,8 +1395,9 @@ formulaireEmploye.addEventListener("submit", async (event) => {
     note: "",
     team: getTeam(normaliserEquipe(document.getElementById("equipe-employe").value)),
     couleur: getTeamColor(normaliserEquipe(document.getElementById("equipe-employe").value)),
-    restDaysWeekly: [],
-    planningExceptions: [],
+    weeklyRestDays: [],
+    vacations: [],
+    manualOverrides: {},
     actif: true,
   };
 
@@ -1714,6 +1755,11 @@ async function sauvegarderEmployes(employe) {
     return;
   }
 
+  const employeNormalise = normaliserPlanningEmploye(employe);
+  employe.weeklyRestDays = employeNormalise.weeklyRestDays;
+  employe.vacations = employeNormalise.vacations;
+  employe.manualOverrides = employeNormalise.manualOverrides;
+
   const teamId = getEmployeeTeamId(employe);
   const team = getTeam(teamId);
 
@@ -1726,8 +1772,11 @@ async function sauvegarderEmployes(employe) {
       note: employe.note || "",
       team,
       couleur: team.color,
-      restDaysWeekly: Array.isArray(employe.restDaysWeekly) ? employe.restDaysWeekly : [],
-      planningExceptions: Array.isArray(employe.planningExceptions) ? employe.planningExceptions : [],
+      weeklyRestDays: employe.weeklyRestDays,
+      vacations: employe.vacations,
+      manualOverrides: employe.manualOverrides,
+      restDaysWeekly: [],
+      planningExceptions: [],
     },
     { merge: true },
   );
@@ -1735,32 +1784,24 @@ async function sauvegarderEmployes(employe) {
 
 
 function trouverExceptionPlanning(employe, dateIso) {
-  if (!Array.isArray(employe.planningExceptions)) {
-    return null;
-  }
-
-  return employe.planningExceptions.find((exception) => exception.date === dateIso) || null;
+  return employe.manualOverrides?.[dateIso] ? { date: dateIso, statut: employe.manualOverrides[dateIso] } : null;
 }
 
 function mettreAJourExceptionPlanning(employe, dateIso, statut) {
-  const base = Array.isArray(employe.planningExceptions) ? employe.planningExceptions : [];
-  const autresExceptions = base.filter((exception) => exception.date !== dateIso);
+  if (!employe.manualOverrides || typeof employe.manualOverrides !== "object") {
+    employe.manualOverrides = {};
+  }
 
-  employe.planningExceptions = [...autresExceptions, { date: dateIso, statut }];
+  employe.manualOverrides[dateIso] = statut;
 }
 
-function reinitialiserReposHebdomadaireEmploye(employe) {
-  const exceptionsExistantes = Array.isArray(employe.planningExceptions) ? employe.planningExceptions : [];
-  const exceptionsConservees = exceptionsExistantes.filter(
-    (exception) => exception?.statut && exception.statut !== "rest" && exception.statut !== "work",
-  );
-
-  employe.restDaysWeekly = [];
-  employe.planningExceptions = exceptionsConservees;
+function reinitialiserPlanningEmploye(employe) {
+  employe.weeklyRestDays = [];
+  employe.manualOverrides = {};
 }
 
 function appliquerReposHebdomadaireEmploye(employe, joursHebdo) {
-  employe.restDaysWeekly = Array.isArray(joursHebdo) ? [...joursHebdo] : [];
+  employe.weeklyRestDays = Array.isArray(joursHebdo) ? [...joursHebdo] : [];
 }
 
 function regenererLignePlanningEmploye(employe) {
@@ -2285,8 +2326,10 @@ function getEmployeeStatusForDate(employe, date) {
 
   target.setHours(0, 0, 0, 0);
 
-  if (Array.isArray(employe.historiqueConges)) {
-    const enVacances = employe.historiqueConges.some((conge) => {
+  const isoDate = formatDateISO(target);
+
+  const enVacances = Array.isArray(employe.vacations)
+    && employe.vacations.some((conge) => {
       if (!conge?.dateDebut || !conge?.dateFin) {
         return false;
       }
@@ -2304,35 +2347,17 @@ function getEmployeeStatusForDate(employe, date) {
       return target >= debut && target <= fin;
     });
 
-    if (enVacances) {
-      return "vacation";
-    }
-  }
-
-  if (Array.isArray(employe.planningExceptions)) {
-    const isoDate = formatDateISO(target);
-    const exception = employe.planningExceptions.find((entry) => {
-      if (!entry?.date) {
-        return false;
-      }
-
-      const exDate = dateLocaleDepuisTexte(entry.date);
-      if (!exDate) {
-        return false;
-      }
-
-      exDate.setHours(0, 0, 0, 0);
-      return formatDateISO(exDate) === isoDate;
-    });
-
-    if (exception?.statut) {
-      return exception.statut;
-    }
+  if (enVacances) {
+    return "vacation";
   }
 
   const day = target.getDay();
-  if (Array.isArray(employe.restDaysWeekly) && employe.restDaysWeekly.includes(day)) {
+  if (Array.isArray(employe.weeklyRestDays) && employe.weeklyRestDays.includes(day)) {
     return "rest";
+  }
+
+  if (employe.manualOverrides && typeof employe.manualOverrides === "object" && employe.manualOverrides[isoDate]) {
+    return employe.manualOverrides[isoDate];
   }
 
   return "work";
