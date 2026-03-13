@@ -24,14 +24,16 @@ initializeApp(firebaseConfig);
 <body>
   <main class="conteneur">
     <header class="entete-app">
-      <div class="selecteur-langue" aria-label="Sélecteur de langue">
-        <button type="button" class="langue-btn actif" data-langue="fr">FR</button>
-        <span>|</span>
-        <button type="button" class="langue-btn" data-langue="es">ES</button>
-        <span>|</span>
-        <button type="button" class="langue-btn" data-langue="en">EN</button>
+      <div class="app-header">
+        <h1 class="app-title" data-i18n="app_title">Gestion des congés employés</h1>
+        <div class="language-switch" aria-label="Sélecteur de langue">
+          <button type="button" class="langue-btn actif" data-langue="fr">FR</button>
+          <span>|</span>
+          <button type="button" class="langue-btn" data-langue="es">ES</button>
+          <span>|</span>
+          <button type="button" class="langue-btn" data-langue="en">EN</button>
+        </div>
       </div>
-      <h1 data-i18n="app_title">Gestion des congés employés</h1>
       <div class="menu-principal">
         <button type="button" id="openPlanning">📅 Planning semaine</button>
       </div>
