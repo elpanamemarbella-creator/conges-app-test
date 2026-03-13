@@ -417,33 +417,48 @@ const noteTooltip = document.getElementById("noteTooltip");
 const menuOnglets = document.querySelectorAll(".menu-onglet");
 const zonesOnglets = document.querySelectorAll("[data-zone]");
 const boutonsLangue = document.querySelectorAll("[data-langue]");
+const isMobile = window.matchMedia("(pointer: coarse)").matches;
 
 if (noteTooltip) {
-  document.addEventListener("mouseover", (event) => {
-    const icon = event.target.closest(".note-icon");
+  if (!isMobile) {
+    document.addEventListener("mouseover", (event) => {
+      const icon = event.target.closest(".note-icon");
 
-    if (!icon) {
-      return;
-    }
+      if (!icon) {
+        return;
+      }
 
-    noteTooltip.textContent = icon.dataset.note || "";
-    noteTooltip.style.display = "block";
-  });
+      noteTooltip.textContent = icon.dataset.note || "";
+      noteTooltip.style.display = "block";
+    });
 
-  document.addEventListener("mousemove", (event) => {
-    if (noteTooltip.style.display !== "block") {
-      return;
-    }
+    document.addEventListener("mousemove", (event) => {
+      if (noteTooltip.style.display !== "block") {
+        return;
+      }
 
-    noteTooltip.style.left = `${event.clientX + 15}px`;
-    noteTooltip.style.top = `${event.clientY + 15}px`;
-  });
+      noteTooltip.style.left = `${event.clientX + 15}px`;
+      noteTooltip.style.top = `${event.clientY + 15}px`;
+    });
 
-  document.addEventListener("mouseout", (event) => {
-    if (event.target.closest(".note-icon")) {
-      noteTooltip.style.display = "none";
-    }
-  });
+    document.addEventListener("mouseout", (event) => {
+      if (event.target.closest(".note-icon")) {
+        noteTooltip.style.display = "none";
+      }
+    });
+  }
+
+  if (isMobile) {
+    document.addEventListener("click", (event) => {
+      const icon = event.target.closest(".note-icon");
+
+      if (!icon) {
+        return;
+      }
+
+      alert(icon.dataset.note || "");
+    });
+  }
 }
 
 let employes = [];
