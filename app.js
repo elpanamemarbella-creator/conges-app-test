@@ -388,32 +388,18 @@ const TEAM_ORDER = [
   "extra",
 ];
 const TEAMS = {
-  "nettoyage-entretien": { fr: "Nettoyage / Entretien", es: "Limpieza / Mantenimiento", en: "Cleaning / Maintenance" },
-  "bar matin": { fr: "Bar matin", es: "Bar mañana", en: "Morning bar" },
-  "salle matin": { fr: "Salle matin", es: "Sala mañana", en: "Morning floor" },
-  "cuisine matin": { fr: "Cuisine matin", es: "Cocina mañana", en: "Morning kitchen" },
-  "cuisine soir": { fr: "Cuisine soir", es: "Cocina noche", en: "Evening kitchen" },
-  "salle soir": { fr: "Salle soir", es: "Sala noche", en: "Evening floor" },
-  "bar soir": { fr: "Bar soir", es: "Bar noche", en: "Evening bar" },
-  chicha: { fr: "Chicha", es: "Shisha", en: "Shisha" },
-  dj: { fr: "DJ", es: "DJ", en: "DJ" },
-  rp: { fr: "RP", es: "RRPP", en: "PR" },
-  portier: { fr: "Portier", es: "Portero", en: "Doorman" },
-  extra: { fr: "Extra", es: "Extra", en: "Extra" },
-};
-const TEAM_COLORS = {
-  "nettoyage-entretien": "#e0f2fe",
-  "bar matin": "#dcfce7",
-  "salle matin": "#fde68a",
-  "cuisine matin": "#fecaca",
-  "cuisine soir": "#fecdd3",
-  "salle soir": "#fbcfe8",
-  "bar soir": "#ddd6fe",
-  chicha: "#d9f99d",
-  dj: "#c4b5fd",
-  rp: "#a7f3d0",
-  portier: "#fdba74",
-  extra: "#e5e7eb",
+  "nettoyage-entretien": { fr: "Nettoyage / Entretien", es: "Limpieza / Mantenimiento", en: "Cleaning / Maintenance", color: "#0ea5e9" },
+  "bar matin": { fr: "Bar matin", es: "Bar mañana", en: "Morning bar", color: "#1d4ed8" },
+  "salle matin": { fr: "Salle matin", es: "Sala mañana", en: "Morning floor", color: "#166534" },
+  "cuisine matin": { fr: "Cuisine matin", es: "Cocina mañana", en: "Morning kitchen", color: "#b45309" },
+  "cuisine soir": { fr: "Cuisine soir", es: "Cocina noche", en: "Evening kitchen", color: "#be123c" },
+  "salle soir": { fr: "Salle soir", es: "Sala noche", en: "Evening floor", color: "#9333ea" },
+  "bar soir": { fr: "Bar soir", es: "Bar noche", en: "Evening bar", color: "#4338ca" },
+  chicha: { fr: "Chicha", es: "Shisha", en: "Shisha", color: "#15803d" },
+  dj: { fr: "DJ", es: "DJ", en: "DJ", color: "#7c3aed" },
+  rp: { fr: "RP", es: "RRPP", en: "PR", color: "#0f766e" },
+  portier: { fr: "Portier", es: "Portero", en: "Doorman", color: "#9a3412" },
+  extra: { fr: "Extra", es: "Extra", en: "Extra", color: "#4b5563" },
 };
 const TEAM_KEYS = {
   "Nettoyage / Entretien": "nettoyage-entretien",
@@ -432,7 +418,6 @@ const TEAM_KEYS = {
   Extra: "extra",
   Extras: "extra",
 };
-const PALETTE_COULEURS = ["#2f80ed", "#eb5757", "#27ae60", "#f2994a", "#9b51e0", "#00b8d9", "#e84393", "#6c5ce7"];
 const WEEKLY_REST_OPTIONS = [
   { value: 1, label: "Lundi" },
   { value: 2, label: "Mardi" },
@@ -580,6 +565,37 @@ function teamLabel(team) {
 
 function tEquipe(equipe) {
   return teamLabel(normaliserEquipe(equipe));
+}
+
+function getTeamColor(equipe) {
+  const teamKey = normaliserEquipe(equipe);
+  return TEAMS[teamKey]?.color || "#4b5563";
+}
+
+function hexToRgb(hex) {
+  const value = String(hex || "").replace("#", "");
+  if (value.length !== 6) {
+    return null;
+  }
+
+  const r = Number.parseInt(value.slice(0, 2), 16);
+  const g = Number.parseInt(value.slice(2, 4), 16);
+  const b = Number.parseInt(value.slice(4, 6), 16);
+
+  if ([r, g, b].some((channel) => Number.isNaN(channel))) {
+    return null;
+  }
+
+  return { r, g, b };
+}
+
+function getTeamTint(equipe, alpha = 0.18) {
+  const rgb = hexToRgb(getTeamColor(equipe));
+  if (!rgb) {
+    return `rgba(75, 85, 99, ${alpha})`;
+  }
+
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
 }
 
 function detecterLangueInitiale() {
@@ -781,7 +797,7 @@ function fusionnerEmployesEtConges(employesBruts, congesCharges) {
       historiqueConges,
       congesPris: arrondir1Decimale(congesInitial + congesDepuisDemandes),
       note: typeof employe.note === "string" ? employe.note : "",
-      couleur: employe.couleur || "",
+      couleur: getTeamColor(equipe),
       restDaysWeekly: Array.isArray(employe.restDaysWeekly) ? employe.restDaysWeekly : [],
       planningExceptions: Array.isArray(employe.planningExceptions) ? employe.planningExceptions : [],
     };
@@ -807,53 +823,8 @@ async function chargerEmployes() {
   }));
 }
 
-async function garantirCouleursEmployes(employesCharges) {
-  const couleursOccupees = new Set(employesCharges.map((employe) => employe.couleur).filter(Boolean));
-  const misesAJour = [];
-
-  for (const employe of employesCharges) {
-    if (employe.couleur) {
-      continue;
-    }
-
-    const couleur = trouverCouleurDisponible(couleursOccupees, employe.id);
-    couleursOccupees.add(couleur);
-    employe.couleur = couleur;
-    misesAJour.push(
-      setDoc(
-        doc(db, "employes", employe.id),
-        {
-          couleur,
-        },
-        { merge: true },
-      ),
-    );
-  }
-
-  if (misesAJour.length) {
-    await Promise.all(misesAJour);
-  }
-}
-
-function trouverCouleurDisponible(couleursOccupees, graine = "") {
-  const couleurLibre = PALETTE_COULEURS.find((couleur) => !couleursOccupees.has(couleur));
-  if (couleurLibre) {
-    return couleurLibre;
-  }
-
-  let hash = 0;
-  for (let index = 0; index < graine.length; index += 1) {
-    hash = (hash << 5) - hash + graine.charCodeAt(index);
-    hash |= 0;
-  }
-
-  return PALETTE_COULEURS[Math.abs(hash) % PALETTE_COULEURS.length];
-}
-
 async function rafraichirDonnees() {
   const [employesBruts, congesCharges] = await Promise.all([chargerEmployes(), chargerConges()]);
-  await garantirCouleursEmployes(employesBruts);
-
   employes = fusionnerEmployesEtConges(employesBruts, congesCharges);
   employesActifs = employes.filter((employe) => employe.actif !== false);
   employesArchives = employes.filter((employe) => employe.actif === false);
@@ -1028,6 +999,7 @@ listeEmployes.addEventListener("click", async (event) => {
 
     select.addEventListener("change", async () => {
       employe.equipe = select.value;
+      employe.couleur = getTeamColor(employe.equipe);
       await sauvegarderEmployes(employe);
       afficherEmployes();
       renderPlanning(currentWeek);
@@ -1325,7 +1297,7 @@ formulaireEmploye.addEventListener("submit", async (event) => {
     birthCode,
     historiqueConges: [],
     note: "",
-    couleur: "",
+    couleur: getTeamColor(normaliserEquipe(document.getElementById("equipe-employe").value)),
     restDaysWeekly: [],
     planningExceptions: [],
     actif: true,
@@ -1336,9 +1308,6 @@ formulaireEmploye.addEventListener("submit", async (event) => {
   }
 
   try {
-    const couleursOccupees = new Set(employes.map((entry) => entry.couleur).filter(Boolean));
-    nouvelEmploye.couleur = trouverCouleurDisponible(couleursOccupees, nouvelEmploye.nom);
-
     const ref = await addDoc(collection(db, "employes"), nouvelEmploye);
     nouvelEmploye.id = ref.id;
 
@@ -1784,6 +1753,9 @@ function afficherEmployes() {
       const congesRestants = arrondir1Decimale(congesAcquis - congesPris);
       const [libelleStatut, classeStatut] = determinerStatut(congesRestants);
       const classeEquipe = CLASSES_EQUIPE[employe.equipe] || "extras";
+      const teamColor = getTeamColor(employe.equipe);
+      const teamTint = getTeamTint(employe.equipe, 0.12);
+      const badgeTint = getTeamTint(employe.equipe, 0.2);
       const ajouterTitre = equipeEnCours !== employe.equipe;
 
       if (ajouterTitre) {
@@ -1796,16 +1768,16 @@ function afficherEmployes() {
             ? `<tr class="ligne-groupe"><td colspan="9">=== ${echapperHtml(tEquipe(employe.equipe).toUpperCase())} ===</td></tr>`
             : ""
         }
-        <tr class="ligne-employe equipe-${classeEquipe} ${employeSelectionneId === employe.id ? "selectionne" : ""}" data-employe-id="${employe.id}">
+        <tr class="ligne-employe equipe-${classeEquipe} ${employeSelectionneId === employe.id ? "selectionne" : ""}" data-employe-id="${employe.id}" style="background:${echapperHtml(teamTint)};">
           <td data-label="${t("employee_col")}">
-            <span class="employee-name">${echapperHtml(employe.nom)}</span>
+            <span class="employee-name" style="background:${echapperHtml(badgeTint)}; color:${echapperHtml(teamColor)};">${echapperHtml(employe.nom)}</span>
             ${
               employe.note
                 ? `<span class="note-indicator note-icon" aria-label="${t("note_aria_label")}" data-nom="${echapperHtml(employe.nom)}" data-note="${echapperHtml(employe.note)}">📝</span>`
                 : ""
             }
           </td>
-          <td data-label="${t("team_col")}" class="employee-team" data-id="${employe.id}"><span class="badge-equipe equipe-${classeEquipe}">${echapperHtml(tEquipe(employe.equipe))}</span></td>
+          <td data-label="${t("team_col")}" class="employee-team" data-id="${employe.id}"><span class="badge-equipe equipe-${classeEquipe}" style="background:${echapperHtml(badgeTint)}; color:${echapperHtml(teamColor)};">${echapperHtml(tEquipe(employe.equipe))}</span></td>
           <td data-label="${t("hire_date_col")}">${formaterDateFr(employe.dateEmbauche)}</td>
           <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
           <td data-label="${t("taken_leave_col")}" class="cellule-conges-pris">${congesPris.toFixed(1)}</td>
@@ -1886,7 +1858,7 @@ function afficherEmployesArchives() {
       (employe) => `
       <tr>
         <td>${echapperHtml(employe.nom)}</td>
-        <td>${echapperHtml(tEquipe(employe.equipe))}</td>
+        <td><span class="badge-equipe" style="background:${echapperHtml(getTeamTint(employe.equipe, 0.2))}; color:${echapperHtml(getTeamColor(employe.equipe))};">${echapperHtml(tEquipe(employe.equipe))}</span></td>
         <td>${formaterDateFr(employe.dateEmbauche)}</td>
         <td class="cellule-actions"><button class="bouton-secondaire" data-reactiver-id="${employe.id}">${t("reactivate")}</button></td>
       </tr>
@@ -2005,7 +1977,7 @@ function afficherCalendrierMensuel() {
       const blocs = joursDansMois
         .map(
           (date) =>
-            `<span class="bloc-conge" style="background-color:${echapperHtml(employe.couleur || "#2f80ed")}" title="${formaterDateFr(date)}"></span>`,
+            `<span class="bloc-conge" style="background-color:${echapperHtml(getTeamColor(employe.equipe))}" title="${formaterDateFr(date)}"></span>`,
         )
         .join("");
 
@@ -2292,10 +2264,35 @@ function renderCoverageToday() {
   let html = "";
 
   TEAM_ORDER.forEach((team) => {
-    html += `<div><strong>${echapperHtml(teamLabel(team))}</strong> : ${echapperHtml(coverage[team].join(", ") || "-")}</div>`;
+    html += `<div><strong style="color:${echapperHtml(getTeamColor(team))};">${echapperHtml(teamLabel(team))}</strong> : ${echapperHtml(coverage[team].join(", ") || "-")}</div>`;
   });
 
   coverageContent.innerHTML = html;
+}
+
+function stylePlanningHeaders(semaine) {
+  const headers = document.querySelectorAll(".planning-table thead th");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  headers.forEach((header, index) => {
+    header.classList.remove("today-column", "weekend-column");
+    if (index === 0) {
+      return;
+    }
+
+    const day = new Date(semaine);
+    day.setDate(day.getDate() + index - 1);
+    day.setHours(0, 0, 0, 0);
+
+    if (day.getDay() === 0 || day.getDay() === 6) {
+      header.classList.add("weekend-column");
+    }
+
+    if (day.getTime() === today.getTime()) {
+      header.classList.add("today-column");
+    }
+  });
 }
 
 function renderPlanning(semaine) {
@@ -2306,6 +2303,10 @@ function renderPlanning(semaine) {
   planningBody.innerHTML = "";
   weekLabel.textContent = formaterLibelleSemaine(semaine);
   renderCoverageToday();
+  stylePlanningHeaders(semaine);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   const employesPlanning = [...employesActifs].sort((a, b) => {
     const teamDiff = getTeamOrderIndex(a.equipe) - getTeamOrderIndex(b.equipe);
@@ -2328,16 +2329,18 @@ function renderPlanning(semaine) {
       cell.colSpan = 8;
       cell.textContent = tEquipe(emp.equipe).toUpperCase();
       cell.className = "team-header";
+      cell.style.background = getTeamTint(emp.equipe, 0.18);
+      cell.style.color = getTeamColor(emp.equipe);
 
       groupRow.appendChild(cell);
       planningBody.appendChild(groupRow);
     }
 
     const tr = document.createElement("tr");
+    tr.className = "planning-row";
 
     const name = document.createElement("td");
-    name.textContent = emp.nom;
-    name.style.background = TEAM_COLORS[getTeamKey(emp.equipe)] || "#f3f4f6";
+    name.innerHTML = `<span class="planning-employee-name" style="background:${echapperHtml(getTeamTint(emp.equipe, 0.2))}; color:${echapperHtml(getTeamColor(emp.equipe))};">${echapperHtml(emp.nom)}</span>`;
     tr.appendChild(name);
 
     for (let i = 0; i < 7; i += 1) {
@@ -2350,25 +2353,35 @@ function renderPlanning(semaine) {
       td.dataset.employeId = emp.id;
       td.dataset.date = dateIso;
 
-      const statut = getEmployeeStatusForDate(emp, jour);
-
-      if (statut === "vacation") {
-        td.className = "vacation-day";
-        td.textContent = "V";
-      } else if (statut === "sick") {
-        td.className = "sick-day";
-        td.textContent = "M";
-      } else if (statut === "rest") {
-        td.className = "rest-day";
-        td.textContent = "R";
-      } else if (statut === "work") {
-        td.className = "work-day";
-        td.textContent = "";
-      } else {
-        td.className = "work-day";
-        td.textContent = "";
+      const dayKey = new Date(jour);
+      dayKey.setHours(0, 0, 0, 0);
+      if (dayKey.getDay() === 0 || dayKey.getDay() === 6) {
+        td.classList.add("weekend-column");
       }
 
+      if (dayKey.getTime() === today.getTime()) {
+        td.classList.add("today-column");
+      }
+
+      const statut = getEmployeeStatusForDate(emp, jour);
+      const badge = document.createElement("span");
+      badge.className = "status-badge";
+
+      if (statut === "vacation") {
+        badge.classList.add("status-vacation");
+        badge.textContent = "Vacation";
+      } else if (statut === "sick") {
+        badge.classList.add("status-sick");
+        badge.textContent = "Sick";
+      } else if (statut === "rest") {
+        badge.classList.add("status-rest");
+        badge.textContent = "Day off";
+      } else {
+        badge.classList.add("status-work");
+        badge.textContent = "Working";
+      }
+
+      td.appendChild(badge);
       tr.appendChild(td);
     }
 
