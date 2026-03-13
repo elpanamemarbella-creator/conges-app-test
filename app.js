@@ -621,6 +621,10 @@ function getTeamTint(equipe, alpha = 0.18) {
   return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
 }
 
+function getTeamRowClass(equipe) {
+  return `team-${getTeamKey(equipe).replace(/\s+/g, "-")}`;
+}
+
 
 function getEmployeeTeamColor(employe) {
   return getEmployeeTeam(employe).color;
@@ -1807,9 +1811,7 @@ function afficherEmployes() {
       const congesRestants = arrondir1Decimale(congesAcquis - congesPris);
       const [libelleStatut, classeStatut] = determinerStatut(congesRestants);
       const classeEquipe = CLASSES_EQUIPE[employe.equipe] || "extras";
-      const teamColor = getEmployeeTeamColor(employe);
-      const teamTint = getEmployeeTeamTint(employe, 0.12);
-      const badgeTint = getEmployeeTeamTint(employe, 0.2);
+      const teamRowClass = getTeamRowClass(employe.equipe);
       const ajouterTitre = equipeEnCours !== employe.equipe;
 
       if (ajouterTitre) {
@@ -1822,22 +1824,22 @@ function afficherEmployes() {
             ? `<tr class="ligne-groupe"><td colspan="9">=== ${echapperHtml(tEquipe(employe.equipe).toUpperCase())} ===</td></tr>`
             : ""
         }
-        <tr class="ligne-employe equipe-${classeEquipe} ${employeSelectionneId === employe.id ? "selectionne" : ""}" data-employe-id="${employe.id}" style="background:${echapperHtml(teamTint)};">
+        <tr class="ligne-employe ${teamRowClass} equipe-${classeEquipe} ${employeSelectionneId === employe.id ? "selectionne" : ""}" data-employe-id="${employe.id}">
           <td data-label="${t("employee_col")}">
-            <span class="employee-name" style="background:${echapperHtml(badgeTint)}; color:${echapperHtml(teamColor)};">${echapperHtml(employe.nom)}</span>
+            <span class="employee-name">${echapperHtml(employe.nom)}</span>
             ${
               employe.note
                 ? `<span class="note-indicator note-icon" aria-label="${t("note_aria_label")}" data-nom="${echapperHtml(employe.nom)}" data-note="${echapperHtml(employe.note)}">📝</span>`
                 : ""
             }
           </td>
-          <td data-label="${t("team_col")}" class="employee-team" data-id="${employe.id}"><span class="badge-equipe equipe-${classeEquipe}" style="background:${echapperHtml(badgeTint)}; color:${echapperHtml(teamColor)};">${echapperHtml(tEquipe(employe.equipe))}</span></td>
+          <td data-label="${t("team_col")}" class="employee-team" data-id="${employe.id}">${echapperHtml(tEquipe(employe.equipe))}</td>
           <td data-label="${t("hire_date_col")}">${formaterDateFr(employe.dateEmbauche)}</td>
           <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
           <td data-label="${t("taken_leave_col")}" class="cellule-conges-pris">${congesPris.toFixed(1)}</td>
           <td data-label="${t("remaining_leave_col")}">${congesRestants.toFixed(1)}</td>
           <td class="vacation-history" data-label="${t("leave_history_col")}" data-history='${JSON.stringify(employe.historiqueConges)}'>${getDernierConge(employe.historiqueConges)}</td>
-          <td data-label="${t("status_col")}"><span class="pastille ${classeStatut}">${libelleStatut}</span></td>
+          <td data-label="${t("status_col")}" class="status-${classeStatut}">${libelleStatut}</td>
           <td data-label="${t("action_col")}" class="cellule-actions">
             <button class="setWeeklyRest" data-weekly-rest-id="${employe.id}">Repos hebdomadaire</button>
             <button class="bouton-supprimer" data-supprimer-id="${employe.id}">${t("delete")}</button>
@@ -1912,7 +1914,7 @@ function afficherEmployesArchives() {
       (employe) => `
       <tr>
         <td>${echapperHtml(employe.nom)}</td>
-        <td><span class="badge-equipe" style="background:${echapperHtml(getEmployeeTeamTint(employe, 0.2))}; color:${echapperHtml(getEmployeeTeamColor(employe))};">${echapperHtml(tEquipe(employe.equipe))}</span></td>
+        <td>${echapperHtml(tEquipe(employe.equipe))}</td>
         <td>${formaterDateFr(employe.dateEmbauche)}</td>
         <td class="cellule-actions"><button class="bouton-secondaire" data-reactiver-id="${employe.id}">${t("reactivate")}</button></td>
       </tr>
@@ -2037,7 +2039,7 @@ function afficherCalendrierMensuel() {
 
       return `
         <div class="ligne-calendrier">
-          <strong><span class="team-tint-label" style="background:${echapperHtml(getEmployeeTeamTint(employe, 0.2))}; color:${echapperHtml(getEmployeeTeamColor(employe))};">${echapperHtml(employe.nom)}</span></strong>
+          <strong>${echapperHtml(employe.nom)}</strong>
           <div class="barre-conges">${blocs}</div>
         </div>
       `;
@@ -2115,7 +2117,7 @@ function afficherDemandesEnAttente() {
 
       return `
         <li class="demande-item">
-          <div><span class="team-tint-label" style="background:${echapperHtml(getEmployeeTeamTint(employe, 0.2))}; color:${echapperHtml(getEmployeeTeamColor(employe))};">${echapperHtml(nom)}</span> : ${formaterDateFr(conge.dateDebut)} → ${formaterDateFr(conge.dateFin)}</div>
+          <div>${echapperHtml(nom)} : ${formaterDateFr(conge.dateDebut)} → ${formaterDateFr(conge.dateFin)}</div>
           <div class="actions-demande">
             <button data-valider-id="${conge.id}" class="bouton-secondaire">${t("validate")}</button>
             <button data-refuser-id="${conge.id}" class="bouton-refuser">${t("refuse")}</button>
@@ -2318,7 +2320,7 @@ function renderCoverageToday() {
   let html = "";
 
   TEAM_ORDER.forEach((team) => {
-    html += `<div><span class="team-tint-label" style="background:${echapperHtml(getTeamTint(team, 0.2))}; color:${echapperHtml(getTeamColor(team))};">${echapperHtml(teamLabel(team))}</span> : ${echapperHtml(coverage[team].join(", ") || "-")}</div>`;
+    html += `<div>${echapperHtml(teamLabel(team))} : ${echapperHtml(coverage[team].join(", ") || "-")}</div>`;
   });
 
   coverageContent.innerHTML = html;
@@ -2394,7 +2396,7 @@ function renderPlanning(semaine) {
     tr.className = "planning-row";
 
     const name = document.createElement("td");
-    name.innerHTML = `<span class="planning-employee-name" style="background:${echapperHtml(getEmployeeTeamTint(emp, 0.2))}; color:${echapperHtml(getEmployeeTeamColor(emp))};">${echapperHtml(emp.nom)}</span>`;
+    name.textContent = emp.nom;
     tr.appendChild(name);
 
     for (let i = 0; i < 7; i += 1) {
@@ -2418,24 +2420,19 @@ function renderPlanning(semaine) {
       }
 
       const statut = getEmployeeStatusForDate(emp, jour);
-      const badge = document.createElement("span");
-      badge.className = "status-badge";
-
       if (statut === "vacation") {
-        badge.classList.add("status-vacation");
-        badge.textContent = t("planning_status_vacation");
+        td.classList.add("vacation-day");
+        td.textContent = t("planning_status_vacation");
       } else if (statut === "sick") {
-        badge.classList.add("status-sick");
-        badge.textContent = t("planning_status_sick");
+        td.classList.add("sick-day");
+        td.textContent = t("planning_status_sick");
       } else if (statut === "rest") {
-        badge.classList.add("status-rest");
-        badge.textContent = t("planning_status_rest");
+        td.classList.add("rest-day");
+        td.textContent = t("planning_status_rest");
       } else {
-        badge.classList.add("status-work");
-        badge.textContent = t("planning_status_work");
+        td.classList.add("work-day");
+        td.textContent = t("planning_status_work");
       }
-
-      td.appendChild(badge);
       tr.appendChild(td);
     }
 
@@ -2465,7 +2462,7 @@ function afficherResume() {
 
       return `
         <tr>
-          <td data-label="${t("name_col")}"><span class="team-tint-label" style="background:${echapperHtml(getEmployeeTeamTint(employe, 0.2))}; color:${echapperHtml(getEmployeeTeamColor(employe))};">${echapperHtml(employe.nom)}</span></td>
+          <td data-label="${t("name_col")}">${echapperHtml(employe.nom)}</td>
           <td data-label="${t("entry_date_col")}">${formaterDateFr(employe.dateEmbauche)}</td>
           <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
           <td data-label="${t("taken_leave_col")}">${congesPris.toFixed(1)}</td>
