@@ -543,6 +543,14 @@ th {
   gap: 0.5rem;
 }
 
+.team-tint-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
 .bouton-secondaire {
   background: var(--vigilance);
 }
@@ -731,6 +739,10 @@ th {
 
 .planning-row:hover td.today-column {
   background: #dbeafe;
+}
+
+.planning-row:hover td.weekend-column {
+  background: #eceff3;
 }
 
 .today-column {
