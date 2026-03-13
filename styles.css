@@ -1,14 +1,15 @@
 :root {
-  --fond: #f5f6fa;
+  --fond: #e8eaed;
   --carte: #ffffff;
-  --texte: #17212f;
-  --discret: #5c6978;
-  --primaire: #2c7be5;
-  --primaire-fonce: #1f69ca;
-  --bon: #127a45;
-  --vigilance: #9b6a09;
-  --danger: #c53131;
-  --bordure: #d8e0eb;
+  --texte: #1f2937;
+  --discret: #6b7280;
+  --primaire: #3b82f6;
+  --primaire-fonce: #2563eb;
+  --bon: #22c55e;
+  --vigilance: #f59e0b;
+  --danger: #ef4444;
+  --repos: #8b5cf6;
+  --bordure: #d1d5db;
 }
 
 * {
@@ -62,19 +63,19 @@ body {
 }
 
 .langue-btn:hover {
-  background: #eaf0fb;
-  color: #1f2d3d;
+  background: #e5e7eb;
+  color: var(--texte);
 }
 
 .langue-btn.actif {
-  color: #1f2d3d;
+  color: var(--texte);
 }
 
 .app-title {
   margin: 0;
   font-size: 28px;
   font-weight: 700;
-  color: #1f2d3d;
+  color: var(--texte);
 }
 
 .zone-onglet {
@@ -87,7 +88,7 @@ body {
   border: 1px solid var(--bordure);
   border-radius: 14px;
   padding: 1.15rem;
-  box-shadow: 0 6px 18px rgba(20, 33, 52, 0.07);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
 }
 
 .carte h2 {
@@ -105,7 +106,7 @@ body {
   border: 1px solid var(--bordure);
   border-radius: 10px;
   padding: 0.75rem;
-  background: #f8fbff;
+  background: var(--carte);
   display: grid;
   gap: 0.3rem;
 }
@@ -137,12 +138,12 @@ body {
 
 .archived-toggle {
   width: fit-content;
-  background: #eef2f7;
-  color: #1f2d3d;
+  background: #f3f4f6;
+  color: var(--texte);
 }
 
 .archived-toggle:hover {
-  background: #dde5ef;
+  background: #e5e7eb;
 }
 
 .grille-formulaire {
@@ -217,9 +218,9 @@ td {
 }
 
 th {
-  color: #405164;
+  color: var(--texte);
   font-weight: 600;
-  background: #eef2f7;
+  background: #f3f4f6;
 }
 
 .vide {
@@ -230,8 +231,8 @@ th {
 
 .ligne-groupe td {
   font-weight: 700;
-  color: #344353;
-  background: #f0f4fb;
+  color: var(--texte);
+  background: #f3f4f6;
   letter-spacing: 0.02em;
 }
 
@@ -260,7 +261,7 @@ th {
 }
 
 .ligne-employe.selectionne {
-  outline: 2px solid #2c7be5;
+  outline: 2px solid var(--primaire);
 }
 
 .badge-equipe {
@@ -304,18 +305,18 @@ th {
 }
 
 .pastille.bon {
-  color: var(--bon);
-  background: #dff5ea;
+  color: #166534;
+  background: #dcfce7;
 }
 
 .pastille.vigilance {
-  color: var(--vigilance);
-  background: #fff3d7;
+  color: #92400e;
+  background: #fef3c7;
 }
 
 .pastille.critique {
-  color: var(--danger);
-  background: #ffe2e2;
+  color: #991b1b;
+  background: #fee2e2;
 }
 
 .note-icon,
@@ -350,7 +351,7 @@ th {
 
 .bouton-supprimer:hover {
   background: transparent;
-  color: #a51f1f;
+  color: #b91c1c;
 }
 
 
@@ -364,7 +365,7 @@ th {
 
 .setWeeklyRest:hover {
   background: transparent;
-  color: #1b4eb3;
+  color: #1d4ed8;
 }
 
 .weekly-rest-modal {
@@ -574,7 +575,7 @@ th {
   border: 1px solid var(--bordure);
   border-radius: 8px;
   padding: 0.65rem;
-  background: #fafcff;
+  background: var(--carte);
 }
 
 .actions-demande {
@@ -583,11 +584,11 @@ th {
 }
 
 .bouton-secondaire {
-  background: var(--bon);
+  background: var(--vigilance);
 }
 
 .bouton-secondaire:hover {
-  background: #0c6036;
+  background: #d97706;
 }
 
 .bouton-refuser {
@@ -595,7 +596,7 @@ th {
 }
 
 .bouton-refuser:hover {
-  background: #a62222;
+  background: #dc2626;
 }
 
 #calendrier-conges-mois {
@@ -672,12 +673,12 @@ th {
 .modal-manager__actions button {
   flex: 1;
   min-height: 40px;
-  background: #2c7be5;
+  background: var(--primaire);
   color: #fff;
 }
 
 .modal-manager__actions button:hover {
-  background: #1f69ca;
+  background: var(--primaire-fonce);
 }
 
 .modal-manager__annuler {
@@ -713,7 +714,7 @@ th {
 
 #weekLabel {
   font-weight: 700;
-  color: #1f2d3d;
+  color: var(--texte);
 }
 
 .planning-table-wrapper {
@@ -731,7 +732,7 @@ th {
 .planning-table th {
   padding: 6px;
   text-align: center;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--bordure);
 }
 
 .planning-table th:first-child,
@@ -741,8 +742,8 @@ th {
 }
 
 .team-header {
-  background: #111827;
-  color: white;
+  background: #e5e7eb;
+  color: var(--texte);
   font-weight: bold;
   text-align: left;
   padding: 8px;
@@ -753,11 +754,15 @@ th {
 }
 
 .vacation-day {
-  background: #fecaca;
+  background: #fef3c7;
+}
+
+.sick-day {
+  background: #fee2e2;
 }
 
 .rest-day {
-  background: #fde68a;
+  background: #ede9fe;
 }
 
 @media (max-width: 940px) {
