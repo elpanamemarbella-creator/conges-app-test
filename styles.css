@@ -371,9 +371,12 @@ th {
 .note-modal {
   position: fixed;
   inset: 0;
+  width: 600px;
+  max-width: 95%;
   z-index: 1000;
   display: grid;
   place-items: center;
+  margin: auto;
 }
 
 .note-modal__overlay {
@@ -385,7 +388,7 @@ th {
 .noteBox {
   position: relative;
   z-index: 1;
-  width: min(92vw, 460px);
+  width: 100%;
   background: #fff;
   border-radius: 14px;
   padding: 1rem;
@@ -398,17 +401,19 @@ th {
   margin: 0;
 }
 
-.note-modal__textarea {
+#noteTextarea {
   width: 100%;
-  min-height: 150px;
+  min-height: 160px;
+  max-height: 60vh;
   border: 1px solid var(--bordure);
   border-radius: 8px;
   padding: 0.6rem 0.7rem;
-  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
   resize: vertical;
 }
 
-.note-modal__textarea:focus {
+#noteTextarea:focus {
   outline: 2px solid #a8c0ff;
   border-color: var(--primaire);
 }
