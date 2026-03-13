@@ -384,6 +384,15 @@ const CLES_EQUIPE = {
   "Nettoyage et entretien": "team_cleaning",
 };
 const PALETTE_COULEURS = ["#2f80ed", "#eb5757", "#27ae60", "#f2994a", "#9b51e0", "#00b8d9", "#e84393", "#6c5ce7"];
+const WEEKLY_REST_OPTIONS = [
+  { value: 1, label: "Lundi" },
+  { value: 2, label: "Mardi" },
+  { value: 3, label: "Mercredi" },
+  { value: 4, label: "Jeudi" },
+  { value: 5, label: "Vendredi" },
+  { value: 6, label: "Samedi" },
+  { value: 0, label: "Dimanche" },
+];
 
 const EMAILJS_PUBLIC_KEY = "cBFH1mPW-cT8LzOBh";
 
@@ -693,6 +702,8 @@ function fusionnerEmployesEtConges(employesBruts, congesCharges) {
       congesPris: arrondir1Decimale(congesInitial + congesDepuisDemandes),
       note: typeof employe.note === "string" ? employe.note : "",
       couleur: employe.couleur || "",
+      restDaysWeekly: Array.isArray(employe.restDaysWeekly) ? employe.restDaysWeekly : [],
+      planningExceptions: Array.isArray(employe.planningExceptions) ? employe.planningExceptions : [],
     };
   });
 }
@@ -711,6 +722,8 @@ async function chargerEmployes() {
   return liste.map((emp) => ({
     ...emp,
     note: typeof emp.note === "string" ? emp.note : "",
+    restDaysWeekly: Array.isArray(emp.restDaysWeekly) ? emp.restDaysWeekly : [],
+    planningExceptions: Array.isArray(emp.planningExceptions) ? emp.planningExceptions : [],
   }));
 }
 
@@ -816,6 +829,40 @@ nextWeekButton?.addEventListener("click", () => {
   renderPlanning(currentWeek);
 });
 
+planningBody?.addEventListener("click", async (event) => {
+  const cellule = event.target.closest("td[data-employe-id][data-date]");
+  if (!cellule) {
+    return;
+  }
+
+  const employe = employes.find((entry) => entry.id === cellule.dataset.employeId);
+  if (!employe) {
+    return;
+  }
+
+  const date = cellule.dataset.date;
+  if (!date) {
+    return;
+  }
+
+  const jour = dateLocaleDepuisTexte(date);
+  if (!jour || estJourVacances(employe, jour)) {
+    return;
+  }
+
+  const exceptionExistante = trouverExceptionPlanning(employe, date);
+  const prochainStatut = exceptionExistante?.statut === "rest" ? "work" : "rest";
+
+  mettreAJourExceptionPlanning(employe, date, prochainStatut);
+
+  try {
+    await sauvegarderEmployes(employe);
+    renderPlanning(currentWeek);
+  } catch (erreur) {
+    console.error("Erreur sauvegarde exception planning :", erreur);
+  }
+});
+
 filtreEquipeSelect?.addEventListener("change", () => {
   afficherEmployes();
 });
@@ -881,6 +928,17 @@ listeEmployes.addEventListener("click", async (event) => {
       console.error("Erreur suppression employé :", erreur);
       alert(t("delete_error"));
     }
+    return;
+  }
+
+  const boutonReposHebdo = event.target.closest("[data-weekly-rest-id]");
+  if (boutonReposHebdo) {
+    const employe = employes.find((entry) => entry.id === boutonReposHebdo.dataset.weeklyRestId);
+    if (!employe) {
+      return;
+    }
+
+    ouvrirFenetreReposHebdomadaire(employe);
     return;
   }
 
@@ -1028,6 +1086,57 @@ function ouvrirFenetreNote(employe) {
   });
 }
 
+
+function ouvrirFenetreReposHebdomadaire(employe) {
+  const modalExistant = document.getElementById("weeklyRestModal");
+  if (modalExistant) {
+    modalExistant.remove();
+  }
+
+  const weeklyRestModal = document.createElement("div");
+  weeklyRestModal.id = "weeklyRestModal";
+  weeklyRestModal.className = "weekly-rest-modal";
+  weeklyRestModal.innerHTML = `
+    <div class="weekly-rest-modal__overlay"></div>
+    <div class="weekly-rest-box" role="dialog" aria-modal="true" aria-labelledby="weeklyRestModalTitle">
+      <h3 id="weeklyRestModalTitle">Repos hebdomadaire — ${echapperHtml(employe.nom)}</h3>
+      <div class="weekly-rest-options">
+        ${WEEKLY_REST_OPTIONS.map(
+          (jour) => `
+            <label class="weekly-rest-option">
+              <input type="checkbox" value="${jour.value}" ${employe.restDaysWeekly.includes(jour.value) ? "checked" : ""} />
+              <span>${jour.label}</span>
+            </label>
+          `,
+        ).join("")}
+      </div>
+      <div class="weekly-rest-actions">
+        <button type="button" class="bouton-secondaire" id="weeklyRestCancel">Annuler</button>
+        <button type="button" id="weeklyRestSave">Enregistrer</button>
+      </div>
+    </div>
+  `;
+
+  document.body.append(weeklyRestModal);
+
+  const fermer = () => {
+    weeklyRestModal.remove();
+  };
+
+  weeklyRestModal.querySelector(".weekly-rest-modal__overlay")?.addEventListener("click", fermer);
+  weeklyRestModal.querySelector("#weeklyRestCancel")?.addEventListener("click", fermer);
+  weeklyRestModal.querySelector("#weeklyRestSave")?.addEventListener("click", async () => {
+    const joursSelectionnes = [...weeklyRestModal.querySelectorAll("input[type='checkbox']:checked")]
+      .map((input) => Number(input.value))
+      .filter((value) => !Number.isNaN(value));
+
+    employe.restDaysWeekly = joursSelectionnes;
+    await sauvegarderEmployes(employe);
+    fermer();
+    renderPlanning(currentWeek);
+  });
+}
+
 listeDemandesEnAttente.addEventListener("click", async (event) => {
   const boutonValidation = event.target.closest("[data-valider-id]");
   const boutonRefus = event.target.closest("[data-refuser-id]");
@@ -1079,6 +1188,8 @@ formulaireEmploye.addEventListener("submit", async (event) => {
     historiqueConges: [],
     note: "",
     couleur: "",
+    restDaysWeekly: [],
+    planningExceptions: [],
     actif: true,
   };
 
@@ -1444,9 +1555,27 @@ async function sauvegarderEmployes(employe) {
     {
       congesPris: Number(employe.congesPris) || 0,
       note: employe.note || "",
+      restDaysWeekly: Array.isArray(employe.restDaysWeekly) ? employe.restDaysWeekly : [],
+      planningExceptions: Array.isArray(employe.planningExceptions) ? employe.planningExceptions : [],
     },
     { merge: true },
   );
+}
+
+
+function trouverExceptionPlanning(employe, dateIso) {
+  if (!Array.isArray(employe.planningExceptions)) {
+    return null;
+  }
+
+  return employe.planningExceptions.find((exception) => exception.date === dateIso) || null;
+}
+
+function mettreAJourExceptionPlanning(employe, dateIso, statut) {
+  const base = Array.isArray(employe.planningExceptions) ? employe.planningExceptions : [];
+  const autresExceptions = base.filter((exception) => exception.date !== dateIso);
+
+  employe.planningExceptions = [...autresExceptions, { date: dateIso, statut }];
 }
 
 function calculJoursCalendaires(startDate, endDate) {
@@ -1545,6 +1674,7 @@ function afficherEmployes() {
           <td class="vacation-history" data-label="${t("leave_history_col")}" data-history='${JSON.stringify(employe.historiqueConges)}'>${getDernierConge(employe.historiqueConges)}</td>
           <td data-label="${t("status_col")}"><span class="pastille ${classeStatut}">${libelleStatut}</span></td>
           <td data-label="${t("action_col")}" class="cellule-actions">
+            <button class="setWeeklyRest" data-weekly-rest-id="${employe.id}">Repos hebdomadaire</button>
             <button class="bouton-supprimer" data-supprimer-id="${employe.id}">${t("delete")}</button>
           </td>
         </tr>
@@ -1954,12 +2084,28 @@ function renderPlanning(semaine) {
       jour.setDate(jour.getDate() + i);
       jour.setHours(12, 0, 0, 0);
 
+      const dateIso = formatDateISO(jour);
+      td.dataset.employeId = emp.id;
+      td.dataset.date = dateIso;
+
       const estVacances = estJourVacances(emp, jour);
+      const exception = trouverExceptionPlanning(emp, dateIso);
+      const jourSemaine = jour.getDay();
+      const estReposHebdo = Array.isArray(emp.restDaysWeekly) && emp.restDaysWeekly.includes(jourSemaine);
       const estWeekend = i >= 5;
 
       if (estVacances) {
         td.className = "vacation-day";
         td.textContent = "V";
+      } else if (exception?.statut === "rest") {
+        td.className = "rest-day";
+        td.textContent = "R";
+      } else if (exception?.statut === "work") {
+        td.className = "work-day";
+        td.textContent = "";
+      } else if (estReposHebdo) {
+        td.className = "rest-day";
+        td.textContent = "R";
       } else if (estWeekend) {
         td.className = "rest-day";
         td.textContent = "R";
@@ -2016,6 +2162,19 @@ function getDernierConge(historiqueConges) {
   const dernier = historiqueConges[historiqueConges.length - 1];
 
   return `${formaterDateFr(dernier.dateDebut)} → ${formaterDateFr(dernier.dateFin)}`;
+}
+
+
+function formatDateISO(dateBrute) {
+  const date = dateBrute instanceof Date ? dateBrute : dateLocaleDepuisTexte(dateBrute);
+  if (!date) {
+    return "";
+  }
+
+  const annee = date.getFullYear();
+  const mois = String(date.getMonth() + 1).padStart(2, "0");
+  const jour = String(date.getDate()).padStart(2, "0");
+  return `${annee}-${mois}-${jour}`;
 }
 
 function formaterDateFr(dateBrute) {
