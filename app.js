@@ -99,6 +99,13 @@ const TRADUCTIONS = {
     delete_error: "Suppression impossible pour le moment.",
     reactivate_error: "Réactivation impossible pour le moment.",
     manager_prompt: "Entrer le code manager",
+    noteTitle: "Note pour",
+    save: "Enregistrer",
+    dictate: "Dicter",
+    structure: "Structurer la note",
+    dictate_not_supported: "La dictée vocale n'est pas supportée sur ce navigateur. Utilisez le micro du clavier.",
+    edit_taken_leave_prompt: "Modifier les congés pris :",
+    note_aria_label: "Note",
     manager_code_required: "Code manager requis",
     cancel: "Annuler",
     wrong_code: "Code incorrect",
@@ -208,6 +215,13 @@ const TRADUCTIONS = {
     delete_error: "Eliminación imposible por el momento.",
     reactivate_error: "Reactivación imposible por el momento.",
     manager_prompt: "Introduce el código del manager",
+    noteTitle: "Nota para",
+    save: "Guardar",
+    dictate: "Dictar",
+    structure: "Estructurar la nota",
+    dictate_not_supported: "El dictado por voz no es compatible con este navegador. Utiliza el micrófono del teclado.",
+    edit_taken_leave_prompt: "Modificar vacaciones disfrutadas:",
+    note_aria_label: "Nota",
     manager_code_required: "Código de manager requerido",
     cancel: "Cancelar",
     wrong_code: "Código incorrecto",
@@ -317,6 +331,13 @@ const TRADUCTIONS = {
     delete_error: "Unable to delete employee for now.",
     reactivate_error: "Unable to reactivate employee for now.",
     manager_prompt: "Enter manager code",
+    noteTitle: "Note for",
+    save: "Save",
+    dictate: "Dictate",
+    structure: "Structure note",
+    dictate_not_supported: "Voice dictation is not supported in this browser. Use your keyboard microphone.",
+    edit_taken_leave_prompt: "Edit taken leave:",
+    note_aria_label: "Note",
     manager_code_required: "Manager code required",
     cancel: "Cancel",
     wrong_code: "Wrong code",
@@ -413,53 +434,39 @@ const managerCodeInput = document.getElementById("manager-code-input");
 const managerModalErreur = document.getElementById("manager-modal-erreur");
 const managerModalValider = document.getElementById("manager-modal-valider");
 const managerModalAnnuler = document.getElementById("manager-modal-annuler");
-const noteTooltip = document.getElementById("noteTooltip");
 const menuOnglets = document.querySelectorAll(".menu-onglet");
 const zonesOnglets = document.querySelectorAll("[data-zone]");
 const boutonsLangue = document.querySelectorAll("[data-langue]");
 const isMobile = window.matchMedia("(pointer: coarse)").matches;
 
-if (noteTooltip) {
-  if (!isMobile) {
-    document.addEventListener("mouseover", (event) => {
-      const icon = event.target.closest(".note-icon");
+const noteViewer = document.getElementById("noteViewer");
+const noteViewerTitle = document.getElementById("noteViewerTitle");
+const noteViewerText = document.getElementById("noteViewerText");
+const closeNoteViewerButton = document.getElementById("closeNoteViewer");
 
-      if (!icon) {
-        return;
-      }
-
-      noteTooltip.textContent = icon.dataset.note || "";
-      noteTooltip.style.display = "block";
-    });
-
-    document.addEventListener("mousemove", (event) => {
-      if (noteTooltip.style.display !== "block") {
-        return;
-      }
-
-      noteTooltip.style.left = `${event.clientX + 15}px`;
-      noteTooltip.style.top = `${event.clientY + 15}px`;
-    });
-
-    document.addEventListener("mouseout", (event) => {
-      if (event.target.closest(".note-icon")) {
-        noteTooltip.style.display = "none";
-      }
-    });
+document.addEventListener("click", (event) => {
+  const icon = event.target.closest(".note-icon");
+  if (!icon || !noteViewer || !noteViewerTitle || !noteViewerText) {
+    return;
   }
 
-  if (isMobile) {
-    document.addEventListener("click", (event) => {
-      const icon = event.target.closest(".note-icon");
+  const nom = icon.dataset.nom || "";
+  const note = icon.dataset.note || "";
 
-      if (!icon) {
-        return;
-      }
+  noteViewerTitle.textContent = `${t("noteTitle")} ${nom}`;
+  noteViewerText.textContent = note;
+  noteViewer.classList.remove("hidden");
+  noteViewer.setAttribute("aria-hidden", "false");
+});
 
-      alert(icon.dataset.note || "");
-    });
+closeNoteViewerButton?.addEventListener("click", () => {
+  if (!noteViewer) {
+    return;
   }
-}
+
+  noteViewer.classList.add("hidden");
+  noteViewer.setAttribute("aria-hidden", "true");
+});
 
 let employes = [];
 let conges = [];
@@ -805,13 +812,13 @@ listeEmployes.addEventListener("click", async (event) => {
       return;
     }
 
-    const code = prompt("Code manager requis");
+    const code = prompt(t("manager_code_required"));
     if (code !== CODE_MANAGER) {
-      alert("Code manager incorrect");
+      alert(t("wrong_code"));
       return;
     }
 
-    const nouveau = window.prompt("Modifier les congés pris :", employe.congesPris);
+    const nouveau = window.prompt(t("edit_taken_leave_prompt"), employe.congesPris);
     if (nouveau === null) {
       return;
     }
@@ -869,9 +876,9 @@ listeEmployesArchives?.addEventListener("click", async (event) => {
 });
 
 function demanderCodeManager() {
-  const code = prompt("Code manager requis");
+  const code = prompt(t("manager_code_required"));
   if (code !== CODE_MANAGER) {
-    alert("Code manager incorrect");
+    alert(t("wrong_code"));
     return false;
   }
 
@@ -916,15 +923,15 @@ function ouvrirFenetreNote(employe) {
   noteModal.innerHTML = `
     <div class="note-modal__overlay"></div>
     <div class="noteBox" role="dialog" aria-modal="true" aria-labelledby="noteModalTitle">
-      <h3 id="noteModalTitle">Note pour ${echapperHtml(employe.nom)}</h3>
+      <h3 id="noteModalTitle">${t("noteTitle")} ${echapperHtml(employe.nom)}</h3>
       <textarea id="noteTextarea"></textarea>
       <div class="note-tools">
-        <button id="dictateNote" type="button">🎤 Dicter</button>
-        <button id="structureNote">✨ Structurer la note</button>
+        <button id="dictateNote" type="button">🎤 ${t("dictate")}</button>
+        <button id="structureNote">✨ ${t("structure")}</button>
       </div>
       <div class="buttons note-modal__buttons">
-        <button id="saveNote" type="button">Enregistrer</button>
-        <button id="cancelNote" type="button" class="note-modal__cancel">Annuler</button>
+        <button id="saveNote" type="button">${t("save")}</button>
+        <button id="cancelNote" type="button" class="note-modal__cancel">${t("cancel")}</button>
       </div>
     </div>
   `;
@@ -951,13 +958,14 @@ function ouvrirFenetreNote(employe) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      alert("La dictée vocale n'est pas supportée sur ce navigateur. Utilisez le micro du clavier.");
+      alert(t("dictate_not_supported"));
       return;
     }
 
     const recognition = new SpeechRecognition();
 
-    recognition.lang = "fr-FR";
+    const langueDictee = langueCourante === "es" ? "es-ES" : langueCourante === "en" ? "en-US" : "fr-FR";
+    recognition.lang = langueDictee;
     recognition.continuous = false;
 
     recognition.onresult = (event) => {
@@ -990,9 +998,9 @@ listeDemandesEnAttente.addEventListener("click", async (event) => {
   }
 
   const nouveauStatut = boutonValidation ? "valide" : "refuse";
-  const code = prompt("Code manager requis");
+  const code = prompt(t("manager_code_required"));
   if (code !== CODE_MANAGER) {
-    alert("Code manager incorrect");
+    alert(t("wrong_code"));
     return;
   }
 
@@ -1485,7 +1493,7 @@ function afficherEmployes() {
             ${echapperHtml(employe.nom)}
             ${
               employe.note
-                ? `<span class="note-indicator note-icon" aria-label="Note" data-note="${echapperHtml(employe.note)}">📝</span>`
+                ? `<span class="note-indicator note-icon" aria-label="${t("note_aria_label")}" data-nom="${echapperHtml(employe.nom)}" data-note="${echapperHtml(employe.note)}">📝</span>`
                 : ""
             }
           </td>
