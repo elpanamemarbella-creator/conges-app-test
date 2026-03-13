@@ -324,6 +324,10 @@ th {
   opacity: 0.7;
 }
 
+.employee-team {
+  cursor: pointer;
+}
+
 .cellule-actions {
   display: grid;
   gap: 0.5rem;
@@ -692,12 +696,13 @@ th {
   margin-bottom: 0.8rem;
 }
 
-#teamCoverage {
-  margin-bottom: 0.9rem;
+#teamCoverageToday {
+  margin-top: 0.9rem;
 }
 
-#teamCoverage h3 {
-  margin: 0 0 0.4rem;
+#coverageContent {
+  display: grid;
+  gap: 0.35rem;
 }
 
 #weekLabel {

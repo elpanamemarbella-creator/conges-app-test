@@ -46,6 +46,10 @@ initializeApp(firebaseConfig);
       <section class="carte">
         <h2 data-i18n="calendar_title">Calendrier des congés</h2>
         <div id="calendrier-conges-mois"></div>
+        <div id="teamCoverageToday" class="dashboard-card">
+          <h3>Couverture d'équipe aujourd'hui</h3>
+          <div id="coverageContent"></div>
+        </div>
       </section>
       <section class="carte">
         <h2 data-i18n="new_paid_leave_request_title">Nouvelle demande de congé payé</h2>
@@ -96,13 +100,18 @@ initializeApp(firebaseConfig);
             <span data-i18n="team_label">Equipe</span>
             <select id="equipe-employe" required>
               <option value="" data-i18n="team_select_placeholder">Sélectionner une équipe</option>
-              <option value="Bar matin" data-equipe-value="Bar matin">Bar matin</option>
-              <option value="Salle matin" data-equipe-value="Salle matin">Salle matin</option>
-              <option value="Bar soir" data-equipe-value="Bar soir">Bar soir</option>
-              <option value="Salle soir" data-equipe-value="Salle soir">Salle soir</option>
-              <option value="Cuisine" data-equipe-value="Cuisine">Cuisine</option>
-              <option value="Extra" data-equipe-value="Extra">Extra</option>
-              <option value="Nettoyage et entretien" data-equipe-value="Nettoyage et entretien">Nettoyage et entretien</option>
+              <option value="nettoyage-entretien" data-equipe-value="nettoyage-entretien">Nettoyage / Entretien</option>
+              <option value="bar matin" data-equipe-value="bar matin">Bar matin</option>
+              <option value="salle matin" data-equipe-value="salle matin">Salle matin</option>
+              <option value="cuisine matin" data-equipe-value="cuisine matin">Cuisine matin</option>
+              <option value="cuisine soir" data-equipe-value="cuisine soir">Cuisine soir</option>
+              <option value="salle soir" data-equipe-value="salle soir">Salle soir</option>
+              <option value="bar soir" data-equipe-value="bar soir">Bar soir</option>
+              <option value="chicha" data-equipe-value="chicha">Chicha</option>
+              <option value="dj" data-equipe-value="dj">DJ</option>
+              <option value="rp" data-equipe-value="rp">RP</option>
+              <option value="portier" data-equipe-value="portier">Portier</option>
+              <option value="extra" data-equipe-value="extra">Extra</option>
             </select>
           </label>
 
@@ -132,13 +141,18 @@ initializeApp(firebaseConfig);
             <span data-i18n="team_filter_label">Filtre équipe</span>
             <select id="filtre-equipe">
               <option value="" data-i18n="all_teams">Toutes les équipes</option>
-              <option value="Bar matin" data-equipe-value="Bar matin">Bar matin</option>
-              <option value="Salle matin" data-equipe-value="Salle matin">Salle matin</option>
-              <option value="Bar soir" data-equipe-value="Bar soir">Bar soir</option>
-              <option value="Salle soir" data-equipe-value="Salle soir">Salle soir</option>
-              <option value="Cuisine" data-equipe-value="Cuisine">Cuisine</option>
-              <option value="Extra" data-equipe-value="Extra">Extra</option>
-              <option value="Nettoyage et entretien" data-equipe-value="Nettoyage et entretien">Nettoyage et entretien</option>
+              <option value="nettoyage-entretien" data-equipe-value="nettoyage-entretien">Nettoyage / Entretien</option>
+              <option value="bar matin" data-equipe-value="bar matin">Bar matin</option>
+              <option value="salle matin" data-equipe-value="salle matin">Salle matin</option>
+              <option value="cuisine matin" data-equipe-value="cuisine matin">Cuisine matin</option>
+              <option value="cuisine soir" data-equipe-value="cuisine soir">Cuisine soir</option>
+              <option value="salle soir" data-equipe-value="salle soir">Salle soir</option>
+              <option value="bar soir" data-equipe-value="bar soir">Bar soir</option>
+              <option value="chicha" data-equipe-value="chicha">Chicha</option>
+              <option value="dj" data-equipe-value="dj">DJ</option>
+              <option value="rp" data-equipe-value="rp">RP</option>
+              <option value="portier" data-equipe-value="portier">Portier</option>
+              <option value="extra" data-equipe-value="extra">Extra</option>
             </select>
           </label>
 
@@ -247,7 +261,6 @@ initializeApp(firebaseConfig);
       <section class="carte hidden" id="planningView">
         <h2>Planning semaine</h2>
 
-        <div id="teamCoverage"></div>
 
         <div class="planning-header">
           <button type="button" id="prevWeek">←</button>
