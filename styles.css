@@ -692,6 +692,14 @@ th {
   margin-bottom: 0.8rem;
 }
 
+#teamCoverage {
+  margin-bottom: 0.9rem;
+}
+
+#teamCoverage h3 {
+  margin: 0 0 0.4rem;
+}
+
 #weekLabel {
   font-weight: 700;
   color: #1f2d3d;
@@ -719,6 +727,14 @@ th {
 .planning-table td:first-child {
   text-align: left;
   font-weight: bold;
+}
+
+.team-header {
+  background: #111827;
+  color: white;
+  font-weight: bold;
+  text-align: left;
+  padding: 8px;
 }
 
 .work-day {

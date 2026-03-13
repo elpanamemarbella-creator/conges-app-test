@@ -374,6 +374,23 @@ const TRADUCTIONS = {
 };
 
 const ORDRE_EQUIPES = ["Bar matin", "Salle matin", "Bar soir", "Salle soir", "Cuisine", "Extra", "Nettoyage et entretien"];
+const TEAM_ORDER = ["nettoyage-entretien", "bar matin", "salle matin", "cuisine", "salle soir", "bar soir"];
+const TEAM_COLORS = {
+  "nettoyage-entretien": "#e0f2fe",
+  "bar matin": "#dcfce7",
+  "salle matin": "#fde68a",
+  cuisine: "#fecaca",
+  "salle soir": "#fbcfe8",
+  "bar soir": "#ddd6fe",
+};
+const TEAM_KEYS = {
+  "Nettoyage et entretien": "nettoyage-entretien",
+  "Bar matin": "bar matin",
+  "Salle matin": "salle matin",
+  Cuisine: "cuisine",
+  "Salle soir": "salle soir",
+  "Bar soir": "bar soir",
+};
 const CLES_EQUIPE = {
   "Bar matin": "team_bar_morning",
   "Salle matin": "team_floor_morning",
@@ -446,6 +463,7 @@ const managerModalAnnuler = document.getElementById("manager-modal-annuler");
 const openPlanningButton = document.getElementById("openPlanning");
 const planningView = document.getElementById("planningView");
 const planningBody = document.getElementById("planningBody");
+const teamCoverage = document.getElementById("teamCoverage");
 const weekLabel = document.getElementById("weekLabel");
 const prevWeekButton = document.getElementById("prevWeek");
 const nextWeekButton = document.getElementById("nextWeek");
@@ -2061,6 +2079,58 @@ function estJourVacances(employe, jour) {
   });
 }
 
+function getTeamKey(equipe) {
+  return TEAM_KEYS[equipe] || equipe.toLowerCase();
+}
+
+function getTeamOrderIndex(equipe) {
+  const index = TEAM_ORDER.indexOf(getTeamKey(equipe));
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+}
+
+function renderCoverage(semaine) {
+  if (!teamCoverage) {
+    return;
+  }
+
+  const coverage = {};
+
+  TEAM_ORDER.forEach((team) => {
+    coverage[team] = 0;
+  });
+
+  employesActifs.forEach((emp) => {
+    const isWorking = !emp.historiqueConges.some((c) => {
+      const debut = dateLocaleDepuisTexte(c.dateDebut);
+      const fin = dateLocaleDepuisTexte(c.dateFin);
+
+      if (!debut || !fin) {
+        return false;
+      }
+
+      debut.setHours(0, 0, 0, 0);
+      fin.setHours(23, 59, 59, 999);
+
+      return semaine >= debut && semaine <= fin;
+    });
+
+    if (isWorking) {
+      const teamKey = getTeamKey(emp.equipe);
+      if (teamKey in coverage) {
+        coverage[teamKey] += 1;
+      }
+    }
+  });
+
+  let html = "<h3>Couverture équipe</h3>";
+
+  TEAM_ORDER.forEach((team) => {
+    html += `<div>${echapperHtml(team)} : ${coverage[team]} présent(s)</div>`;
+  });
+
+  teamCoverage.innerHTML = html;
+}
+
 function renderPlanning(semaine) {
   if (!planningBody || !weekLabel) {
     return;
@@ -2068,14 +2138,39 @@ function renderPlanning(semaine) {
 
   planningBody.innerHTML = "";
   weekLabel.textContent = formaterLibelleSemaine(semaine);
+  renderCoverage(semaine);
 
-  const employesPlanning = [...employesActifs].sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
+  const employesPlanning = [...employesActifs].sort((a, b) => {
+    const teamDiff = getTeamOrderIndex(a.equipe) - getTeamOrderIndex(b.equipe);
+    if (teamDiff !== 0) {
+      return teamDiff;
+    }
+
+    return a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" });
+  });
+
+  let currentTeam = null;
 
   employesPlanning.forEach((emp) => {
+    if (getTeamKey(emp.equipe) !== currentTeam) {
+      currentTeam = getTeamKey(emp.equipe);
+
+      const groupRow = document.createElement("tr");
+      const cell = document.createElement("td");
+
+      cell.colSpan = 8;
+      cell.textContent = tEquipe(emp.equipe).toUpperCase();
+      cell.className = "team-header";
+
+      groupRow.appendChild(cell);
+      planningBody.appendChild(groupRow);
+    }
+
     const tr = document.createElement("tr");
 
     const name = document.createElement("td");
     name.textContent = emp.nom;
+    name.style.background = TEAM_COLORS[getTeamKey(emp.equipe)] || "#f3f4f6";
     tr.appendChild(name);
 
     for (let i = 0; i < 7; i += 1) {
