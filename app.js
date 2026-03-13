@@ -879,7 +879,10 @@ function demanderCodeManager() {
 }
 
 function structurerNote(texte) {
+  if (!texte) return "";
+
   const phrases = texte
+    .replace(/\n/g, ". ")
     .replace(/[,;]/g, ".")
     .split(".")
     .map((phrase) => phrase.trim())
@@ -888,6 +891,18 @@ function structurerNote(texte) {
 
   return phrases.join(".\n");
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const bouton = document.getElementById("structureNote");
+  const textarea = document.getElementById("noteTextarea");
+
+  if (!bouton || !textarea) return;
+
+  bouton.addEventListener("click", () => {
+    const texte = textarea.value;
+    textarea.value = structurerNote(texte);
+  });
+});
 
 function ouvrirFenetreNote(employe) {
   const modalExistant = document.getElementById("noteModal");
@@ -902,10 +917,10 @@ function ouvrirFenetreNote(employe) {
     <div class="note-modal__overlay"></div>
     <div class="noteBox" role="dialog" aria-modal="true" aria-labelledby="noteModalTitle">
       <h3 id="noteModalTitle">Note pour ${echapperHtml(employe.nom)}</h3>
-      <textarea id="noteTextarea" class="note-modal__textarea"></textarea>
+      <textarea id="noteTextarea"></textarea>
       <div class="note-tools">
         <button id="dictateNote" type="button">🎤 Dicter</button>
-        <button id="structureNote" type="button">✨ Structurer la note</button>
+        <button id="structureNote">✨ Structurer la note</button>
       </div>
       <div class="buttons note-modal__buttons">
         <button id="saveNote" type="button">Enregistrer</button>
