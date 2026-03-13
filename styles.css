@@ -36,12 +36,12 @@ body {
 
 .selecteur-langue {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 20px;
+  right: 20px;
   display: inline-flex;
   align-items: center;
   gap: 0.28rem;
-  font-size: 0.82rem;
+  font-size: 14px;
   color: var(--discret);
 }
 
@@ -862,5 +862,17 @@ th {
 
   .planning-table td::before {
     content: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .selecteur-langue {
+    top: 10px;
+    right: 15px;
+    font-size: 13px;
+  }
+
+  .entete-app h1 {
+    margin-top: 50px;
   }
 }
