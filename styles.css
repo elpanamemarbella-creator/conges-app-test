@@ -359,7 +359,7 @@ th {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -393,7 +393,7 @@ th {
 .note-modal__overlay {
   position: absolute;
   inset: 0;
-  background: rgba(20, 33, 52, 0.4);
+  background: transparent;
 }
 
 .noteBox {
@@ -414,7 +414,7 @@ th {
 
 #noteTextarea {
   width: 100%;
-  min-height: 160px;
+  min-height: 280px;
   max-height: 60vh;
   border: 1px solid var(--bordure);
   border-radius: 8px;
