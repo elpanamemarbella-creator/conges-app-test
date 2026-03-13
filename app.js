@@ -1290,7 +1290,15 @@ function ouvrirFenetreReposHebdomadaire(employe) {
       .map((input) => Number(input.value))
       .filter((value) => !Number.isNaN(value));
 
-    employe.restDaysWeekly = joursSelectionnes;
+    const joursHebdo = [...new Set(joursSelectionnes)].sort((a, b) => a - b);
+
+    const exceptionsExistantes = Array.isArray(employe.planningExceptions) ? employe.planningExceptions : [];
+    const exceptionsConservees = exceptionsExistantes.filter(
+      (exception) => exception?.statut && exception.statut !== "rest" && exception.statut !== "work",
+    );
+
+    employe.restDaysWeekly = joursHebdo;
+    employe.planningExceptions = exceptionsConservees;
     await sauvegarderEmployes(employe);
     fermer();
     renderPlanning(currentWeek);
@@ -2273,10 +2281,6 @@ function getEmployeeStatusForDate(employe, date) {
 
   const day = target.getDay();
   if (Array.isArray(employe.restDaysWeekly) && employe.restDaysWeekly.includes(day)) {
-    return "rest";
-  }
-
-  if (day === 0 || day === 6) {
     return "rest";
   }
 
