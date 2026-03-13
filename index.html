@@ -257,7 +257,13 @@ initializeApp(firebaseConfig);
     </div>
   </div>
 
-  <div id="noteTooltip"></div>
+  <div id="noteViewer" class="note-viewer hidden" aria-hidden="true">
+    <div class="note-content" role="dialog" aria-modal="true" aria-labelledby="noteViewerTitle">
+      <h2 id="noteViewerTitle"></h2>
+      <div id="noteViewerText"></div>
+      <button id="closeNoteViewer" type="button">OK</button>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
