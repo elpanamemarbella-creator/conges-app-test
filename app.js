@@ -138,10 +138,10 @@ const TRADUCTIONS = {
     email_start_label: "Début",
     email_end_label: "Fin",
     email_days_label: "Nombre de jours",
-    planning_status_vacation: "Congé",
+    planning_status_vacation: "Vacances",
     planning_status_sick: "Maladie",
     planning_status_rest: "Repos",
-    planning_status_work: "Prévu",
+    planning_status_work: "Travail",
   },
   es: {
     app_title: "Gestión de vacaciones empleados",
@@ -2411,26 +2411,22 @@ function renderPlanning(semaine) {
 
       const dayKey = new Date(jour);
       dayKey.setHours(0, 0, 0, 0);
-      if (dayKey.getDay() === 0 || dayKey.getDay() === 6) {
-        td.classList.add("weekend-column");
-      }
-
       if (dayKey.getTime() === today.getTime()) {
         td.classList.add("today-column");
       }
 
       const statut = getEmployeeStatusForDate(emp, jour);
       if (statut === "vacation") {
-        td.classList.add("vacation-day");
+        td.classList.add("status-vacances");
         td.textContent = t("planning_status_vacation");
       } else if (statut === "sick") {
         td.classList.add("sick-day");
         td.textContent = t("planning_status_sick");
       } else if (statut === "rest") {
-        td.classList.add("rest-day");
+        td.classList.add("status-repos");
         td.textContent = t("planning_status_rest");
       } else {
-        td.classList.add("work-day");
+        td.classList.add("status-travail");
         td.textContent = t("planning_status_work");
       }
       tr.appendChild(td);
