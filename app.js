@@ -945,6 +945,14 @@ function ouvrirFenetreNote(employe) {
   const boutonAnnuler = noteModal.querySelector("#cancelNote");
 
   noteTextarea.value = employe.note || "";
+
+  const ajusterHauteurNote = () => {
+    noteTextarea.style.height = "auto";
+    noteTextarea.style.height = `${noteTextarea.scrollHeight}px`;
+  };
+
+  ajusterHauteurNote();
+  noteTextarea.addEventListener("input", ajusterHauteurNote);
   noteTextarea.focus();
 
   const fermer = () => {
