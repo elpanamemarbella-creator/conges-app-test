@@ -8,10 +8,15 @@ import {
   getDocs,
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-const managerCode = "2005";
+const managerCode = typeof globalThis.managerCode === "string" ? globalThis.managerCode : "2005";
+globalThis.managerCode = managerCode;
+
+if (typeof managerCode === "undefined") {
+  console.error("managerCode is not defined");
+}
 
 if (!/^\d{4}$/.test(managerCode)) {
-  throw new Error("managerCode must be a 4-digit number without separators.");
+  console.error("managerCode must be a 4-digit number without separators.");
 }
 
 const firebaseConfig = {
