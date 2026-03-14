@@ -2777,10 +2777,7 @@ function getCalendarDatesForView() {
 }
 
 function getCalendarStatusClass(emp, date) {
-  const today = new Date();
-  today.setHours(12, 0, 0, 0);
-
-  if (emp.actif === false || date > today) {
+  if (emp.actif === false) {
     return "status-inactive";
   }
 
@@ -2793,7 +2790,11 @@ function getCalendarStatusClass(emp, date) {
     return "status-rest";
   }
 
-  return "status-work";
+  if (status === "work") {
+    return "status-work";
+  }
+
+  return "status-inactive";
 }
 
 function getCalendarLabel() {
