@@ -836,7 +836,9 @@ function initialiserConnexion() {
   });
 
   function handleLogin() {
-    const enteredPin = String(loginPinInput.value || "").trim();
+    const enteredPin = String(loginPinInput.value || "")
+      .replace(/\D/g, "")
+      .slice(0,4);
     if (!/^\d{4}$/.test(enteredPin)) {
       loginError.textContent = t("login_invalid_pin");
       loginError.hidden = false;
