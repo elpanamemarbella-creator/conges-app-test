@@ -541,7 +541,7 @@ const CLASSES_EQUIPE = {
 
 const loginScreen = document.getElementById("login-screen");
 const loginForm = document.getElementById("login-form");
-const loginPinInput = document.getElementById("login-pin");
+const loginPinInput = document.getElementById("pinInput");
 const loginError = document.getElementById("login-error");
 const appHeader = document.getElementById("app-header");
 const employeeDashboardCard = document.getElementById("employee-dashboard-card");
@@ -737,8 +737,7 @@ function initialiserConnexion() {
     loginPinInput.value = String(loginPinInput.value || "").replace(/\D/g, "").slice(0, 4);
   });
 
-  loginForm.addEventListener("submit", (event) => {
-    event.preventDefault();
+  const handleLogin = () => {
     const enteredPin = String(loginPinInput.value || "").trim();
     if (!/^\d{4}$/.test(enteredPin)) {
       loginError.textContent = t("login_invalid_pin");
@@ -758,7 +757,7 @@ function initialiserConnexion() {
 
     const employe = employesActifs.find((entry) => String(entry.pinCode || "").trim() === enteredPin);
     if (!employe) {
-      loginError.textContent = "Code PIN incorrect";
+      loginError.textContent = t("login_wrong_pin");
       loginError.hidden = false;
       return;
     }
@@ -769,6 +768,18 @@ function initialiserConnexion() {
     loginError.hidden = true;
     appliquerControleAcces();
     rafraichirDonnees();
+  };
+
+  loginForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    handleLogin();
+  });
+
+  loginPinInput.addEventListener("keypress", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleLogin();
+    }
   });
 
   appliquerControleAcces();
@@ -896,9 +907,9 @@ function appliquerTraductionsStatiques() {
   if (loginScreen) {
     loginScreen.querySelector("h1").textContent = t("login_title");
   }
-  const loginLabel = document.querySelector('label[for="login-pin"]');
+  const loginLabel = document.querySelector('label[for="pinInput"]');
   if (loginLabel) loginLabel.textContent = t("login_pin_label");
-  const loginSubmit = loginForm?.querySelector('button[type="submit"]');
+  const loginSubmit = document.getElementById("login-submit") || loginForm?.querySelector('button[type="submit"]');
   if (loginSubmit) loginSubmit.textContent = t("login_submit");
   if (calendarPrevButton) calendarPrevButton.textContent = t("calendar_prev");
   if (calendarNextButton) calendarNextButton.textContent = t("calendar_next");
