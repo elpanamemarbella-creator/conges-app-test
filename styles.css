@@ -46,6 +46,39 @@ body {
   gap: 0.7rem;
 }
 
+.login-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 60px);
+  gap: 10px;
+  justify-content: center;
+  margin-top: 0.4rem;
+}
+
+.login-keypad__button {
+  min-height: 52px;
+  border-radius: 10px;
+  border: 1px solid var(--bordure);
+  background: #f8fafc;
+  color: var(--texte);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-keypad__button:hover {
+  background: #eef2ff;
+}
+
+.login-keypad__button[data-keypad-action="Enter"] {
+  background: var(--primaire);
+  color: #fff;
+  border-color: var(--primaire);
+}
+
+.login-keypad__button[data-keypad-action="Enter"]:hover {
+  background: var(--primaire-fonce);
+}
+
 .calendar-nav {
   display: flex;
   align-items: center;
