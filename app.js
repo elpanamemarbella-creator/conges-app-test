@@ -803,11 +803,10 @@ function initialiserConnexion() {
     // MANAGER LOGIN FIRST
     if (enteredPin === managerCode) {
       sessionState = { userRole: "manager", employeeId: "" };
-      enregistrerSession();
+      localStorage.setItem("sessionState", JSON.stringify(sessionState));
       loginPinInput.value = "";
       loginError.hidden = true;
       appliquerControleAcces();
-      rafraichirDonnees();
       return;
     }
 
@@ -830,6 +829,7 @@ function initialiserConnexion() {
     loginError.hidden = true;
     appliquerControleAcces();
     rafraichirDonnees();
+    return;
   }
 
   window.handleLogin = handleLogin;
