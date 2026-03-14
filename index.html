@@ -60,16 +60,20 @@ initializeApp(firebaseConfig);
 
       <section class="carte">
         <h2 data-i18n="calendar_title">Calendrier des vacances</h2>
+        <label class="calendar-view-picker">
+          <span data-i18n="calendar_view_label">Vue</span>
+          <select id="calendar-view-select">
+            <option value="weekly" data-i18n="calendar_view_weekly">Vue hebdomadaire</option>
+            <option value="monthly" data-i18n="calendar_view_monthly">Vue mensuelle</option>
+            <option value="yearly" data-i18n="calendar_view_yearly">Vue annuelle</option>
+          </select>
+        </label>
         <div class="calendar-nav">
-          <button type="button" id="calendar-prev">&lt; Previous Month</button>
+          <button type="button" id="calendar-prev">&lt; Previous</button>
           <strong id="calendar-month-label">June 2026</strong>
-          <button type="button" id="calendar-next">Next Month &gt;</button>
+          <button type="button" id="calendar-next">Next &gt;</button>
         </div>
         <div id="calendrier-conges-mois"></div>
-        <div id="teamCoverageToday" class="dashboard-card">
-          <h3>Couverture d'équipe aujourd'hui</h3>
-          <div id="coverageContent"></div>
-        </div>
       </section>
       <section class="carte" id="paid-leave-card">
         <h2 data-i18n="new_paid_leave_request_title">Nouvelle demande de congé payé</h2>
