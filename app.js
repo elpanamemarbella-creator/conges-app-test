@@ -8,16 +8,10 @@ import {
   getDocs,
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-const managerCode = typeof globalThis.managerCode === "string" ? globalThis.managerCode : "2005";
+let employees = [];
+const managerCode = "2005";
+globalThis.employees = employees;
 globalThis.managerCode = managerCode;
-
-if (typeof managerCode === "undefined") {
-  console.error("managerCode is not defined");
-}
-
-if (!/^\d{4}$/.test(managerCode)) {
-  console.error("managerCode must be a 4-digit number without separators.");
-}
 
 const firebaseConfig = {
   apiKey: "AIzaSyAEtBkoWO_vfn_MgINrumqCqhBmwKU-Sl4",
@@ -762,13 +756,12 @@ function initialiserConnexion() {
     }
 
     // THEN EMPLOYEE LOGIN
-    if (!Array.isArray(employesActifs)) {
-      loginError.textContent = t("login_wrong_pin");
-      loginError.hidden = false;
-      return;
+    if (!Array.isArray(employees)) {
+      employees = [];
+      globalThis.employees = employees;
     }
 
-    const employe = employesActifs.find((entry) => String(entry.pinCode || "").trim() === enteredPin);
+    const employe = employees.find((entry) => String(entry.pinCode || "").trim() === enteredPin);
     if (!employe) {
       loginError.textContent = t("login_wrong_pin");
       loginError.hidden = false;
@@ -1159,6 +1152,8 @@ async function rafraichirDonnees() {
   employes = fusionnerEmployesEtConges(employesBruts, congesCharges);
   employesActifs = employes.filter((employe) => employe.actif !== false);
   employesArchives = employes.filter((employe) => employe.actif === false);
+  employees = [...employesActifs];
+  globalThis.employees = employees;
   conges = congesCharges;
 
   afficherEmployes();
