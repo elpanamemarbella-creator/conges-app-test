@@ -750,6 +750,7 @@ function initialiserConnexion() {
       return;
     }
 
+    // MANAGER LOGIN FIRST
     if (enteredPin === managerCode) {
       sessionState = { userRole: "manager", employeeId: "" };
       enregistrerSession();
@@ -757,6 +758,13 @@ function initialiserConnexion() {
       loginError.hidden = true;
       appliquerControleAcces();
       rafraichirDonnees();
+      return;
+    }
+
+    // THEN EMPLOYEE LOGIN
+    if (!Array.isArray(employesActifs)) {
+      loginError.textContent = t("login_wrong_pin");
+      loginError.hidden = false;
       return;
     }
 
