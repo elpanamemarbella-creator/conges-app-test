@@ -724,6 +724,104 @@ function appliquerControleAcces() {
   openPlanningButton.hidden = true;
 }
 
+const isDesktopDevice = () => window.innerWidth > 768 && window.matchMedia("(pointer: fine)").matches;
+
+function attachDesktopPinKeypad(inputElement, onEnter, ariaLabel = "PIN keypad") {
+  if (!inputElement) {
+    return { hide: () => {} };
+  }
+
+  const keypadActions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "Clear", "0", "Delete", "Enter"];
+  const keypad = document.createElement("div");
+  keypad.className = "login-keypad";
+  keypad.hidden = true;
+  keypad.setAttribute("aria-label", ariaLabel);
+
+  keypadActions.forEach((action) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "login-keypad__button";
+    button.dataset.keypadAction = action;
+    button.textContent = action;
+    keypad.appendChild(button);
+  });
+
+  inputElement.insertAdjacentElement("afterend", keypad);
+
+  const updateVisibility = (forceVisible = false) => {
+    const shouldDisplay = isDesktopDevice() && (forceVisible || document.activeElement === inputElement);
+    keypad.hidden = !shouldDisplay;
+  };
+
+  keypad.addEventListener("mousedown", (event) => {
+    event.preventDefault();
+  });
+
+  keypad.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-keypad-action]");
+    if (!button) {
+      return;
+    }
+
+    const action = button.dataset.keypadAction;
+    const currentPin = String(inputElement.value || "");
+
+    if (/^\d$/.test(action)) {
+      if (currentPin.length >= 4) {
+        return;
+      }
+      inputElement.value = `${currentPin}${action}`;
+      inputElement.dispatchEvent(new Event("input", { bubbles: true }));
+      inputElement.focus();
+      return;
+    }
+
+    if (action === "Delete") {
+      inputElement.value = currentPin.slice(0, -1);
+      inputElement.dispatchEvent(new Event("input", { bubbles: true }));
+      inputElement.focus();
+      return;
+    }
+
+    if (action === "Clear") {
+      inputElement.value = "";
+      inputElement.dispatchEvent(new Event("input", { bubbles: true }));
+      inputElement.focus();
+      return;
+    }
+
+    if (action === "Enter") {
+      onEnter();
+    }
+  });
+
+  inputElement.addEventListener("focus", () => {
+    updateVisibility(true);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!isDesktopDevice()) {
+      updateVisibility(false);
+      return;
+    }
+
+    if (inputElement.contains(event.target) || keypad.contains(event.target)) {
+      updateVisibility(true);
+      return;
+    }
+
+    updateVisibility(false);
+  });
+
+  window.addEventListener("resize", () => {
+    updateVisibility(false);
+  });
+
+  return {
+    hide: () => updateVisibility(false),
+  };
+}
+
 function initialiserConnexion() {
   chargerSession();
 
@@ -735,29 +833,6 @@ function initialiserConnexion() {
   loginPinInput.addEventListener("input", () => {
     loginPinInput.value = String(loginPinInput.value || "").replace(/\D/g, "").slice(0, 4);
   });
-
-  const isDesktopDevice = () => window.innerWidth > 768 && window.matchMedia("(pointer: fine)").matches;
-  const keypadActions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "Clear", "0", "Delete", "Enter"];
-  const loginKeypad = document.createElement("div");
-  loginKeypad.className = "login-keypad";
-  loginKeypad.hidden = true;
-  loginKeypad.setAttribute("aria-label", "PIN keypad");
-
-  keypadActions.forEach((action) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "login-keypad__button";
-    button.dataset.keypadAction = action;
-    button.textContent = action;
-    loginKeypad.appendChild(button);
-  });
-
-  loginPinInput.insertAdjacentElement("afterend", loginKeypad);
-
-  function updateKeypadVisibility(forceVisible = false) {
-    const shouldDisplay = isDesktopDevice() && (forceVisible || document.activeElement === loginPinInput);
-    loginKeypad.hidden = !shouldDisplay;
-  }
 
   function handleLogin() {
     const enteredPin = String(loginPinInput.value || "").trim();
@@ -799,48 +874,6 @@ function initialiserConnexion() {
     rafraichirDonnees();
   }
 
-  loginKeypad.addEventListener("mousedown", (event) => {
-    event.preventDefault();
-  });
-
-  loginKeypad.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-keypad-action]");
-    if (!button) {
-      return;
-    }
-
-    const action = button.dataset.keypadAction;
-    const currentPin = String(loginPinInput.value || "");
-
-    if (/^\d$/.test(action)) {
-      if (currentPin.length >= 4) {
-        return;
-      }
-      loginPinInput.value = `${currentPin}${action}`;
-      loginPinInput.dispatchEvent(new Event("input", { bubbles: true }));
-      loginPinInput.focus();
-      return;
-    }
-
-    if (action === "Delete") {
-      loginPinInput.value = currentPin.slice(0, -1);
-      loginPinInput.dispatchEvent(new Event("input", { bubbles: true }));
-      loginPinInput.focus();
-      return;
-    }
-
-    if (action === "Clear") {
-      loginPinInput.value = "";
-      loginPinInput.dispatchEvent(new Event("input", { bubbles: true }));
-      loginPinInput.focus();
-      return;
-    }
-
-    if (action === "Enter") {
-      handleLogin();
-    }
-  });
-
   loginForm.addEventListener("submit", (event) => {
     event.preventDefault();
     handleLogin();
@@ -853,27 +886,7 @@ function initialiserConnexion() {
     }
   });
 
-  loginPinInput.addEventListener("focus", () => {
-    updateKeypadVisibility(true);
-  });
-
-  document.addEventListener("click", (event) => {
-    if (!isDesktopDevice()) {
-      updateKeypadVisibility(false);
-      return;
-    }
-
-    if (loginPinInput.contains(event.target) || loginKeypad.contains(event.target)) {
-      updateKeypadVisibility(true);
-      return;
-    }
-
-    updateKeypadVisibility(false);
-  });
-
-  window.addEventListener("resize", () => {
-    updateKeypadVisibility(false);
-  });
+  attachDesktopPinKeypad(loginPinInput, handleLogin, "Login PIN keypad");
 
   appliquerControleAcces();
 }
@@ -1525,6 +1538,17 @@ listeEmployesArchives?.addEventListener("click", async (event) => {
 function demanderCodeManager() {
   if (!managerModal || !managerCodeInput || !managerModalErreur || !managerModalValider || !managerModalAnnuler) {
     return Promise.resolve(false);
+  }
+
+  if (!managerCodeInput.dataset.desktopKeypadBound) {
+    const triggerManagerValidation = () => {
+      managerModalValider.click();
+    };
+    managerCodeInput.addEventListener("input", () => {
+      managerCodeInput.value = String(managerCodeInput.value || "").replace(/\D/g, "").slice(0, 4);
+    });
+    attachDesktopPinKeypad(managerCodeInput, triggerManagerValidation, "Manager PIN keypad");
+    managerCodeInput.dataset.desktopKeypadBound = "true";
   }
 
   return new Promise((resolve) => {

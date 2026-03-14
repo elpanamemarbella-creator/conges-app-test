@@ -315,7 +315,7 @@ initializeApp(firebaseConfig);
     <div class="modal-manager__overlay" data-modal-close></div>
     <div class="modal-manager__carte" role="dialog" aria-modal="true" aria-labelledby="manager-modal-titre">
       <h3 id="manager-modal-titre" data-i18n="manager_code_required">Code manager requis</h3>
-      <input id="manager-code-input" type="password" autocomplete="off" data-i18n-placeholder="manager_prompt" placeholder="Entrer le code manager" />
+      <input id="manager-code-input" type="password" maxlength="4" inputmode="numeric" autocomplete="off" data-i18n-placeholder="manager_prompt" placeholder="Entrer le code manager" />
       <p id="manager-modal-erreur" class="modal-manager__erreur" hidden data-i18n="manager_code_incorrect">Code manager incorrect</p>
       <div class="modal-manager__actions">
         <button type="button" id="manager-modal-annuler" class="modal-manager__annuler" data-i18n="cancel">Annuler</button>
