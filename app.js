@@ -539,6 +539,7 @@ const CLASSES_EQUIPE = {
 };
 
 const loginScreen = document.getElementById("login-screen");
+const appContainer = document.querySelector("main.conteneur");
 const loginForm = document.getElementById("loginForm") || document.getElementById("pinLoginForm") || document.getElementById("login-form");
 const loginPinInput = document.getElementById("loginPinInput") || document.getElementById("pinInput");
 const loginEnterButton = document.getElementById("loginEnterButton") || document.getElementById("login-submit");
@@ -675,14 +676,19 @@ function getEmployeConnecte() {
 }
 
 function enregistrerSession() {
-  sessionStorage.setItem("session.userRole", sessionState.userRole || "");
-  sessionStorage.setItem("session.employeeId", sessionState.employeeId || "");
+  localStorage.setItem("sessionState", JSON.stringify(sessionState));
 }
 
 function chargerSession() {
-  const userRole = sessionStorage.getItem("session.userRole") || "";
-  const employeeId = sessionStorage.getItem("session.employeeId") || "";
-  sessionState = { userRole, employeeId };
+  const savedSession = localStorage.getItem("sessionState");
+
+  if (savedSession) {
+    try {
+      sessionState = JSON.parse(savedSession);
+    } catch (e) {
+      sessionState = { userRole: "", employeeId: "" };
+    }
+  }
 
   if (!isMobileDevice()) {
     sessionState = { userRole: "manager", employeeId: "" };
@@ -721,11 +727,11 @@ function appliquerControleAcces() {
   const isLogged = role === "manager" || role === "employee";
 
   if (loginScreen) {
-    if (!isMobileDevice()) {
-      loginScreen.hidden = true;
-    } else {
-      loginScreen.hidden = isLogged;
-    }
+    loginScreen.hidden = isLogged;
+  }
+
+  if (appContainer) {
+    appContainer.hidden = !isLogged;
   }
 
   if (appHeader) {
@@ -1739,6 +1745,8 @@ function structurerNote(texte) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  appliquerControleAcces();
+
   const bouton = document.getElementById("structureNote");
   const textarea = document.getElementById("noteTextarea");
 
