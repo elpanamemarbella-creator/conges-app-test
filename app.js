@@ -8,7 +8,11 @@ import {
   getDocs,
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-const CODE_MANAGER = "2005";
+const managerCode = "2005";
+
+if (!/^\d{4}$/.test(managerCode)) {
+  throw new Error("managerCode must be a 4-digit number without separators.");
+}
 
 const firebaseConfig = {
   apiKey: "AIzaSyAEtBkoWO_vfn_MgINrumqCqhBmwKU-Sl4",
@@ -742,7 +746,7 @@ function initialiserConnexion() {
       return;
     }
 
-    if (code === CODE_MANAGER) {
+    if (code === managerCode) {
       sessionState = { userRole: "manager", employeeId: "" };
       enregistrerSession();
       loginPinInput.value = "";
@@ -1266,7 +1270,7 @@ listeEmployes.addEventListener("click", async (event) => {
     }
 
     const code = prompt(t("manager_code_required"));
-    if (code !== CODE_MANAGER) {
+    if (code !== managerCode) {
       alert(t("wrong_code"));
       return;
     }
@@ -1430,7 +1434,7 @@ function demanderCodeManager() {
     };
 
     const onValider = () => {
-      if (managerCodeInput.value === CODE_MANAGER) {
+      if (managerCodeInput.value === managerCode) {
         fermer(true);
         return;
       }
@@ -1713,7 +1717,7 @@ listeDemandesEnAttente.addEventListener("click", async (event) => {
 
   const nouveauStatut = boutonValidation ? "valide" : "refuse";
   const code = prompt(t("manager_code_required"));
-  if (code !== CODE_MANAGER) {
+  if (code !== managerCode) {
     alert(t("wrong_code"));
     return;
   }
