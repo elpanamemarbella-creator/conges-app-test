@@ -683,6 +683,10 @@ function chargerSession() {
   const userRole = sessionStorage.getItem("session.userRole") || "";
   const employeeId = sessionStorage.getItem("session.employeeId") || "";
   sessionState = { userRole, employeeId };
+
+  if (!isMobileDevice()) {
+    sessionState = { userRole: "manager", employeeId: "" };
+  }
 }
 
 function isMobileDevice() {
@@ -717,7 +721,11 @@ function appliquerControleAcces() {
   const isLogged = role === "manager" || role === "employee";
 
   if (loginScreen) {
-    loginScreen.hidden = isLogged;
+    if (!isMobileDevice()) {
+      loginScreen.hidden = true;
+    } else {
+      loginScreen.hidden = isLogged;
+    }
   }
 
   if (appHeader) {
