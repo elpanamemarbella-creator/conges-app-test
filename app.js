@@ -739,14 +739,14 @@ function initialiserConnexion() {
 
   loginForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    const code = normaliserCodePin(loginPinInput.value);
-    if (!code) {
+    const enteredPin = String(loginPinInput.value || "").trim();
+    if (!/^\d{4}$/.test(enteredPin)) {
       loginError.textContent = t("login_invalid_pin");
       loginError.hidden = false;
       return;
     }
 
-    if (code === managerCode) {
+    if (enteredPin === managerCode) {
       sessionState = { userRole: "manager", employeeId: "" };
       enregistrerSession();
       loginPinInput.value = "";
@@ -756,9 +756,9 @@ function initialiserConnexion() {
       return;
     }
 
-    const employe = employesActifs.find((entry) => entry.pinCode === code);
+    const employe = employesActifs.find((entry) => String(entry.pinCode || "").trim() === enteredPin);
     if (!employe) {
-      loginError.textContent = t("login_wrong_pin");
+      loginError.textContent = "Code PIN incorrect";
       loginError.hidden = false;
       return;
     }
