@@ -845,12 +845,6 @@ function attachDesktopPinKeypad(inputElement, onEnter, ariaLabel = "PIN keypad")
 }
 
 function initialiserConnexion() {
-  chargerSession();
-
-  if (authentifierDesktopAutomatiquement()) {
-    appliquerControleAcces();
-  }
-
   if (!loginForm || !loginPinInput) {
     appliquerControleAcces();
     return;
