@@ -757,6 +757,10 @@ function appliquerControleAcces() {
 const isDesktopDevice = () => window.innerWidth > 768 && window.matchMedia("(pointer: fine)").matches;
 
 function attachDesktopPinKeypad(inputElement, onEnter, ariaLabel = "PIN keypad") {
+  if (isDesktopDevice()) {
+    return { hide: () => {} };
+  }
+
   if (!inputElement) {
     return { hide: () => {} };
   }
@@ -854,6 +858,14 @@ function attachDesktopPinKeypad(inputElement, onEnter, ariaLabel = "PIN keypad")
 
 function initialiserConnexion() {
   chargerSession();
+
+  if (isDesktopDevice()) {
+    sessionState = { userRole: "manager", employeeId: "" };
+  }
+
+  if (isDesktopDevice() && loginScreen) {
+    loginScreen.hidden = true;
+  }
 
   if (authentifierDesktopAutomatiquement()) {
     appliquerControleAcces();
