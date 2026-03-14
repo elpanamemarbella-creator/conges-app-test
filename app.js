@@ -87,6 +87,11 @@ const TRADUCTIONS = {
     save_title: "Sauvegarde",
     save_auto_message: "La sauvegarde est gérée automatiquement par le système existant.",
     calendar_title: "Calendrier des vacances",
+    calendar_view_label: "Vue",
+    calendar_view_weekly: "Vue hebdomadaire",
+    calendar_view_monthly: "Vue mensuelle",
+    calendar_view_yearly: "Vue annuelle",
+    team_coverage_today: "Couverture aujourd'hui",
     no_validated_leave_month: "Aucun congé validé sur le mois en cours.",
     no_leave: "Aucun congé",
     day_singular: "jour",
@@ -159,8 +164,8 @@ const TRADUCTIONS = {
     planning_status_sick: "Maladie",
     planning_status_rest: "Repos",
     planning_status_work: "Travail",
-    calendar_prev: "< Mois précédent",
-    calendar_next: "Mois suivant >",
+    calendar_prev: "< Précédent",
+    calendar_next: "Suivant >",
     leave_status_approved: "Validé",
     leave_status_pending: "En attente",
     leave_status_rejected: "Refusé",
@@ -226,6 +231,11 @@ const TRADUCTIONS = {
     save_title: "Guardar",
     save_auto_message: "La copia de seguridad se gestiona automáticamente por el sistema existente.",
     calendar_title: "Calendario de vacaciones",
+    calendar_view_label: "View",
+    calendar_view_weekly: "Vista semanal",
+    calendar_view_monthly: "Vista mensual",
+    calendar_view_yearly: "Vista anual",
+    team_coverage_today: "Cobertura de hoy",
     no_validated_leave_month: "No hay vacaciones validadas en el mes actual.",
     no_leave: "Sin vacaciones",
     day_singular: "día",
@@ -298,8 +308,8 @@ const TRADUCTIONS = {
     planning_status_sick: "Baja médica",
     planning_status_rest: "Descanso",
     planning_status_work: "Programado",
-    calendar_prev: "< Mes anterior",
-    calendar_next: "Mes siguiente >",
+    calendar_prev: "< Anterior",
+    calendar_next: "Siguiente >",
     leave_status_approved: "Aprobado",
     leave_status_pending: "Pendiente",
     leave_status_rejected: "Rechazado",
@@ -365,6 +375,11 @@ const TRADUCTIONS = {
     save_title: "Backup",
     save_auto_message: "Backup is handled automatically by the existing system.",
     calendar_title: "Leave calendar",
+    calendar_view_label: "View",
+    calendar_view_weekly: "Weekly view",
+    calendar_view_monthly: "Monthly view",
+    calendar_view_yearly: "Yearly view",
+    team_coverage_today: "Team coverage today",
     no_validated_leave_month: "No approved leave in the current month.",
     no_leave: "No leave",
     day_singular: "day",
@@ -437,8 +452,8 @@ const TRADUCTIONS = {
     planning_status_sick: "Sick leave",
     planning_status_rest: "Day off",
     planning_status_work: "Scheduled",
-    calendar_prev: "< Previous month",
-    calendar_next: "Next month >",
+    calendar_prev: "< Previous",
+    calendar_next: "Next >",
     leave_status_approved: "Approved",
     leave_status_pending: "Pending",
     leave_status_rejected: "Rejected",
@@ -557,6 +572,7 @@ const saveCard = document.getElementById("save-card");
 const calendarPrevButton = document.getElementById("calendar-prev");
 const calendarNextButton = document.getElementById("calendar-next");
 const calendarMonthLabel = document.getElementById("calendar-month-label");
+const calendarViewSelect = document.getElementById("calendar-view-select");
 
 const formulaireEmploye = document.getElementById("formulaire-employe");
 const formulaireDemandeConge = document.getElementById("formulaire-demande-conge");
@@ -596,7 +612,6 @@ const openPlanningButton = document.getElementById("openPlanning");
 const logoutButton = document.getElementById("logoutButton");
 const planningView = document.getElementById("planningView");
 const planningBody = document.getElementById("planningBody");
-const coverageContent = document.getElementById("coverageContent");
 const weekLabel = document.getElementById("weekLabel");
 const prevWeekButton = document.getElementById("prevWeek");
 const nextWeekButton = document.getElementById("nextWeek");
@@ -654,6 +669,7 @@ let currentWeek = getStartOfWeek(new Date());
 let pinModalEmployeId = "";
 let currentMonthDate = new Date();
 currentMonthDate.setDate(1);
+let currentCalendarView = "weekly";
 let sessionState = {
   userRole: "",
   employeeId: "",
@@ -1023,8 +1039,7 @@ function changerLangue(langue) {
   afficherDemandesEnAttente();
   afficherResume();
   afficherTableauBord();
-  afficherCalendrierMensuel();
-  renderCoverageToday();
+  renderCalendarPlanning();
   afficherHistoriqueSalarieSelectionne();
   renderPlanning(currentWeek);
   appliquerControleAcces();
@@ -1248,8 +1263,7 @@ async function rafraichirDonnees() {
   afficherDemandesEnAttente();
   afficherResume();
   afficherTableauBord();
-  afficherCalendrierMensuel();
-  renderCoverageToday();
+  renderCalendarPlanning();
   afficherHistoriqueSalarieSelectionne();
   renderPlanning(currentWeek);
   appliquerControleAcces();
@@ -1298,15 +1312,50 @@ nextWeekButton?.addEventListener("click", () => {
   renderPlanning(currentWeek);
 });
 
+function shiftCalendarPeriod(delta) {
+  if (currentCalendarView === "weekly") {
+    currentMonthDate.setDate(currentMonthDate.getDate() + (delta * 7));
+  } else if (currentCalendarView === "yearly") {
+    currentMonthDate = new Date(currentMonthDate.getFullYear() + delta, 0, 1);
+  } else {
+    currentMonthDate = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + delta, 1);
+  }
+
+  renderCalendarPlanning();
+}
+
 calendarPrevButton?.addEventListener("click", () => {
-  currentMonthDate = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() - 1, 1);
-  afficherCalendrierMensuel();
+  shiftCalendarPeriod(-1);
 });
 
 calendarNextButton?.addEventListener("click", () => {
-  currentMonthDate = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 1);
-  afficherCalendrierMensuel();
+  shiftCalendarPeriod(1);
 });
+
+calendarViewSelect?.addEventListener("change", () => {
+  currentCalendarView = calendarViewSelect.value || "weekly";
+  renderCalendarPlanning();
+});
+
+let touchStartX = 0;
+calendrierCongesMois?.addEventListener("touchstart", (event) => {
+  touchStartX = event.changedTouches?.[0]?.screenX || 0;
+}, { passive: true });
+
+calendrierCongesMois?.addEventListener("touchend", (event) => {
+  const touchEndX = event.changedTouches?.[0]?.screenX || 0;
+  const diff = touchEndX - touchStartX;
+
+  if (Math.abs(diff) < 50 || currentCalendarView !== "weekly") {
+    return;
+  }
+
+  if (diff < 0) {
+    shiftCalendarPeriod(1);
+  } else {
+    shiftCalendarPeriod(-1);
+  }
+}, { passive: true });
 
 logoutButton?.addEventListener("click", () => {
   deconnecter();
@@ -1440,7 +1489,7 @@ listeEmployes.addEventListener("click", async (event) => {
       await sauvegarderEmployes(employe);
       afficherEmployes();
       renderPlanning(currentWeek);
-      renderCoverageToday();
+      renderCalendarPlanning();
     });
 
     select.addEventListener("blur", () => {
@@ -2336,7 +2385,7 @@ function regenererLignePlanningEmploye(employe) {
     }
   });
 
-  renderCoverageToday();
+  renderCalendarPlanning();
 }
 
 function calculJoursCalendaires(startDate, endDate) {
@@ -2677,68 +2726,175 @@ function exporterEmployesExcel() {
   window.XLSX.writeFile(classeur, "conges-employes.xlsx");
 }
 
-function afficherCalendrierMensuel() {
+function getCoverageByTeamForDate(date) {
+  const coverage = {};
+
+  TEAM_ORDER.forEach((team) => {
+    coverage[team] = { working: 0, total: 0 };
+  });
+
+  employesActifs.forEach((emp) => {
+    const teamKey = getTeamKey(emp.equipe);
+    if (!(teamKey in coverage)) {
+      return;
+    }
+
+    coverage[teamKey].total += 1;
+    if (getEmployeeStatusForDate(emp, date) === "work") {
+      coverage[teamKey].working += 1;
+    }
+  });
+
+  return coverage;
+}
+
+function getCalendarDatesForView() {
+  if (currentCalendarView === "weekly") {
+    const start = getStartOfWeek(currentMonthDate);
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      d.setHours(12, 0, 0, 0);
+      return d;
+    });
+  }
+
+  if (currentCalendarView === "yearly") {
+    return [];
+  }
+
+  const start = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), 1);
+  const end = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 0);
+  const dates = [];
+
+  for (let day = 1; day <= end.getDate(); day += 1) {
+    const d = new Date(start.getFullYear(), start.getMonth(), day);
+    d.setHours(12, 0, 0, 0);
+    dates.push(d);
+  }
+
+  return dates;
+}
+
+function getCalendarStatusClass(emp, date) {
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+
+  if (emp.actif === false || date > today) {
+    return "status-inactive";
+  }
+
+  const status = getEmployeeStatusForDate(emp, date);
+  if (status === "vacation") {
+    return "status-vacation";
+  }
+
+  if (status === "rest") {
+    return "status-rest";
+  }
+
+  return "status-work";
+}
+
+function getCalendarLabel() {
+  if (currentCalendarView === "weekly") {
+    const debut = getStartOfWeek(currentMonthDate);
+    return formaterLibelleSemaine(debut);
+  }
+
+  if (currentCalendarView === "yearly") {
+    return String(currentMonthDate.getFullYear());
+  }
+
+  const formatter = new Intl.DateTimeFormat(langueCourante, { month: "long", year: "numeric" });
+  return formatter.format(new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), 1));
+}
+
+function renderCalendarPlanning() {
   if (!calendrierCongesMois) {
     return;
   }
 
-  const debutMois = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), 1);
-  const finMois = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 0);
-  const daysInMonth = finMois.getDate();
-  const formatter = new Intl.DateTimeFormat(langueCourante, { month: "long", year: "numeric" });
-
   if (calendarMonthLabel) {
-    calendarMonthLabel.textContent = formatter.format(debutMois);
+    calendarMonthLabel.textContent = getCalendarLabel();
   }
 
-  const sourceEmployes = estEmployeConnecte() ? employesActifs : employes;
+  if (calendarViewSelect) {
+    calendarViewSelect.value = currentCalendarView;
+  }
 
-  const headerDays = Array.from({ length: daysInMonth }, (_, i) => `<span class="calendar-day-header">${i + 1}</span>`).join("");
-
-  const rows = sourceEmployes
+  const sourceEmployes = (estEmployeConnecte() ? employesActifs : employes)
     .slice()
-    .sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }))
-    .map((employe) => {
-      const dayCells = [];
-      for (let day = 1; day <= daysInMonth; day += 1) {
-        const d = new Date(debutMois.getFullYear(), debutMois.getMonth(), day);
-        const dateIso = formatDateISO(d);
-        const leave = conges.find((entry) => entry.idEmploye === employe.id && entry.dateDebut <= dateIso && entry.dateFin >= dateIso);
-        const cls = !leave
-          ? ""
-          : leave.statut === "valide"
-            ? "vacation-approved"
-            : leave.statut === "refuse"
-              ? "vacation-rejected"
-              : "vacation-pending";
-        const title = !leave
-          ? ""
-          : leave.statut === "valide"
-            ? t("leave_status_approved")
-            : leave.statut === "refuse"
-              ? t("leave_status_rejected")
-              : t("leave_status_pending");
-        dayCells.push(`<span class="calendar-day-cell ${cls}" title="${echapperHtml(title)}"></span>`);
+    .sort((a, b) => {
+      const teamDiff = getTeamOrderIndex(a.equipe) - getTeamOrderIndex(b.equipe);
+      if (teamDiff !== 0) {
+        return teamDiff;
       }
 
+      return a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" });
+    });
+
+  const groupedByTeam = TEAM_ORDER.reduce((acc, team) => ({ ...acc, [team]: [] }), {});
+  sourceEmployes.forEach((emp) => {
+    const key = getTeamKey(emp.equipe);
+    if (key in groupedByTeam) {
+      groupedByTeam[key].push(emp);
+    }
+  });
+
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  const coverage = getCoverageByTeamForDate(today);
+
+  const content = TEAM_ORDER
+    .filter((team) => groupedByTeam[team].length > 0)
+    .map((team) => {
+      const employeesHtml = currentCalendarView === "yearly"
+        ? groupedByTeam[team]
+          .map((emp) => {
+            const months = Array.from({ length: 12 }, (_, monthIndex) => {
+              const firstDay = new Date(currentMonthDate.getFullYear(), monthIndex, 1);
+              const lastDay = new Date(currentMonthDate.getFullYear(), monthIndex + 1, 0).getDate();
+              const squares = Array.from({ length: lastDay }, (_, i) => {
+                const d = new Date(firstDay.getFullYear(), firstDay.getMonth(), i + 1);
+                d.setHours(12, 0, 0, 0);
+                return `<span class="calendar-square ${getCalendarStatusClass(emp, d)}"></span>`;
+              }).join("");
+              return `<div class="calendar-year-month"><span class="calendar-year-month-label">${firstDay.toLocaleDateString(langueCourante, { month: "short" })}</span><div class="calendar-squares">${squares}</div></div>`;
+            }).join("");
+
+            return `<div class="calendar-employee-row"><div class="calendar-employee-name">${echapperHtml(emp.nom)}</div><div class="calendar-year-grid">${months}</div></div>`;
+          })
+          .join("")
+        : (() => {
+          const dates = getCalendarDatesForView();
+          const headers = dates
+            .map((d) => `<span class="calendar-day-header">${d.getDate()}</span>`)
+            .join("");
+
+          const rows = groupedByTeam[team]
+            .map((emp) => {
+              const squares = dates
+                .map((d) => `<span class="calendar-square ${getCalendarStatusClass(emp, d)}"></span>`)
+                .join("");
+              return `<div class="calendar-employee-row"><div class="calendar-employee-name">${echapperHtml(emp.nom)}</div><div class="calendar-squares">${squares}</div></div>`;
+            })
+            .join("");
+
+          return `<div class="calendar-days-head">${headers}</div>${rows}`;
+        })();
+
       return `
-        <div class="calendar-grid-row">
-          <div class="calendar-employee-name">${echapperHtml(employe.nom)}</div>
-          <div class="calendar-days-grid">${dayCells.join("")}</div>
-        </div>
+        <section class="planning-team-card ${echapperHtml(getTeamRowClass(team))}">
+          <h3>${echapperHtml(teamLabel(team).toUpperCase())}</h3>
+          <p class="planning-coverage">${echapperHtml(t("team_coverage_today"))}: ${coverage[team].working} / ${coverage[team].total}</p>
+          ${employeesHtml}
+        </section>
       `;
     })
     .join("");
 
-  calendrierCongesMois.innerHTML = `
-    <div class="calendar-container">
-      <div class="calendar-grid-row calendar-grid-header">
-        <div class="calendar-employee-name"></div>
-        <div class="calendar-days-grid">${headerDays}</div>
-      </div>
-      ${rows || `<p class="message-vide">${t("no_validated_leave_month")}</p>`}
-    </div>
-  `;
+  calendrierCongesMois.innerHTML = content || `<p class="message-vide">${t("no_employee_registered")}</p>`;
 }
 
 function extraireJoursCongeDansMois(employe, debutMois, finMois) {
@@ -2969,37 +3125,7 @@ function getTeamOrderIndex(equipe) {
 }
 
 function renderCoverageToday() {
-  if (!coverageContent) {
-    return;
-  }
-
-  const today = new Date();
-  today.setHours(12, 0, 0, 0);
-
-  const coverage = {};
-
-  TEAM_ORDER.forEach((team) => {
-    coverage[team] = [];
-  });
-
-  employesActifs.forEach((emp) => {
-    const statut = getEmployeeStatusForDate(emp, today);
-
-    if (statut === "work") {
-      const teamKey = getTeamKey(emp.equipe);
-      if (teamKey in coverage) {
-        coverage[teamKey].push(emp.nom);
-      }
-    }
-  });
-
-  let html = "";
-
-  TEAM_ORDER.forEach((team) => {
-    html += `<div class="team-line ${echapperHtml(getTeamRowClass(team))}"><strong>${echapperHtml(teamLabel(team))}</strong> : ${echapperHtml(coverage[team].join(", ") || "-")}</div>`;
-  });
-
-  coverageContent.innerHTML = html;
+  renderCalendarPlanning();
 }
 
 function stylePlanningHeaders(semaine) {
@@ -3034,7 +3160,7 @@ function renderPlanning(semaine) {
 
   planningBody.innerHTML = "";
   weekLabel.textContent = formaterLibelleSemaine(semaine);
-  renderCoverageToday();
+  renderCalendarPlanning();
   stylePlanningHeaders(semaine);
 
   const today = new Date();
