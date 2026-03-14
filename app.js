@@ -713,7 +713,6 @@ function deconnecter() {
 }
 
 function appliquerControleAcces() {
-  authentifierDesktopAutomatiquement();
   const role = sessionState.userRole;
   const isLogged = role === "manager" || role === "employee";
 
@@ -1315,6 +1314,9 @@ async function initApp() {
 }
 
 appliquerTraductionsStatiques();
+chargerSession();
+authentifierDesktopAutomatiquement();
+appliquerControleAcces();
 initialiserConnexion();
 initApp();
 
