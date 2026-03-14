@@ -540,7 +540,7 @@ const CLASSES_EQUIPE = {
 };
 
 const loginScreen = document.getElementById("login-screen");
-const loginForm = document.getElementById("login-form");
+const loginForm = document.getElementById("pinLoginForm") || document.getElementById("login-form");
 const loginPinInput = document.getElementById("pinInput");
 const loginError = document.getElementById("login-error");
 const appHeader = document.getElementById("app-header");
@@ -737,7 +737,7 @@ function initialiserConnexion() {
     loginPinInput.value = String(loginPinInput.value || "").replace(/\D/g, "").slice(0, 4);
   });
 
-  const handleLogin = () => {
+  function handleLogin() {
     const enteredPin = String(loginPinInput.value || "").trim();
     if (!/^\d{4}$/.test(enteredPin)) {
       loginError.textContent = t("login_invalid_pin");
@@ -768,7 +768,7 @@ function initialiserConnexion() {
     loginError.hidden = true;
     appliquerControleAcces();
     rafraichirDonnees();
-  };
+  }
 
   loginForm.addEventListener("submit", (event) => {
     event.preventDefault();
