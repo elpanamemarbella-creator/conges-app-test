@@ -834,22 +834,29 @@ function initialiserConnexion() {
 
   window.handleLogin = handleLogin;
 
-  loginForm.addEventListener("submit", (event) => {
-    event.preventDefault();
+  const triggerLogin = (event) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     handleLogin();
-  });
+  };
+
+  loginForm.addEventListener("submit", triggerLogin);
 
   loginPinInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
-      event.preventDefault();
-      handleLogin();
+      triggerLogin(event);
     }
   });
 
-  loginEnterButton?.addEventListener("click", (event) => {
-    event.preventDefault();
-    handleLogin();
+  loginPinInput.addEventListener("keypress", (event) => {
+    if (event.key === "Enter") {
+      triggerLogin(event);
+    }
   });
+
+  loginEnterButton?.addEventListener("click", triggerLogin);
 
   attachDesktopPinKeypad(loginPinInput, handleLogin, "Login PIN keypad");
 
