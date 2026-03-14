@@ -541,6 +541,7 @@ const CLASSES_EQUIPE = {
 const loginScreen = document.getElementById("login-screen");
 const loginForm = document.getElementById("loginForm") || document.getElementById("pinLoginForm") || document.getElementById("login-form");
 const loginPinInput = document.getElementById("loginPinInput") || document.getElementById("pinInput");
+const loginEnterButton = document.getElementById("loginEnterButton") || document.getElementById("login-submit");
 const loginError = document.getElementById("login-error");
 const appHeader = document.getElementById("app-header");
 const employeeDashboardCard = document.getElementById("employee-dashboard-card");
@@ -881,11 +882,16 @@ function initialiserConnexion() {
     handleLogin();
   });
 
-  loginPinInput.addEventListener("keypress", (event) => {
+  loginPinInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
       handleLogin();
     }
+  });
+
+  loginEnterButton?.addEventListener("click", (event) => {
+    event.preventDefault();
+    handleLogin();
   });
 
   attachDesktopPinKeypad(loginPinInput, handleLogin, "Login PIN keypad");
@@ -1017,7 +1023,7 @@ function appliquerTraductionsStatiques() {
   }
   const loginLabel = document.querySelector('label[for="loginPinInput"]') || document.querySelector('label[for="pinInput"]');
   if (loginLabel) loginLabel.textContent = t("login_pin_label");
-  const loginSubmit = document.getElementById("login-submit") || loginForm?.querySelector('button[type="submit"]');
+  const loginSubmit = document.getElementById("loginEnterButton") || document.getElementById("login-submit") || loginForm?.querySelector("button");
   if (loginSubmit) loginSubmit.textContent = t("login_submit");
   if (calendarPrevButton) calendarPrevButton.textContent = t("calendar_prev");
   if (calendarNextButton) calendarNextButton.textContent = t("calendar_next");
