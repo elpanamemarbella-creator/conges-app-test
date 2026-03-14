@@ -25,6 +25,10 @@ const db = getFirestore(app);
 const TRADUCTIONS = {
   fr: {
     app_title: "Gestion des congés employés",
+    login_title: "Accès à l'application",
+    login_pin_label: "Code PIN",
+    login_submit: "Entrer",
+    logout: "Se déconnecter",
     dashboard_title: "Tableau de bord",
     add_employee_title: "Ajouter un employé",
     employee_name_label: "Nom de l'employé",
@@ -117,6 +121,8 @@ const TRADUCTIONS = {
     cancel: "Annuler",
     wrong_code: "Code incorrect",
     invalid_pin_code_error: "Le code PIN doit contenir exactement 4 chiffres.",
+    login_invalid_pin: "Le code PIN doit contenir exactement 4 chiffres.",
+    login_wrong_pin: "PIN incorrect.",
     leave_update_error: "Impossible de mettre à jour la demande de congé.",
     add_employee_error: "Impossible d'ajouter l'employé.",
     select_employee_error: "Veuillez choisir un employé.",
@@ -150,9 +156,18 @@ const TRADUCTIONS = {
     planning_status_sick: "Maladie",
     planning_status_rest: "Repos",
     planning_status_work: "Travail",
+    calendar_prev: "< Mois précédent",
+    calendar_next: "Mois suivant >",
+    leave_status_approved: "Validé",
+    leave_status_pending: "En attente",
+    leave_status_rejected: "Refusé",
   },
   es: {
     app_title: "Gestión de vacaciones empleados",
+    login_title: "Acceso a la aplicación",
+    login_pin_label: "Código PIN",
+    login_submit: "Entrar",
+    logout: "Cerrar sesión",
     dashboard_title: "Panel de control",
     add_employee_title: "Añadir empleado",
     employee_name_label: "Nombre del empleado",
@@ -245,6 +260,8 @@ const TRADUCTIONS = {
     cancel: "Cancelar",
     wrong_code: "Código incorrecto",
     invalid_pin_code_error: "El código PIN debe contener exactamente 4 dígitos.",
+    login_invalid_pin: "El PIN debe tener exactamente 4 dígitos.",
+    login_wrong_pin: "PIN incorrecto.",
     leave_update_error: "No se puede actualizar la solicitud de vacaciones.",
     add_employee_error: "No se puede añadir el empleado.",
     select_employee_error: "Seleccione un empleado.",
@@ -278,9 +295,18 @@ const TRADUCTIONS = {
     planning_status_sick: "Baja médica",
     planning_status_rest: "Descanso",
     planning_status_work: "Programado",
+    calendar_prev: "< Mes anterior",
+    calendar_next: "Mes siguiente >",
+    leave_status_approved: "Aprobado",
+    leave_status_pending: "Pendiente",
+    leave_status_rejected: "Rechazado",
   },
   en: {
     app_title: "Employee leave management",
+    login_title: "Application access",
+    login_pin_label: "PIN code",
+    login_submit: "Enter",
+    logout: "Log out",
     dashboard_title: "Dashboard",
     add_employee_title: "Add employee",
     employee_name_label: "Employee name",
@@ -373,6 +399,8 @@ const TRADUCTIONS = {
     cancel: "Cancel",
     wrong_code: "Wrong code",
     invalid_pin_code_error: "The PIN code must contain exactly 4 digits.",
+    login_invalid_pin: "PIN must contain exactly 4 digits.",
+    login_wrong_pin: "Incorrect PIN.",
     leave_update_error: "Unable to update leave request.",
     add_employee_error: "Unable to add employee.",
     select_employee_error: "Please select an employee.",
@@ -406,6 +434,11 @@ const TRADUCTIONS = {
     planning_status_sick: "Sick leave",
     planning_status_rest: "Day off",
     planning_status_work: "Scheduled",
+    calendar_prev: "< Previous month",
+    calendar_next: "Next month >",
+    leave_status_approved: "Approved",
+    leave_status_pending: "Pending",
+    leave_status_rejected: "Rejected",
   },
 };
 
@@ -502,6 +535,24 @@ const CLASSES_EQUIPE = {
   extra: "extras",
 };
 
+const loginScreen = document.getElementById("login-screen");
+const loginForm = document.getElementById("login-form");
+const loginPinInput = document.getElementById("login-pin");
+const loginError = document.getElementById("login-error");
+const appHeader = document.getElementById("app-header");
+const employeeDashboardCard = document.getElementById("employee-dashboard-card");
+const paidLeaveCard = document.getElementById("paid-leave-card");
+const leaveRequestCard = document.getElementById("leave-request-card");
+const pendingRequestsCard = document.getElementById("pending-requests-card");
+const addEmployeeCard = document.getElementById("add-employee-card");
+const employeesListCard = document.getElementById("employees-list-card");
+const archivedCard = document.getElementById("archived-card");
+const summaryCard = document.getElementById("summary-card");
+const saveCard = document.getElementById("save-card");
+const calendarPrevButton = document.getElementById("calendar-prev");
+const calendarNextButton = document.getElementById("calendar-next");
+const calendarMonthLabel = document.getElementById("calendar-month-label");
+
 const formulaireEmploye = document.getElementById("formulaire-employe");
 const formulaireDemandeConge = document.getElementById("formulaire-demande-conge");
 const listeEmployes = document.getElementById("liste-employes");
@@ -537,6 +588,7 @@ const pinModalInput = document.getElementById("pin-modal-input");
 const pinModalAnnuler = document.getElementById("pin-modal-annuler");
 const pinModalEnregistrer = document.getElementById("pin-modal-enregistrer");
 const openPlanningButton = document.getElementById("openPlanning");
+const logoutButton = document.getElementById("logoutButton");
 const planningView = document.getElementById("planningView");
 const planningBody = document.getElementById("planningBody");
 const coverageContent = document.getElementById("coverageContent");
@@ -595,6 +647,128 @@ let langueCourante = detecterLangueInitiale();
 let employeSelectionneId = "";
 let currentWeek = getStartOfWeek(new Date());
 let pinModalEmployeId = "";
+let currentMonthDate = new Date();
+currentMonthDate.setDate(1);
+let sessionState = {
+  userRole: "",
+  employeeId: "",
+};
+
+function estManager() {
+  return sessionState.userRole === "manager";
+}
+
+function estEmployeConnecte() {
+  return sessionState.userRole === "employee";
+}
+
+function getEmployeConnecte() {
+  if (!estEmployeConnecte()) {
+    return null;
+  }
+
+  return employesActifs.find((entry) => entry.id === sessionState.employeeId) || null;
+}
+
+function enregistrerSession() {
+  sessionStorage.setItem("session.userRole", sessionState.userRole || "");
+  sessionStorage.setItem("session.employeeId", sessionState.employeeId || "");
+}
+
+function chargerSession() {
+  const userRole = sessionStorage.getItem("session.userRole") || "";
+  const employeeId = sessionStorage.getItem("session.employeeId") || "";
+  sessionState = { userRole, employeeId };
+}
+
+function deconnecter() {
+  sessionState = { userRole: "", employeeId: "" };
+  enregistrerSession();
+  appliquerControleAcces();
+}
+
+function appliquerControleAcces() {
+  const role = sessionState.userRole;
+  const isLogged = role === "manager" || role === "employee";
+
+  if (loginScreen) {
+    loginScreen.hidden = isLogged;
+  }
+
+  if (appHeader) {
+    appHeader.hidden = !isLogged;
+  }
+
+  const cardsManager = [paidLeaveCard, pendingRequestsCard, addEmployeeCard, employeesListCard, archivedCard, summaryCard, saveCard, planningView];
+
+  if (!isLogged) {
+    cardsManager.concat([employeeDashboardCard, leaveRequestCard]).forEach((card) => { if (card) card.hidden = true; });
+    return;
+  }
+
+  if (role === "manager") {
+    if (employeeDashboardCard) employeeDashboardCard.hidden = false;
+    if (leaveRequestCard) leaveRequestCard.hidden = false;
+    cardsManager.forEach((card) => { if (card && card.id !== "planningView") card.hidden = false; });
+    openPlanningButton.hidden = false;
+    return;
+  }
+
+  if (employeeDashboardCard) employeeDashboardCard.hidden = false;
+  if (leaveRequestCard) leaveRequestCard.hidden = false;
+  cardsManager.forEach((card) => { if (card) card.hidden = true; });
+  if (planningView) planningView.hidden = true;
+  openPlanningButton.hidden = true;
+}
+
+function initialiserConnexion() {
+  chargerSession();
+
+  if (!loginForm || !loginPinInput) {
+    appliquerControleAcces();
+    return;
+  }
+
+  loginPinInput.addEventListener("input", () => {
+    loginPinInput.value = String(loginPinInput.value || "").replace(/\D/g, "").slice(0, 4);
+  });
+
+  loginForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const code = normaliserCodePin(loginPinInput.value);
+    if (!code) {
+      loginError.textContent = t("login_invalid_pin");
+      loginError.hidden = false;
+      return;
+    }
+
+    if (code === CODE_MANAGER) {
+      sessionState = { userRole: "manager", employeeId: "" };
+      enregistrerSession();
+      loginPinInput.value = "";
+      loginError.hidden = true;
+      appliquerControleAcces();
+      rafraichirDonnees();
+      return;
+    }
+
+    const employe = employesActifs.find((entry) => entry.pinCode === code);
+    if (!employe) {
+      loginError.textContent = t("login_wrong_pin");
+      loginError.hidden = false;
+      return;
+    }
+
+    sessionState = { userRole: "employee", employeeId: employe.id };
+    enregistrerSession();
+    loginPinInput.value = "";
+    loginError.hidden = true;
+    appliquerControleAcces();
+    rafraichirDonnees();
+  });
+
+  appliquerControleAcces();
+}
 
 function t(cle) {
   return TRADUCTIONS[langueCourante]?.[cle] || TRADUCTIONS.fr[cle] || cle;
@@ -715,7 +889,18 @@ function appliquerTraductionsStatiques() {
   });
 
   rafraichirSelecteursEquipes();
+  if (loginScreen) {
+    loginScreen.querySelector("h1").textContent = t("login_title");
+  }
+  const loginLabel = document.querySelector('label[for="login-pin"]');
+  if (loginLabel) loginLabel.textContent = t("login_pin_label");
+  const loginSubmit = loginForm?.querySelector('button[type="submit"]');
+  if (loginSubmit) loginSubmit.textContent = t("login_submit");
+  if (calendarPrevButton) calendarPrevButton.textContent = t("calendar_prev");
+  if (calendarNextButton) calendarNextButton.textContent = t("calendar_next");
+  if (logoutButton) logoutButton.textContent = `↩︎ ${t("logout")}`;
 }
+
 
 function changerLangue(langue) {
   if (!TRADUCTIONS[langue]) {
@@ -735,6 +920,7 @@ function changerLangue(langue) {
   renderCoverageToday();
   afficherHistoriqueSalarieSelectionne();
   renderPlanning(currentWeek);
+  appliquerControleAcces();
 }
 
 function recupererLangueActive() {
@@ -957,6 +1143,7 @@ async function rafraichirDonnees() {
   renderCoverageToday();
   afficherHistoriqueSalarieSelectionne();
   renderPlanning(currentWeek);
+  appliquerControleAcces();
 }
 
 async function initApp() {
@@ -969,6 +1156,7 @@ async function initApp() {
 }
 
 appliquerTraductionsStatiques();
+initialiserConnexion();
 initApp();
 
 boutonsLangue.forEach((bouton) => {
@@ -998,7 +1186,24 @@ nextWeekButton?.addEventListener("click", () => {
   renderPlanning(currentWeek);
 });
 
+calendarPrevButton?.addEventListener("click", () => {
+  currentMonthDate = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() - 1, 1);
+  afficherCalendrierMensuel();
+});
+
+calendarNextButton?.addEventListener("click", () => {
+  currentMonthDate = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 1);
+  afficherCalendrierMensuel();
+});
+
+logoutButton?.addEventListener("click", () => {
+  deconnecter();
+});
+
 planningBody?.addEventListener("click", async (event) => {
+  if (!estManager()) {
+    return;
+  }
   const cellule = event.target.closest("td[data-employe-id][data-date]");
   if (!cellule) {
     return;
@@ -1495,6 +1700,9 @@ function ouvrirFenetreReposHebdomadaire(employe) {
 }
 
 listeDemandesEnAttente.addEventListener("click", async (event) => {
+  if (!estManager()) {
+    return;
+  }
   const boutonValidation = event.target.closest("[data-valider-id]");
   const boutonRefus = event.target.closest("[data-refuser-id]");
 
@@ -1526,6 +1734,9 @@ listeDemandesEnAttente.addEventListener("click", async (event) => {
 });
 
 formulaireEmploye.addEventListener("submit", async (event) => {
+  if (!estManager()) {
+    return;
+  }
   event.preventDefault();
 
   const birthCode = normaliserCodeNaissance(birthDateEmployeInput?.value);
@@ -2042,7 +2253,11 @@ function obtenirEmployesFiltres() {
 }
 
 function afficherEmployes() {
-  if (!employesActifs.length) {
+  const sourceEmployes = estEmployeConnecte()
+    ? employesActifs.filter((entry) => entry.id === sessionState.employeeId)
+    : employesActifs;
+
+  if (!sourceEmployes.length) {
     listeEmployes.innerHTML = `<tr><td colspan="10" class="vide">${t("no_employee_registered")}</td></tr>`;
     employesFiltres = [];
     employeSelectionneId = "";
@@ -2051,7 +2266,24 @@ function afficherEmployes() {
     return;
   }
 
-  const employesTries = obtenirEmployesFiltres();
+  const equipeFiltre = estEmployeConnecte() ? "" : (filtreEquipeSelect?.value || "");
+  const recherche = (rechercheEmployeInput?.value || "").trim().toLowerCase();
+  const employesTries = [...sourceEmployes]
+    .sort((a, b) => {
+      const indexA = getTeamOrderIndex(a.equipe);
+      const indexB = getTeamOrderIndex(b.equipe);
+      if (indexA !== indexB) {
+        return indexA - indexB;
+      }
+
+      return a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" });
+    })
+    .filter((employe) => {
+      const correspondEquipe = !equipeFiltre || employe.equipe === equipeFiltre;
+      const correspondRecherche = !recherche || employe.nom.toLowerCase().includes(recherche);
+      return correspondEquipe && correspondRecherche;
+    });
+
   employesFiltres = employesTries;
 
   if (!employesTries.length) {
@@ -2075,6 +2307,19 @@ function afficherEmployes() {
 
       if (ajouterTitre) {
         equipeEnCours = employe.equipe;
+      }
+
+      if (estEmployeConnecte()) {
+        return `
+          <tr class="ligne-employe ${teamRowClass} equipe-${classeEquipe}" data-employe-id="${employe.id}">
+            <td data-label="${t("employee_col")}"><span class="employee-name">${echapperHtml(employe.nom)}</span></td>
+            <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
+            <td data-label="${t("taken_leave_col")}">${congesPris.toFixed(1)}</td>
+            <td data-label="${t("remaining_leave_col")}">${congesRestants.toFixed(1)}</td>
+            <td data-label="${t("status_col")}" class="status-${classeStatut}">${libelleStatut}</td>
+            <td data-label="${t("action_col")}"><button type="button" id="employee-request-leave">${t("new_leave_request_title")}</button></td>
+          </tr>
+        `;
       }
 
       return `
@@ -2110,6 +2355,12 @@ function afficherEmployes() {
       `;
     })
     .join("");
+
+  if (estEmployeConnecte()) {
+    afficherEmployesArchives();
+    afficherHistoriqueSalarieSelectionne();
+    return;
+  }
 
   const lignesEmployes = listeEmployes.querySelectorAll(".ligne-employe[data-employe-id]");
   lignesEmployes.forEach((ligne) => {
@@ -2156,6 +2407,13 @@ function basculerArchives() {
 }
 
 function afficherEmployesArchives() {
+  if (estEmployeConnecte()) {
+    if (archiveCount) archiveCount.textContent = "0";
+    if (listeEmployesArchives) {
+      listeEmployesArchives.innerHTML = `<tr><td colspan="4" class="vide">${t("no_archived_employee")}</td></tr>`;
+    }
+    return;
+  }
   if (!listeEmployesArchives) {
     return;
   }
@@ -2187,6 +2445,26 @@ function afficherEmployesArchives() {
 
 function afficherTableauBord() {
   if (!tableauBord) {
+    return;
+  }
+
+  if (estEmployeConnecte()) {
+    const employe = getEmployeConnecte();
+    if (!employe) {
+      tableauBord.innerHTML = `<p class="message-vide">${t("no_employee_registered")}</p>`;
+      return;
+    }
+
+    const congesAcquis = calculerCongesAcquis(employe.dateEmbauche);
+    const congesPris = arrondir1Decimale(Number(employe.congesPris) || 0);
+    const congesRestants = arrondir1Decimale(congesAcquis - congesPris);
+
+    tableauBord.innerHTML = `
+      <article class="tuile-kpi"><span class="kpi-titre">${t("employee_col")}</span><strong class="kpi-valeur">${echapperHtml(employe.nom)}</strong></article>
+      <article class="tuile-kpi"><span class="kpi-titre">${t("earned_leave_col")}</span><strong class="kpi-valeur">${congesAcquis.toFixed(1)}</strong></article>
+      <article class="tuile-kpi"><span class="kpi-titre">${t("taken_leave_col")}</span><strong class="kpi-valeur">${congesPris.toFixed(1)}</strong></article>
+      <article class="tuile-kpi"><span class="kpi-titre">${t("remaining_leave_col")}</span><strong class="kpi-valeur">${congesRestants.toFixed(1)}</strong></article>
+    `;
     return;
   }
 
@@ -2279,38 +2557,63 @@ function afficherCalendrierMensuel() {
     return;
   }
 
-  const dateRef = new Date();
-  const mois = dateRef.getMonth();
-  const annee = dateRef.getFullYear();
-  const debutMois = new Date(annee, mois, 1);
-  const finMois = new Date(annee, mois + 1, 0);
+  const debutMois = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), 1);
+  const finMois = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 0);
+  const daysInMonth = finMois.getDate();
+  const formatter = new Intl.DateTimeFormat(langueCourante, { month: "long", year: "numeric" });
 
-  const lignes = employes
+  if (calendarMonthLabel) {
+    calendarMonthLabel.textContent = formatter.format(debutMois);
+  }
+
+  const sourceEmployes = estEmployeConnecte() ? employesActifs : employes;
+
+  const headerDays = Array.from({ length: daysInMonth }, (_, i) => `<span class="calendar-day-header">${i + 1}</span>`).join("");
+
+  const rows = sourceEmployes
+    .slice()
+    .sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }))
     .map((employe) => {
-      const joursDansMois = extraireJoursCongeDansMois(employe, debutMois, finMois);
-      if (!joursDansMois.length) {
-        return "";
+      const dayCells = [];
+      for (let day = 1; day <= daysInMonth; day += 1) {
+        const d = new Date(debutMois.getFullYear(), debutMois.getMonth(), day);
+        const dateIso = formatDateISO(d);
+        const leave = conges.find((entry) => entry.idEmploye === employe.id && entry.dateDebut <= dateIso && entry.dateFin >= dateIso);
+        const cls = !leave
+          ? ""
+          : leave.statut === "valide"
+            ? "vacation-approved"
+            : leave.statut === "refuse"
+              ? "vacation-rejected"
+              : "vacation-pending";
+        const title = !leave
+          ? ""
+          : leave.statut === "valide"
+            ? t("leave_status_approved")
+            : leave.statut === "refuse"
+              ? t("leave_status_rejected")
+              : t("leave_status_pending");
+        dayCells.push(`<span class="calendar-day-cell ${cls}" title="${echapperHtml(title)}"></span>`);
       }
 
-      const blocs = joursDansMois
-        .map(
-          (date) =>
-            `<span class="bloc-conge" style="background-color:${echapperHtml(getEmployeeTeamColor(employe))}" title="${formaterDateFr(date)}"></span>`,
-        )
-        .join("");
-
       return `
-        <div class="ligne-calendrier">
-          <strong>${echapperHtml(employe.nom)}</strong>
-          <div class="barre-conges">${blocs}</div>
+        <div class="calendar-grid-row">
+          <div class="calendar-employee-name">${echapperHtml(employe.nom)}</div>
+          <div class="calendar-days-grid">${dayCells.join("")}</div>
         </div>
       `;
     })
-    .filter(Boolean)
     .join("");
 
-  calendrierCongesMois.innerHTML =
-    lignes || `<p class="message-vide">${t("no_validated_leave_month")}</p>`;
+  calendrierCongesMois.innerHTML = `
+    <div class="calendar-container">
+      <div class="calendar-grid-row calendar-grid-header">
+        <div class="calendar-employee-name"></div>
+        <div class="calendar-days-grid">${headerDays}</div>
+      </div>
+      ${rows || `<p class="message-vide">${t("no_validated_leave_month")}</p>`}
+    </div>
+  `;
 }
 
 function extraireJoursCongeDansMois(employe, debutMois, finMois) {
@@ -2352,7 +2655,8 @@ function afficherBlocDemandeConge() {
   blocDemandeVide.hidden = true;
   formulaireDemandeConge.hidden = false;
 
-  const options = trierEmployesParEquipe()
+  const sourceEmployes = estEmployeConnecte() ? [getEmployeConnecte()].filter(Boolean) : trierEmployesParEquipe();
+  const options = sourceEmployes
     .map(
       (employe) =>
         `<option value="${employe.id}">${echapperHtml(employe.nom)} (${echapperHtml(tEquipe(employe.equipe))})</option>`,
@@ -2363,6 +2667,11 @@ function afficherBlocDemandeConge() {
 }
 
 function afficherDemandesEnAttente() {
+  if (!estManager()) {
+    listeDemandesEnAttente.innerHTML = `<li class="vide">${t("no_pending_request")}</li>`;
+    return;
+  }
+
   const demandesEnAttente = conges
     .filter((conge) => conge.statut === "en_attente")
     .sort((a, b) => a.dateDebut.localeCompare(b.dateDebut));
@@ -2685,12 +2994,13 @@ function renderPlanning(semaine) {
 afficherOnglet();
 
 function afficherResume() {
-  if (!employesActifs.length) {
+  const sourceEmployes = estEmployeConnecte() ? employesActifs.filter((entry) => entry.id === sessionState.employeeId) : employesActifs;
+  if (!sourceEmployes.length) {
     listeResume.innerHTML = `<tr><td colspan="5" class="vide">${t("no_employee_registered")}</td></tr>`;
     return;
   }
 
-  const employesTries = [...employesActifs].sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
+  const employesTries = [...sourceEmployes].sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
 
   listeResume.innerHTML = employesTries
     .map((employe) => {

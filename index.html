@@ -22,8 +22,20 @@ initializeApp(firebaseConfig);
 </script>
 </head>
 <body>
+  <section id="login-screen" class="login-screen">
+    <div class="login-card">
+      <h1>Accès à l'application</h1>
+      <form id="login-form" class="login-form">
+        <label for="login-pin">Code PIN</label>
+        <input id="login-pin" type="password" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="____" required />
+        <button type="submit">Entrer</button>
+      </form>
+      <p id="login-error" class="modal-manager__erreur" hidden></p>
+    </div>
+  </section>
+
   <main class="conteneur">
-    <header class="entete-app">
+    <header class="entete-app" id="app-header" hidden>
       <div class="app-header">
         <h1 class="app-title" data-i18n="app_title">Gestion des congés employés</h1>
         <div class="language-switch" aria-label="Sélecteur de langue">
@@ -36,27 +48,33 @@ initializeApp(firebaseConfig);
       </div>
       <div class="menu-principal">
         <button type="button" id="openPlanning">📅 Planning semaine</button>
+        <button type="button" id="logoutButton">↩︎ Déconnexion</button>
       </div>
     </header>
 
     <section class="zone-onglet" data-zone="employes">
-      <section class="carte">
+      <section class="carte" id="employee-dashboard-card">
         <h2 data-i18n="dashboard_title">Tableau de bord</h2>
         <div class="tableau-bord" id="tableau-bord"></div>
       </section>
 
       <section class="carte">
         <h2 data-i18n="calendar_title">Calendrier des vacances</h2>
+        <div class="calendar-nav">
+          <button type="button" id="calendar-prev">&lt; Previous Month</button>
+          <strong id="calendar-month-label">June 2026</strong>
+          <button type="button" id="calendar-next">Next Month &gt;</button>
+        </div>
         <div id="calendrier-conges-mois"></div>
         <div id="teamCoverageToday" class="dashboard-card">
           <h3>Couverture d'équipe aujourd'hui</h3>
           <div id="coverageContent"></div>
         </div>
       </section>
-      <section class="carte">
+      <section class="carte" id="paid-leave-card">
         <h2 data-i18n="new_paid_leave_request_title">Nouvelle demande de congé payé</h2>
       </section>
-      <section class="carte">
+      <section class="carte" id="leave-request-card">
         <h2 data-i18n="new_leave_request_title">Nouvelle demande de congé</h2>
         <div id="bloc-demande-vide" class="message-vide" hidden data-i18n="no_employee_available">Aucun employé disponible</div>
         <form id="formulaire-demande-conge" class="grille-formulaire" hidden>
@@ -84,13 +102,13 @@ initializeApp(firebaseConfig);
         </form>
         <p id="message-demande-conge" class="message-vide" hidden></p>
       </section>
-      <section class="carte">
+      <section class="carte" id="pending-requests-card">
         <h2 data-i18n="pending_requests_title">Demandes de congés en attente</h2>
         <ul id="liste-demandes-en-attente" class="liste-demandes">
           <li class="vide" data-i18n="loading">Chargement...</li>
         </ul>
       </section>
-      <section class="carte">
+      <section class="carte" id="add-employee-card">
         <h2 data-i18n="add_employee_title">Ajouter un employé</h2>
         <form id="formulaire-employe" class="grille-formulaire">
           <label>
@@ -135,7 +153,7 @@ initializeApp(firebaseConfig);
           <button type="submit" data-i18n="add_employee_button">Ajouter employé</button>
         </form>
       </section>
-      <section class="carte">
+      <section class="carte" id="employees-list-card">
         <h2 data-i18n="employees_title">Employés</h2>
         <p class="message-vide" data-i18n="history_hint">Cliquer sur un salarié pour afficher l'historique complet de ses demandes.</p>
         <div class="barre-filtres">
@@ -203,7 +221,7 @@ initializeApp(firebaseConfig);
           </table>
         </div>
       </section>
-      <section class="carte">
+      <section class="carte" id="archived-card">
         <div class="archived-section">
           <button type="button" id="toggleArchived" class="archived-toggle">
             <span data-i18n="archived_employees_title">Employés archivés</span>
@@ -236,7 +254,7 @@ initializeApp(firebaseConfig);
 
 
 
-      <section class="carte" data-zone="resume">
+      <section class="carte" data-zone="resume" id="summary-card">
         <h2 data-i18n="summary_title">Résumé</h2>
         <table>
           <thead>
@@ -256,7 +274,7 @@ initializeApp(firebaseConfig);
         </table>
       </section>
 
-      <section class="carte" data-zone="sauvegarde">
+      <section class="carte" data-zone="sauvegarde" id="save-card">
         <h2 data-i18n="save_title">Sauvegarde</h2>
         <p class="message-vide" data-i18n="save_auto_message">La sauvegarde est gérée automatiquement par le système existant.</p>
       </section>

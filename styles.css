@@ -24,6 +24,83 @@ body {
   line-height: 1.45;
 }
 
+
+.login-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.login-card {
+  background: #fff;
+  border: 1px solid var(--bordure);
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
+  padding: 1rem;
+  width: min(420px, 100%);
+}
+
+.login-form {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+
+.calendar-container {
+  overflow-x: auto;
+}
+
+.calendar-grid-row {
+  display: grid;
+  grid-template-columns: 170px minmax(640px, 1fr);
+  gap: 0.45rem;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.calendar-employee-name {
+  font-weight: 600;
+}
+
+.calendar-days-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(20px, 1fr);
+  gap: 2px;
+}
+
+.calendar-day-header {
+  text-align: center;
+  font-size: 12px;
+  color: var(--discret);
+}
+
+.calendar-day-cell {
+  height: 18px;
+  border-radius: 4px;
+  background: #eef2f7;
+}
+
+.vacation-approved {
+  background-color: #3b82f6;
+}
+
+.vacation-pending {
+  background-color: #f59e0b;
+}
+
+.vacation-rejected {
+  background-color: #9ca3af;
+}
+
 .conteneur {
   width: min(1000px, 92vw);
   margin: 2.2rem auto;
