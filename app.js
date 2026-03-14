@@ -685,13 +685,35 @@ function chargerSession() {
   sessionState = { userRole, employeeId };
 }
 
+function isMobileDevice() {
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+}
+
+function authentifierDesktopAutomatiquement() {
+  if (isMobileDevice()) {
+    return false;
+  }
+
+  if (sessionState.userRole !== "manager") {
+    sessionState = { userRole: "manager", employeeId: "" };
+    enregistrerSession();
+  }
+
+  return true;
+}
+
 function deconnecter() {
   sessionState = { userRole: "", employeeId: "" };
-  enregistrerSession();
+
+  if (!authentifierDesktopAutomatiquement()) {
+    enregistrerSession();
+  }
+
   appliquerControleAcces();
 }
 
 function appliquerControleAcces() {
+  authentifierDesktopAutomatiquement();
   const role = sessionState.userRole;
   const isLogged = role === "manager" || role === "employee";
 
@@ -825,6 +847,10 @@ function attachDesktopPinKeypad(inputElement, onEnter, ariaLabel = "PIN keypad")
 
 function initialiserConnexion() {
   chargerSession();
+
+  if (authentifierDesktopAutomatiquement()) {
+    appliquerControleAcces();
+  }
 
   if (!loginForm || !loginPinInput) {
     appliquerControleAcces();
