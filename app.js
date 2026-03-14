@@ -790,6 +790,25 @@ function initialiserConnexion() {
     loginPinInput.value = String(loginPinInput.value || "").replace(/\D/g, "").slice(0, 4);
   });
 
+  function completeLogin() {
+    sessionState = { userRole: "manager", employeeId: "" };
+    localStorage.setItem("sessionState", JSON.stringify(sessionState));
+
+    if (loginScreen) {
+      loginScreen.style.display = "none";
+      loginScreen.hidden = true;
+    }
+
+    if (appContainer) {
+      appContainer.style.display = "block";
+      appContainer.hidden = false;
+    }
+
+    if (appHeader) {
+      appHeader.hidden = false;
+    }
+  }
+
   function handleLogin() {
     const enteredPin = String(loginPinInput.value || "")
       .replace(/\D/g, "")
@@ -802,8 +821,7 @@ function initialiserConnexion() {
 
     // MANAGER LOGIN FIRST
     if (enteredPin === managerCode) {
-      sessionState = { userRole: "manager", employeeId: "" };
-      localStorage.setItem("sessionState", JSON.stringify(sessionState));
+      completeLogin();
       loginPinInput.value = "";
       loginError.hidden = true;
       appliquerControleAcces();
@@ -823,8 +841,7 @@ function initialiserConnexion() {
       return;
     }
 
-    sessionState = { userRole: "employee", employeeId: employe.id };
-    enregistrerSession();
+    completeLogin();
     loginPinInput.value = "";
     loginError.hidden = true;
     appliquerControleAcces();
@@ -844,19 +861,16 @@ function initialiserConnexion() {
 
   loginForm.addEventListener("submit", triggerLogin);
 
-  loginPinInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      triggerLogin(event);
+  const enterButton = loginEnterButton;
+  const pinInput = loginPinInput;
+
+  enterButton?.addEventListener("click", triggerLogin);
+  pinInput?.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      triggerLogin(e);
     }
   });
-
-  loginPinInput.addEventListener("keypress", (event) => {
-    if (event.key === "Enter") {
-      triggerLogin(event);
-    }
-  });
-
-  loginEnterButton?.addEventListener("click", triggerLogin);
 
   attachDesktopPinKeypad(loginPinInput, handleLogin, "Login PIN keypad");
 
