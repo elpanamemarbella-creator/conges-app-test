@@ -539,8 +539,8 @@ const CLASSES_EQUIPE = {
 };
 
 const loginScreen = document.getElementById("login-screen");
-const loginForm = document.getElementById("pinLoginForm") || document.getElementById("login-form");
-const loginPinInput = document.getElementById("pinInput");
+const loginForm = document.getElementById("loginForm") || document.getElementById("pinLoginForm") || document.getElementById("login-form");
+const loginPinInput = document.getElementById("loginPinInput") || document.getElementById("pinInput");
 const loginError = document.getElementById("login-error");
 const appHeader = document.getElementById("app-header");
 const employeeDashboardCard = document.getElementById("employee-dashboard-card");
@@ -874,6 +874,8 @@ function initialiserConnexion() {
     rafraichirDonnees();
   }
 
+  window.handleLogin = handleLogin;
+
   loginForm.addEventListener("submit", (event) => {
     event.preventDefault();
     handleLogin();
@@ -1013,7 +1015,7 @@ function appliquerTraductionsStatiques() {
   if (loginScreen) {
     loginScreen.querySelector("h1").textContent = t("login_title");
   }
-  const loginLabel = document.querySelector('label[for="pinInput"]');
+  const loginLabel = document.querySelector('label[for="loginPinInput"]') || document.querySelector('label[for="pinInput"]');
   if (loginLabel) loginLabel.textContent = t("login_pin_label");
   const loginSubmit = document.getElementById("login-submit") || loginForm?.querySelector('button[type="submit"]');
   if (loginSubmit) loginSubmit.textContent = t("login_submit");
