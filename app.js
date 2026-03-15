@@ -88,6 +88,7 @@ const TRADUCTIONS = {
     save_auto_message: "La sauvegarde est gérée automatiquement par le système existant.",
     calendar_title: "Calendrier des vacances",
     calendar_view_label: "Vue",
+    calendar_view_today: "Aujourd'hui",
     calendar_view_weekly: "Vue hebdomadaire",
     calendar_view_monthly: "Vue mensuelle",
     calendar_view_yearly: "Vue annuelle",
@@ -164,8 +165,8 @@ const TRADUCTIONS = {
     planning_status_sick: "Maladie",
     planning_status_rest: "Repos",
     planning_status_work: "Travail",
-    calendar_prev: "< Précédent",
-    calendar_next: "Suivant >",
+    calendar_prev: "Précédent",
+    calendar_next: "Suivant",
     leave_status_approved: "Validé",
     leave_status_pending: "En attente",
     leave_status_rejected: "Refusé",
@@ -231,7 +232,8 @@ const TRADUCTIONS = {
     save_title: "Guardar",
     save_auto_message: "La copia de seguridad se gestiona automáticamente por el sistema existente.",
     calendar_title: "Calendario de vacaciones",
-    calendar_view_label: "View",
+    calendar_view_label: "Vista",
+    calendar_view_today: "Hoy",
     calendar_view_weekly: "Vista semanal",
     calendar_view_monthly: "Vista mensual",
     calendar_view_yearly: "Vista anual",
@@ -308,8 +310,8 @@ const TRADUCTIONS = {
     planning_status_sick: "Baja médica",
     planning_status_rest: "Descanso",
     planning_status_work: "Programado",
-    calendar_prev: "< Anterior",
-    calendar_next: "Siguiente >",
+    calendar_prev: "Anterior",
+    calendar_next: "Siguiente",
     leave_status_approved: "Aprobado",
     leave_status_pending: "Pendiente",
     leave_status_rejected: "Rechazado",
@@ -376,6 +378,7 @@ const TRADUCTIONS = {
     save_auto_message: "Backup is handled automatically by the existing system.",
     calendar_title: "Leave calendar",
     calendar_view_label: "View",
+    calendar_view_today: "Today",
     calendar_view_weekly: "Weekly view",
     calendar_view_monthly: "Monthly view",
     calendar_view_yearly: "Yearly view",
@@ -452,8 +455,8 @@ const TRADUCTIONS = {
     planning_status_sick: "Sick leave",
     planning_status_rest: "Day off",
     planning_status_work: "Scheduled",
-    calendar_prev: "< Previous",
-    calendar_next: "Next >",
+    calendar_prev: "Previous",
+    calendar_next: "Next",
     leave_status_approved: "Approved",
     leave_status_pending: "Pending",
     leave_status_rejected: "Rejected",
@@ -668,8 +671,8 @@ let employeSelectionneId = "";
 let currentWeek = getStartOfWeek(new Date());
 let pinModalEmployeId = "";
 let currentMonthDate = new Date();
-currentMonthDate.setDate(1);
-let currentCalendarView = "weekly";
+currentMonthDate.setHours(12, 0, 0, 0);
+let currentCalendarView = "today";
 let sessionState = {
   userRole: "",
   employeeId: "",
@@ -1248,9 +1251,38 @@ function normaliserPlanningEmploye(employe) {
   };
 }
 
+
+function dedupeEmployeesByName(employeesList) {
+  const grouped = new Map();
+
+  employeesList.forEach((employee) => {
+    const normalizedName = String(employee?.nom || "").trim().toLocaleLowerCase("fr");
+    if (!normalizedName) {
+      return;
+    }
+
+    if (!grouped.has(normalizedName)) {
+      grouped.set(normalizedName, []);
+    }
+
+    grouped.get(normalizedName).push(employee);
+  });
+
+  const selectedIds = new Set();
+
+  grouped.forEach((duplicates) => {
+    const activeDuplicates = duplicates.filter((entry) => entry.actif !== false);
+    const pool = activeDuplicates.length ? activeDuplicates : duplicates;
+    pool.sort((a, b) => String(a.nom || "").localeCompare(String(b.nom || ""), "fr", { sensitivity: "base" }));
+    selectedIds.add(pool[0].id);
+  });
+
+  return employeesList.filter((employee) => selectedIds.has(employee.id));
+}
+
 async function rafraichirDonnees() {
   const [employesBruts, congesCharges] = await Promise.all([chargerEmployes(), chargerConges()]);
-  employes = fusionnerEmployesEtConges(employesBruts, congesCharges);
+  employes = dedupeEmployeesByName(fusionnerEmployesEtConges(employesBruts, congesCharges));
   employesActifs = employes.filter((employe) => employe.actif !== false);
   employesArchives = employes.filter((employe) => employe.actif === false);
   employees = [...employesActifs];
@@ -1313,7 +1345,7 @@ nextWeekButton?.addEventListener("click", () => {
 });
 
 function shiftCalendarPeriod(delta) {
-  if (currentCalendarView === "weekly") {
+  if (currentCalendarView === "today" || currentCalendarView === "weekly") {
     currentMonthDate.setDate(currentMonthDate.getDate() + (delta * 7));
   } else if (currentCalendarView === "yearly") {
     currentMonthDate = new Date(currentMonthDate.getFullYear() + delta, 0, 1);
@@ -1321,6 +1353,7 @@ function shiftCalendarPeriod(delta) {
     currentMonthDate = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + delta, 1);
   }
 
+  currentMonthDate.setHours(12, 0, 0, 0);
   renderCalendarPlanning();
 }
 
@@ -1333,7 +1366,11 @@ calendarNextButton?.addEventListener("click", () => {
 });
 
 calendarViewSelect?.addEventListener("change", () => {
-  currentCalendarView = calendarViewSelect.value || "weekly";
+  currentCalendarView = calendarViewSelect.value || "today";
+  if (currentCalendarView === "today" || currentCalendarView === "weekly") {
+    currentMonthDate = new Date();
+    currentMonthDate.setHours(12, 0, 0, 0);
+  }
   renderCalendarPlanning();
 });
 
@@ -1346,7 +1383,7 @@ calendrierCongesMois?.addEventListener("touchend", (event) => {
   const touchEndX = event.changedTouches?.[0]?.screenX || 0;
   const diff = touchEndX - touchStartX;
 
-  if (Math.abs(diff) < 50 || currentCalendarView !== "weekly") {
+  if (Math.abs(diff) < 50 || (currentCalendarView !== "weekly" && currentCalendarView !== "today")) {
     return;
   }
 
@@ -2749,7 +2786,7 @@ function getCoverageByTeamForDate(date) {
 }
 
 function getCalendarDatesForView() {
-  if (currentCalendarView === "weekly") {
+  if (currentCalendarView === "today" || currentCalendarView === "weekly") {
     const start = getStartOfWeek(currentMonthDate);
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(start);
@@ -2798,6 +2835,10 @@ function getCalendarStatusClass(emp, date) {
 }
 
 function getCalendarLabel() {
+  if (currentCalendarView === "today") {
+    return t("calendar_view_today");
+  }
+
   if (currentCalendarView === "weekly") {
     const debut = getStartOfWeek(currentMonthDate);
     return formaterLibelleSemaine(debut);
@@ -2882,7 +2923,8 @@ function renderCalendarPlanning() {
             })
             .join("");
 
-          return `<div class="calendar-days-head">${headers}</div>${rows}`;
+          const headerRow = `<div class="calendar-employee-row calendar-employee-row--header"><div class="calendar-employee-name"></div><div class="calendar-squares">${headers}</div></div>`;
+          return `${headerRow}${rows}`;
         })();
 
       return `
@@ -3048,13 +3090,10 @@ function afficherOnglet() {
 
 function getStartOfWeek(date) {
   const d = new Date(date);
-  const day = d.getDay() || 7;
-
-  if (day !== 1) {
-    d.setHours(-24 * (day - 1));
-  }
-
   d.setHours(0, 0, 0, 0);
+  const day = d.getDay();
+  const diff = (day + 6) % 7;
+  d.setDate(d.getDate() - diff);
   return d;
 }
 

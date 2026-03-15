@@ -1113,20 +1113,19 @@ th {
 }
 
 .calendar-employee-row {
+  --calendar-name-width: 130px;
   display: grid;
-  grid-template-columns: 130px 1fr;
+  grid-template-columns: var(--calendar-name-width) 1fr;
   gap: 0.4rem;
   align-items: center;
   margin-bottom: 0.35rem;
 }
 
-.calendar-days-head {
-  margin-left: 130px;
-  margin-bottom: 0.35rem;
+.calendar-employee-row--header {
+  margin-bottom: 0.25rem;
 }
 
-.calendar-squares,
-.calendar-days-head {
+.calendar-squares {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(12px, 1fr);
@@ -1172,11 +1171,7 @@ th {
   }
 
   .calendar-employee-row {
-    grid-template-columns: 95px 1fr;
-  }
-
-  .calendar-days-head {
-    margin-left: 95px;
+    --calendar-name-width: 95px;
   }
 
   .calendar-square {
