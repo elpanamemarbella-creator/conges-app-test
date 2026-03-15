@@ -1114,8 +1114,12 @@ th {
   border: 1px solid var(--bordure);
   border-radius: 10px;
   padding: 0.75rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0;
   background: #fff;
+}
+
+.team-block {
+  margin-bottom: 6px;
 }
 
 .planning-team-card h3 {
@@ -1130,7 +1134,8 @@ th {
 }
 
 .employee-row {
-  height: 26px;
+  height: 24px;
+  line-height: 24px;
   font-size: 13px;
 }
 
@@ -1146,7 +1151,7 @@ th {
   display: grid;
   grid-template-columns: 120px repeat(7, 1fr);
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   margin-bottom: 0.35rem;
 }
 
@@ -1159,8 +1164,8 @@ th {
 }
 
 .calendar-square.status-square {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 2px;
 }
 
