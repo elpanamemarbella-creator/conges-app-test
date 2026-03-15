@@ -2668,18 +2668,20 @@ function afficherTableauBord() {
   const employesEnCongeAujourdhui = calculerEmployesEnCongeAujourdHui();
 
   tableauBord.innerHTML = `
-    <article class="tuile-kpi">
-      <span class="kpi-titre">${t("kpi_employees")}</span>
-      <strong class="kpi-valeur">${totalEmployes}</strong>
-    </article>
-    <article class="tuile-kpi">
-      <span class="kpi-titre">${t("kpi_pending_requests")}</span>
-      <strong class="kpi-valeur">${demandesEnAttente}</strong>
-    </article>
-    <article class="tuile-kpi">
-      <span class="kpi-titre">${t("kpi_on_leave_today")}</span>
-      <strong class="kpi-valeur">${employesEnCongeAujourdhui}</strong>
-    </article>
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-number">${totalEmployes}</div>
+        <div class="stat-label">Employés</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">${demandesEnAttente}</div>
+        <div class="stat-label">Attente</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">${employesEnCongeAujourdhui}</div>
+        <div class="stat-label">Congé</div>
+      </div>
+    </div>
   `;
 }
 
