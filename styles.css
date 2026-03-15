@@ -1287,6 +1287,45 @@ th {
     border-radius: 10px;
     min-height: 36px;
   }
+
+  .ligne-famille,
+  .ligne-famille-contenu,
+  .famille-contenu,
+  .table-famille,
+  .planning-team-card .team-header {
+    width: 100%;
+    margin-left: 0 !important;
+    box-sizing: border-box;
+  }
+
+  .ligne-famille td,
+  .ligne-famille-contenu .famille-cellule,
+  .planning-team-card .team-header {
+    padding-left: 10px;
+  }
+
+  .ligne-famille td::before,
+  .ligne-famille-contenu .famille-cellule::before {
+    content: none;
+    min-width: 0;
+  }
+
+  .ligne-famille td,
+  .ligne-famille-contenu .famille-cellule {
+    display: block;
+  }
+
+  .family-toggle,
+  .planning-team-card .team-header {
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .family-toggle {
+    width: 100%;
+    margin-left: 0;
+    padding-left: 10px;
+  }
 }
 
 .calendar-view-picker {
