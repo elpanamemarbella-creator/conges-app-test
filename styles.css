@@ -452,6 +452,57 @@ th {
   letter-spacing: 0.02em;
 }
 
+.ligne-famille td {
+  padding: 0;
+  background: #f3f4f6;
+}
+
+.family-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-start;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--texte);
+  padding: 0.75rem;
+  font-weight: 700;
+}
+
+.family-toggle:hover {
+  background: #e5e7eb;
+  color: var(--texte);
+}
+
+.family-arrow {
+  width: 1rem;
+  flex-shrink: 0;
+}
+
+.ligne-famille-contenu .famille-cellule {
+  padding: 0;
+}
+
+.famille-contenu {
+  max-height: 2000px;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 140ms ease, opacity 120ms ease;
+}
+
+.ligne-famille-contenu.fermee .famille-contenu {
+  max-height: 0;
+  opacity: 0;
+}
+
+.table-famille {
+  margin-top: 0;
+  border: 0;
+  border-radius: 0;
+}
+
 .ligne-employe.selectionne {
   outline: 2px solid var(--primaire);
 }
