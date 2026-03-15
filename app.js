@@ -564,7 +564,6 @@ const loginEnterButton = document.getElementById("loginEnterButton") || document
 const loginError = document.getElementById("login-error");
 const appHeader = document.getElementById("app-header");
 const employeeDashboardCard = document.getElementById("employee-dashboard-card");
-const paidLeaveCard = document.getElementById("paid-leave-card");
 const leaveRequestCard = document.getElementById("leave-request-card");
 const pendingRequestsCard = document.getElementById("pending-requests-card");
 const addEmployeeCard = document.getElementById("add-employee-card");
@@ -803,7 +802,7 @@ function appliquerControleAcces() {
     appHeader.hidden = !isLogged;
   }
 
-  const cardsManager = [paidLeaveCard, pendingRequestsCard, addEmployeeCard, employeesListCard, archivedCard, summaryCard, saveCard, planningView];
+  const cardsManager = [pendingRequestsCard, addEmployeeCard, employeesListCard, archivedCard, summaryCard, saveCard, planningView];
 
   if (!isLogged) {
     cardsManager.concat([employeeDashboardCard, leaveRequestCard]).forEach((card) => { if (card) card.hidden = true; });
