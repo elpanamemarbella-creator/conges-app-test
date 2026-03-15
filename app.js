@@ -723,6 +723,7 @@ let employesArchives = [];
 let archivesOuvertes = false;
 let langueCourante = detecterLangueInitiale();
 let employeSelectionneId = "";
+let famillesOuvertes = new Set();
 let currentWeek = getStartOfWeek(new Date());
 let pinModalEmployeId = "";
 let currentMonthDate = new Date();
@@ -1486,6 +1487,18 @@ boutonBasculerArchives?.addEventListener("click", () => {
 mettreAJourLibelleArchives();
 
 listeEmployes.addEventListener("click", async (event) => {
+  const boutonFamille = event.target.closest(".family-toggle[data-family-id]");
+  if (boutonFamille) {
+    const familyId = boutonFamille.dataset.familyId;
+    if (famillesOuvertes.has(familyId)) {
+      famillesOuvertes.delete(familyId);
+    } else {
+      famillesOuvertes.add(familyId);
+    }
+    afficherEmployes();
+    return;
+  }
+
   const celluleCongesPris = event.target.closest(".cellule-conges-pris");
   if (celluleCongesPris) {
     const ligneCible = celluleCongesPris.closest(".ligne-employe[data-employe-id]");
@@ -2538,74 +2551,101 @@ function afficherEmployes() {
     return;
   }
 
-  let equipeEnCours = "";
+  if (!estEmployeConnecte() && employeSelectionneId) {
+    const employeSelectionne = employesTries.find((employe) => employe.id === employeSelectionneId);
+    if (employeSelectionne) {
+      famillesOuvertes.add(employeSelectionne.equipe);
+    }
+  }
 
-  listeEmployes.innerHTML = employesTries
-    .map((employe) => {
-      const congesAcquis = calculerCongesAcquis(employe.dateEmbauche);
-      const congesPris = arrondir1Decimale(Number(employe.congesPris) || 0);
-      const congesRestants = arrondir1Decimale(congesAcquis - congesPris);
-      const [libelleStatut, classeStatut] = determinerStatut(congesRestants);
-      const classeEquipe = CLASSES_EQUIPE[employe.equipe] || "extras";
-      const teamRowClass = getTeamRowClass(employe.equipe);
-      const ajouterTitre = equipeEnCours !== employe.equipe;
+  const genererLigneEmploye = (employe) => {
+    const congesAcquis = calculerCongesAcquis(employe.dateEmbauche);
+    const congesPris = arrondir1Decimale(Number(employe.congesPris) || 0);
+    const congesRestants = arrondir1Decimale(congesAcquis - congesPris);
+    const [libelleStatut, classeStatut] = determinerStatut(congesRestants);
+    const classeEquipe = CLASSES_EQUIPE[employe.equipe] || "extras";
+    const teamRowClass = getTeamRowClass(employe.equipe);
 
-      if (ajouterTitre) {
-        equipeEnCours = employe.equipe;
-      }
-
-      if (estEmployeConnecte()) {
-        return `
-          <tr class="ligne-employe ${teamRowClass} equipe-${classeEquipe}" data-employe-id="${employe.id}">
-            <td data-label="${t("employee_col")}"><span class="employee-name">${echapperHtml(employe.nom)}</span></td>
-            <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
-            <td data-label="${t("taken_leave_col")}">${congesPris.toFixed(1)}</td>
-            <td data-label="${t("remaining_leave_col")}">${congesRestants.toFixed(1)}</td>
-            <td data-label="${t("status_col")}" class="status-${classeStatut}">${libelleStatut}</td>
-            <td data-label="${t("action_col")}"><button type="button" id="employee-request-leave">${t("new_leave_request_title")}</button></td>
-          </tr>
-        `;
-      }
-
+    if (estEmployeConnecte()) {
       return `
-        ${
-          ajouterTitre
-            ? `<tr class="ligne-groupe"><td colspan="10">=== ${echapperHtml(tEquipe(employe.equipe).toUpperCase())} ===</td></tr>`
-            : ""
-        }
-        <tr class="ligne-employe ${teamRowClass} equipe-${classeEquipe} ${employeSelectionneId === employe.id ? "selectionne" : ""}" data-employe-id="${employe.id}">
-          <td data-label="${t("employee_col")}">
-            <span class="employee-name">${echapperHtml(employe.nom)}</span>
-            ${
-              employe.note
-                ? `<span class="note-indicator note-icon" aria-label="${t("note_aria_label")}" data-nom="${echapperHtml(employe.nom)}" data-note="${echapperHtml(employe.note)}">📝</span>`
-                : ""
-            }
-          </td>
-          <td data-label="${t("team_col")}" class="employee-team" data-id="${employe.id}">${echapperHtml(tEquipe(employe.equipe))}</td>
-          <td data-label="${t("hire_date_col")}">${formaterDateFr(employe.dateEmbauche)}</td>
+        <tr class="ligne-employe ${teamRowClass} equipe-${classeEquipe}" data-employe-id="${employe.id}">
+          <td data-label="${t("employee_col")}"><span class="employee-name">${echapperHtml(employe.nom)}</span></td>
           <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
-          <td data-label="${t("taken_leave_col")}" class="cellule-conges-pris">${congesPris.toFixed(1)}</td>
+          <td data-label="${t("taken_leave_col")}">${congesPris.toFixed(1)}</td>
           <td data-label="${t("remaining_leave_col")}">${congesRestants.toFixed(1)}</td>
-          <td class="vacation-history" data-label="${t("leave_history_col")}" data-history='${JSON.stringify(employe.historiqueConges)}'>${getDernierConge(employe.historiqueConges)}</td>
           <td data-label="${t("status_col")}" class="status-${classeStatut}">${libelleStatut}</td>
-          <td data-label="${t("action_col")}" class="cellule-actions">
-            <button class="setWeeklyRest" data-weekly-rest-id="${employe.id}">Repos hebdomadaire</button>
-            <button class="bouton-supprimer" data-supprimer-id="${employe.id}">${t("delete")}</button>
+          <td data-label="${t("action_col")}"><button type="button" id="employee-request-leave">${t("new_leave_request_title")}</button></td>
+        </tr>
+      `;
+    }
+
+    return `
+      <tr class="ligne-employe ${teamRowClass} equipe-${classeEquipe} ${employeSelectionneId === employe.id ? "selectionne" : ""}" data-employe-id="${employe.id}">
+        <td data-label="${t("employee_col")}">
+          <span class="employee-name">${echapperHtml(employe.nom)}</span>
+          ${
+            employe.note
+              ? `<span class="note-indicator note-icon" aria-label="${t("note_aria_label")}" data-nom="${echapperHtml(employe.nom)}" data-note="${echapperHtml(employe.note)}">📝</span>`
+              : ""
+          }
+        </td>
+        <td data-label="${t("team_col")}" class="employee-team" data-id="${employe.id}">${echapperHtml(tEquipe(employe.equipe))}</td>
+        <td data-label="${t("hire_date_col")}">${formaterDateFr(employe.dateEmbauche)}</td>
+        <td data-label="${t("earned_leave_col")}">${congesAcquis.toFixed(1)}</td>
+        <td data-label="${t("taken_leave_col")}" class="cellule-conges-pris">${congesPris.toFixed(1)}</td>
+        <td data-label="${t("remaining_leave_col")}">${congesRestants.toFixed(1)}</td>
+        <td class="vacation-history" data-label="${t("leave_history_col")}" data-history='${JSON.stringify(employe.historiqueConges)}'>${getDernierConge(employe.historiqueConges)}</td>
+        <td data-label="${t("status_col")}" class="status-${classeStatut}">${libelleStatut}</td>
+        <td data-label="${t("action_col")}" class="cellule-actions">
+          <button class="setWeeklyRest" data-weekly-rest-id="${employe.id}">Repos hebdomadaire</button>
+          <button class="bouton-supprimer" data-supprimer-id="${employe.id}">${t("delete")}</button>
+        </td>
+        <td data-label="${t("pin_col")}" class="cellule-pin">
+          <span class="pin-icon" data-edit-pin-id="${employe.id}" title="${echapperHtml(employe.pinCode ? t("edit_pin_tooltip") : t("configure_pin_tooltip"))}" aria-label="${echapperHtml(employe.pinCode ? t("edit_pin_tooltip") : t("configure_pin_tooltip"))}">${employe.pinCode ? "🔒" : "⚠"}</span>
+        </td>
+      </tr>
+    `;
+  };
+
+  if (estEmployeConnecte()) {
+    listeEmployes.innerHTML = employesTries.map(genererLigneEmploye).join("");
+    afficherEmployesArchives();
+    afficherHistoriqueSalarieSelectionne();
+    return;
+  }
+
+  const employesParFamille = new Map();
+  employesTries.forEach((employe) => {
+    if (!employesParFamille.has(employe.equipe)) {
+      employesParFamille.set(employe.equipe, []);
+    }
+    employesParFamille.get(employe.equipe).push(employe);
+  });
+
+  listeEmployes.innerHTML = Array.from(employesParFamille.entries())
+    .map(([equipe, groupeEmployes]) => {
+      const ouverte = famillesOuvertes.has(equipe);
+      const fleche = ouverte ? "▼" : "▶";
+      return `
+        <tr class="ligne-famille" data-family-id="${echapperHtml(equipe)}">
+          <td colspan="10">
+            <button type="button" class="family-toggle" data-family-id="${echapperHtml(equipe)}" aria-expanded="${ouverte ? "true" : "false"}">
+              <span class="family-arrow">${fleche}</span>
+              <span class="family-name">${echapperHtml(tEquipe(equipe).toUpperCase())}</span>
+              <span class="family-count">(${groupeEmployes.length})</span>
+            </button>
           </td>
-          <td data-label="${t("pin_col")}" class="cellule-pin">
-            <span class="pin-icon" data-edit-pin-id="${employe.id}" title="${echapperHtml(employe.pinCode ? t("edit_pin_tooltip") : t("configure_pin_tooltip"))}" aria-label="${echapperHtml(employe.pinCode ? t("edit_pin_tooltip") : t("configure_pin_tooltip"))}">${employe.pinCode ? "🔒" : "⚠"}</span>
+        </tr>
+        <tr class="ligne-famille-contenu ${ouverte ? "ouverte" : "fermee"}" data-family-id="${echapperHtml(equipe)}">
+          <td colspan="10" class="famille-cellule">
+            <div class="famille-contenu">
+              <table class="table-famille"><tbody>${groupeEmployes.map(genererLigneEmploye).join("")}</tbody></table>
+            </div>
           </td>
         </tr>
       `;
     })
     .join("");
-
-  if (estEmployeConnecte()) {
-    afficherEmployesArchives();
-    afficherHistoriqueSalarieSelectionne();
-    return;
-  }
 
   const lignesEmployes = listeEmployes.querySelectorAll(".ligne-employe[data-employe-id]");
   lignesEmployes.forEach((ligne) => {
