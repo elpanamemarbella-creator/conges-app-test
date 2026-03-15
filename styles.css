@@ -925,7 +925,7 @@ th {
   font-weight: bold;
 }
 
-.team-header {
+.planning-table-team-header {
   background: #e5e7eb;
   color: var(--texte);
   font-weight: bold;
@@ -1123,6 +1123,17 @@ th {
   font-size: 0.95rem;
 }
 
+.planning-team-card .team-header {
+  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.employee-row {
+  height: 26px;
+  font-size: 13px;
+}
+
 .planning-coverage {
   margin: 0 0 0.5rem;
   color: var(--discret);
@@ -1141,6 +1152,16 @@ th {
 
 .calendar-header {
   margin-bottom: 0.25rem;
+}
+
+.calendar-row.employee-row {
+  margin-bottom: 4px;
+}
+
+.calendar-square.status-square {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
 }
 
 .calendar-employee-name {

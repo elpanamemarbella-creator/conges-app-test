@@ -2890,12 +2890,12 @@ function renderCalendarPlanning() {
               const squares = Array.from({ length: lastDay }, (_, i) => {
                 const d = new Date(firstDay.getFullYear(), firstDay.getMonth(), i + 1);
                 d.setHours(12, 0, 0, 0);
-                return `<span class="calendar-square ${getCalendarStatusClass(emp, d)}"></span>`;
+                return `<span class="calendar-square status-square ${getCalendarStatusClass(emp, d)}"></span>`;
               }).join("");
               return `<div class="calendar-year-month"><span class="calendar-year-month-label">${firstDay.toLocaleDateString(langueCourante, { month: "short" })}</span><div class="calendar-squares">${squares}</div></div>`;
             }).join("");
 
-            return `<div class="calendar-row"><div class="calendar-employee-name">${echapperHtml(emp.nom)}</div><div class="calendar-year-grid">${months}</div></div>`;
+            return `<div class="calendar-row employee-row"><div class="calendar-employee-name">${echapperHtml(emp.nom)}</div><div class="calendar-year-grid">${months}</div></div>`;
           })
           .join("")
         : (() => {
@@ -2908,9 +2908,9 @@ function renderCalendarPlanning() {
           const rows = groupedByTeam[team]
             .map((emp) => {
               const squares = dates
-                .map((d) => `<span class="calendar-square ${getCalendarStatusClass(emp, d)}"></span>`)
+                .map((d) => `<span class="calendar-square status-square ${getCalendarStatusClass(emp, d)}"></span>`)
                 .join("");
-              return `<div class="calendar-row" style="grid-template-columns: ${gridColumns};"><div class="calendar-employee-name">${echapperHtml(emp.nom)}</div><div class="calendar-squares">${squares}</div></div>`;
+              return `<div class="calendar-row employee-row" style="grid-template-columns: ${gridColumns};"><div class="calendar-employee-name">${echapperHtml(emp.nom)}</div><div class="calendar-squares">${squares}</div></div>`;
             })
             .join("");
 
@@ -2920,8 +2920,8 @@ function renderCalendarPlanning() {
 
       return `
         <section class="planning-team-card ${echapperHtml(getTeamRowClass(team))}">
-          <h3>${echapperHtml(teamLabel(team).toUpperCase())}</h3>
-          <p class="planning-coverage">${echapperHtml(t("team_coverage_today"))}: ${coverage[team].working} / ${coverage[team].total}</p>
+          <h3 class="team-header">${echapperHtml(teamLabel(team).toUpperCase())}</h3>
+          <p class="planning-coverage">${echapperHtml(teamLabel(team).toUpperCase())} (${coverage[team].working}/${coverage[team].total})</p>
           ${employeesHtml}
         </section>
       `;
@@ -3217,7 +3217,7 @@ function renderPlanning(semaine) {
 
       cell.colSpan = 8;
       cell.textContent = tEquipe(emp.equipe).toUpperCase();
-      cell.className = "team-header";
+      cell.className = "planning-table-team-header";
       cell.style.background = getEmployeeTeamTint(emp, 0.18);
       cell.style.color = getEmployeeTeamColor(emp);
 
