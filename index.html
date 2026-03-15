@@ -79,32 +79,7 @@ initializeApp(firebaseConfig);
         <h2 data-i18n="new_paid_leave_request_title">Nouvelle demande de congé payé</h2>
       </section>
       <section class="carte" id="leave-request-card">
-        <h2 data-i18n="new_leave_request_title">Nouvelle demande de congé</h2>
-        <div id="bloc-demande-vide" class="message-vide" hidden data-i18n="no_employee_available">Aucun employé disponible</div>
-        <form id="formulaire-demande-conge" class="grille-formulaire" hidden>
-          <label>
-            <span data-i18n="employee_col">Employé</span>
-            <select id="employe-demande" required></select>
-          </label>
-
-          <label>
-            <span data-i18n="start_date_label">Date de début</span>
-            <input type="date" id="demande-date-debut" required />
-          </label>
-
-          <label>
-            <span data-i18n="end_date_label">Date de fin</span>
-            <input type="date" id="demande-date-fin" required />
-          </label>
-
-          <label>
-            <span data-i18n="confirm_birth_date_label">Confirmez votre date de naissance (JJ/MM)</span>
-            <input type="text" id="demande-birth-date" inputmode="numeric" maxlength="5" placeholder="18/03" data-i18n-placeholder="birth_date_placeholder" required />
-          </label>
-
-          <button type="submit" data-i18n="add_request_button">Ajouter la demande</button>
-        </form>
-        <p id="message-demande-conge" class="message-vide" hidden></p>
+        <button type="button" id="open-leave-request-modal" class="modal-action-button" data-i18n="new_leave_request_title">Nouvelle demande de congé</button>
       </section>
       <section class="carte" id="pending-requests-card">
         <h2 data-i18n="pending_requests_title">Demandes de congés en attente</h2>
@@ -114,48 +89,7 @@ initializeApp(firebaseConfig);
       </section>
       <section class="carte" id="add-employee-card">
         <h2 data-i18n="add_employee_title">Ajouter un employé</h2>
-        <form id="formulaire-employe" class="grille-formulaire">
-          <label>
-            <span data-i18n="employee_name_label">Nom de l'employé</span>
-            <input type="text" id="nom-employe" required placeholder="ex. Alex Martin" data-i18n-placeholder="employee_name_placeholder" />
-          </label>
-
-          <label>
-            <span data-i18n="team_label">Equipe</span>
-            <select id="equipe-employe" required>
-              <option value="" data-i18n="team_select_placeholder">Sélectionner une équipe</option>
-              <option value="nettoyage-entretien" data-equipe-value="nettoyage-entretien">Nettoyage / Entretien</option>
-              <option value="bar matin" data-equipe-value="bar matin">Bar matin</option>
-              <option value="salle matin" data-equipe-value="salle matin">Salle matin</option>
-              <option value="cuisine matin" data-equipe-value="cuisine matin">Cuisine matin</option>
-              <option value="cuisine soir" data-equipe-value="cuisine soir">Cuisine soir</option>
-              <option value="salle soir" data-equipe-value="salle soir">Salle soir</option>
-              <option value="bar soir" data-equipe-value="bar soir">Bar soir</option>
-              <option value="chicha" data-equipe-value="chicha">Chicha</option>
-              <option value="dj" data-equipe-value="dj">DJ</option>
-              <option value="rp" data-equipe-value="rp">RP</option>
-              <option value="portier" data-equipe-value="portier">Portier</option>
-              <option value="extra" data-equipe-value="extra">Extra</option>
-            </select>
-          </label>
-
-          <label>
-            <span data-i18n="hire_date_label">Date d'embauche</span>
-            <input type="date" id="date-embauche" required />
-          </label>
-
-          <label>
-            <span data-i18n="used_leave_label">Congés déjà pris</span>
-            <input type="number" id="conges-pris" min="0" step="0.5" value="0" required />
-          </label>
-
-          <label>
-            <span data-i18n="birth_date_label">Date de naissance (JJ/MM)</span>
-            <input type="text" id="birth-date-employe" inputmode="numeric" maxlength="5" placeholder="18/03" data-i18n-placeholder="birth_date_placeholder" required />
-          </label>
-
-          <button type="submit" data-i18n="add_employee_button">Ajouter employé</button>
-        </form>
+        <button type="button" id="open-add-employee-modal" class="modal-action-button" data-i18n="add_employee_button">Ajouter employé</button>
       </section>
       <section class="carte" id="employees-list-card">
         <h2 data-i18n="employees_title">Employés</h2>
@@ -338,6 +272,93 @@ initializeApp(firebaseConfig);
         <button type="button" id="pin-modal-annuler" class="modal-manager__annuler" data-i18n="cancel">Annuler</button>
         <button type="button" id="pin-modal-enregistrer" data-i18n="save">Enregistrer</button>
       </div>
+    </div>
+  </div>
+
+  <div id="leave-request-modal" class="app-modal" hidden>
+    <div class="app-modal__overlay" data-modal-overlay-close="leave-request-modal"></div>
+    <div class="app-modal__content" role="dialog" aria-modal="true" aria-labelledby="leave-request-modal-title">
+      <div class="app-modal__header">
+        <h3 id="leave-request-modal-title" data-i18n="new_leave_request_title">Nouvelle demande de congé</h3>
+        <button type="button" class="app-modal__close" data-modal-close="leave-request-modal" aria-label="Fermer">×</button>
+      </div>
+      <div id="bloc-demande-vide" class="message-vide" hidden data-i18n="no_employee_available">Aucun employé disponible</div>
+      <form id="formulaire-demande-conge" class="grille-formulaire" hidden>
+        <label>
+          <span data-i18n="employee_col">Employé</span>
+          <select id="employe-demande" required></select>
+        </label>
+
+        <label>
+          <span data-i18n="start_date_label">Date de début</span>
+          <input type="date" id="demande-date-debut" required />
+        </label>
+
+        <label>
+          <span data-i18n="end_date_label">Date de fin</span>
+          <input type="date" id="demande-date-fin" required />
+        </label>
+
+        <label>
+          <span data-i18n="confirm_birth_date_label">Confirmez votre date de naissance (JJ/MM)</span>
+          <input type="text" id="demande-birth-date" inputmode="numeric" maxlength="5" placeholder="18/03" data-i18n-placeholder="birth_date_placeholder" required />
+        </label>
+
+        <button type="submit" data-i18n="add_request_button">Ajouter la demande</button>
+      </form>
+      <p id="message-demande-conge" class="message-vide" hidden></p>
+    </div>
+  </div>
+
+  <div id="add-employee-modal" class="app-modal" hidden>
+    <div class="app-modal__overlay" data-modal-overlay-close="add-employee-modal"></div>
+    <div class="app-modal__content" role="dialog" aria-modal="true" aria-labelledby="add-employee-modal-title">
+      <div class="app-modal__header">
+        <h3 id="add-employee-modal-title" data-i18n="add_employee_title">Ajouter un employé</h3>
+        <button type="button" class="app-modal__close" data-modal-close="add-employee-modal" aria-label="Fermer">×</button>
+      </div>
+      <form id="formulaire-employe" class="grille-formulaire">
+        <label>
+          <span data-i18n="employee_name_label">Nom de l'employé</span>
+          <input type="text" id="nom-employe" required placeholder="ex. Alex Martin" data-i18n-placeholder="employee_name_placeholder" />
+        </label>
+
+        <label>
+          <span data-i18n="team_label">Equipe</span>
+          <select id="equipe-employe" required>
+            <option value="" data-i18n="team_select_placeholder">Sélectionner une équipe</option>
+            <option value="nettoyage-entretien" data-equipe-value="nettoyage-entretien">Nettoyage / Entretien</option>
+            <option value="bar matin" data-equipe-value="bar matin">Bar matin</option>
+            <option value="salle matin" data-equipe-value="salle matin">Salle matin</option>
+            <option value="cuisine matin" data-equipe-value="cuisine matin">Cuisine matin</option>
+            <option value="cuisine soir" data-equipe-value="cuisine soir">Cuisine soir</option>
+            <option value="salle soir" data-equipe-value="salle soir">Salle soir</option>
+            <option value="bar soir" data-equipe-value="bar soir">Bar soir</option>
+            <option value="chicha" data-equipe-value="chicha">Chicha</option>
+            <option value="dj" data-equipe-value="dj">DJ</option>
+            <option value="rp" data-equipe-value="rp">RP</option>
+            <option value="portier" data-equipe-value="portier">Portier</option>
+            <option value="extra" data-equipe-value="extra">Extra</option>
+          </select>
+        </label>
+
+        <label>
+          <span data-i18n="hire_date_label">Date d'embauche</span>
+          <input type="date" id="date-embauche" required />
+        </label>
+
+        <label>
+          <span data-i18n="used_leave_label">Congés déjà pris</span>
+          <input type="number" id="conges-pris" min="0" step="0.5" value="0" required />
+        </label>
+
+        <label>
+          <span data-i18n="birth_date_label">Date de naissance (JJ/MM)</span>
+          <input type="text" id="birth-date-employe" inputmode="numeric" maxlength="5" placeholder="18/03" data-i18n-placeholder="birth_date_placeholder" required />
+        </label>
+
+        <button type="submit" data-i18n="add_employee_button">Ajouter employé</button>
+      </form>
     </div>
   </div>
 
