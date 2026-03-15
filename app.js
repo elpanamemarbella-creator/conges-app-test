@@ -776,12 +776,6 @@ function attachDesktopPinKeypad(inputElement) {
 }
 
 function initialiserConnexion() {
-  chargerSession();
-
-  if (authentifierDesktopAutomatiquement()) {
-    appliquerControleAcces();
-  }
-
   if (!loginForm || !loginPinInput) {
     appliquerControleAcces();
     return;
