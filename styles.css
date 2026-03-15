@@ -1113,13 +1113,14 @@ th {
 .planning-team-card {
   border: 1px solid var(--bordure);
   border-radius: 10px;
-  padding: 0.4rem 0.5rem;
+  padding: 0;
   margin-bottom: 0;
   background: #fff;
 }
 
 .team-block {
   margin-bottom: 6px;
+  padding: 4px 6px;
 }
 
 .planning-team-card .team-header {
@@ -1129,9 +1130,10 @@ th {
 }
 
 .employee-row {
-  height: 24px;
-  line-height: 24px;
+  height: 22px;
+  line-height: 22px;
   font-size: 13px;
+  margin-bottom: 2px;
 }
 
 .planning-coverage {
@@ -1144,9 +1146,9 @@ th {
 .calendar-header,
 .calendar-row {
   display: grid;
-  grid-template-columns: 120px repeat(7, 1fr);
+  grid-template-columns: 120px repeat(7, auto);
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   margin-bottom: 2px;
 }
 
@@ -1159,8 +1161,8 @@ th {
 }
 
 .calendar-square.status-square {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 2px;
 }
 

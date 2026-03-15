@@ -2904,7 +2904,7 @@ function renderCalendarPlanning() {
             .map((d) => `<span class="calendar-day-header">${d.getDate()}</span>`)
             .join("");
 
-          const gridColumns = `120px repeat(${Math.max(dates.length, 1)}, 1fr)`;
+          const gridColumns = `120px repeat(${Math.max(dates.length, 1)}, auto)`;
           const rows = groupedByTeam[team]
             .map((emp) => {
               const squares = dates
