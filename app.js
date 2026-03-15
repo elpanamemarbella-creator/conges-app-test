@@ -2919,9 +2919,8 @@ function renderCalendarPlanning() {
         })();
 
       return `
-        <section class="planning-team-card ${echapperHtml(getTeamRowClass(team))}">
-          <h3 class="team-header">${echapperHtml(teamLabel(team).toUpperCase())}</h3>
-          <p class="planning-coverage">${echapperHtml(teamLabel(team).toUpperCase())} (${coverage[team].working}/${coverage[team].total})</p>
+        <section class="planning-team-card team-block ${echapperHtml(getTeamRowClass(team))}">
+          <p class="planning-coverage team-header">${echapperHtml(teamLabel(team).toUpperCase())} (${coverage[team].working}/${coverage[team].total})</p>
           ${employeesHtml}
         </section>
       `;
