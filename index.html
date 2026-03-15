@@ -37,8 +37,8 @@ initializeApp(firebaseConfig);
   <main class="conteneur" id="app-container">
     <header class="entete-app" id="app-header" hidden>
       <div class="app-header">
-        <h1 class="app-title" data-i18n="app_title">Gestion des congés employés</h1>
-        <div class="language-switch" aria-label="Sélecteur de langue">
+        <h1 class="app-title page-title" data-i18n="app_title">Gestion des congés employés</h1>
+        <div class="language-switch language-switcher" aria-label="Sélecteur de langue">
           <button type="button" class="langue-btn actif" data-langue="fr">FR</button>
           <span>|</span>
           <button type="button" class="langue-btn" data-langue="es">ES</button>
@@ -47,7 +47,6 @@ initializeApp(firebaseConfig);
         </div>
       </div>
       <div class="menu-principal">
-        <button type="button" id="openPlanning">📅 Planning semaine</button>
         <button type="button" id="logoutButton">↩︎ Déconnexion</button>
       </div>
     </header>
@@ -59,7 +58,7 @@ initializeApp(firebaseConfig);
       </section>
 
       <section class="carte">
-        <h2 data-i18n="calendar_title">Calendrier des vacances</h2>
+        <h2 data-i18n="calendar_title">Planning des équipes</h2>
         <label class="calendar-view-picker">
           <span data-i18n="calendar_view_label">Vue</span>
           <select id="calendar-view-select">

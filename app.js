@@ -86,7 +86,7 @@ const TRADUCTIONS = {
     entry_date_col: "Date d'entrée",
     save_title: "Sauvegarde",
     save_auto_message: "La sauvegarde est gérée automatiquement par le système existant.",
-    calendar_title: "Calendrier des vacances",
+    calendar_title: "Planning des équipes",
     calendar_view_label: "Vue",
     calendar_view_today: "Aujourd'hui",
     calendar_view_weekly: "Vue hebdomadaire",
@@ -231,7 +231,7 @@ const TRADUCTIONS = {
     entry_date_col: "Fecha de incorporación",
     save_title: "Guardar",
     save_auto_message: "La copia de seguridad se gestiona automáticamente por el sistema existente.",
-    calendar_title: "Calendario de vacaciones",
+    calendar_title: "Planificación de equipos",
     calendar_view_label: "Vista",
     calendar_view_today: "Hoy",
     calendar_view_weekly: "Vista semanal",
@@ -376,7 +376,7 @@ const TRADUCTIONS = {
     entry_date_col: "Entry date",
     save_title: "Backup",
     save_auto_message: "Backup is handled automatically by the existing system.",
-    calendar_title: "Leave calendar",
+    calendar_title: "Team schedule",
     calendar_view_label: "View",
     calendar_view_today: "Today",
     calendar_view_weekly: "Weekly view",
@@ -611,7 +611,6 @@ const pinModal = document.getElementById("pin-modal");
 const pinModalInput = document.getElementById("pin-modal-input");
 const pinModalAnnuler = document.getElementById("pin-modal-annuler");
 const pinModalEnregistrer = document.getElementById("pin-modal-enregistrer");
-const openPlanningButton = document.getElementById("openPlanning");
 const logoutButton = document.getElementById("logoutButton");
 const planningView = document.getElementById("planningView");
 const planningBody = document.getElementById("planningBody");
@@ -758,7 +757,6 @@ function appliquerControleAcces() {
     if (employeeDashboardCard) employeeDashboardCard.hidden = false;
     if (leaveRequestCard) leaveRequestCard.hidden = false;
     cardsManager.forEach((card) => { if (card && card.id !== "planningView") card.hidden = false; });
-    openPlanningButton.hidden = false;
     return;
   }
 
@@ -766,7 +764,6 @@ function appliquerControleAcces() {
   if (leaveRequestCard) leaveRequestCard.hidden = false;
   cardsManager.forEach((card) => { if (card) card.hidden = true; });
   if (planningView) planningView.hidden = true;
-  openPlanningButton.hidden = true;
 }
 
 const isDesktopDevice = () => window.innerWidth > 768 && window.matchMedia("(pointer: fine)").matches;
@@ -1309,11 +1306,6 @@ menuOnglets.forEach((onglet) => {
   onglet.addEventListener("click", () => {
     afficherOnglet(onglet.dataset.onglet || "employes");
   });
-});
-
-openPlanningButton?.addEventListener("click", () => {
-  planningView?.classList.toggle("hidden");
-  renderPlanning(currentWeek);
 });
 
 prevWeekButton?.addEventListener("click", () => {

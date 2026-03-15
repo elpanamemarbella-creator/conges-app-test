@@ -152,17 +152,17 @@ body {
 }
 
 .entete-app {
-  margin-bottom: 1.35rem;
+  margin-bottom: 0.7rem;
 }
 
 .app-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 12px;
-  padding: 8px 16px;
+  margin-bottom: 6px;
+  padding: 4px 10px;
   font-size: 18px;
 }
 
@@ -242,10 +242,10 @@ body {
 .stats-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 6px;
   background: white;
   border-radius: 12px;
-  padding: 12px;
+  padding: 10px;
 }
 
 .stat {
@@ -888,7 +888,7 @@ th {
 
 
 .menu-principal {
-  margin-top: 0.9rem;
+  margin-top: 0.3rem;
 }
 
 .planning-header {
@@ -1105,18 +1105,39 @@ th {
 }
 
 @media (max-width: 768px) {
+  .conteneur {
+    margin: 1rem auto;
+  }
+
+  .entete-app {
+    margin-bottom: 0.5rem;
+  }
+
   .app-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 4px;
+    margin-bottom: 4px;
+    padding: 2px 0;
   }
 
-  .language-switch {
+  .page-title {
+    font-size: 22px;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .language-switcher {
+    font-size: 13px;
     align-self: flex-end;
-    margin-top: -10px;
+    margin-top: -4px;
   }
 
-  .app-title {
-    font-size: 24px;
+  button {
+    padding: 8px 14px;
+    font-size: 14px;
+    border-radius: 10px;
+    min-height: 36px;
   }
 }
 
