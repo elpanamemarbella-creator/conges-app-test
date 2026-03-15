@@ -303,6 +303,67 @@ body {
   gap: 0.9rem;
 }
 
+.modal-action-button {
+  width: fit-content;
+}
+
+.app-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app-modal[hidden] {
+  display: none;
+}
+
+.app-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.app-modal__content {
+  position: relative;
+  z-index: 1;
+  width: min(420px, 90vw);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
+}
+
+.app-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.app-modal__header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.app-modal__close {
+  min-height: auto;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: #e5e7eb;
+  color: #374151;
+  line-height: 1;
+}
+
+.app-modal__close:hover {
+  background: #d1d5db;
+}
+
 label {
   display: grid;
   gap: 0.35rem;

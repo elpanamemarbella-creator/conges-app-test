@@ -579,6 +579,10 @@ const calendarViewSelect = document.getElementById("calendar-view-select");
 
 const formulaireEmploye = document.getElementById("formulaire-employe");
 const formulaireDemandeConge = document.getElementById("formulaire-demande-conge");
+const leaveRequestModal = document.getElementById("leave-request-modal");
+const addEmployeeModal = document.getElementById("add-employee-modal");
+const openLeaveRequestModalButton = document.getElementById("open-leave-request-modal");
+const openAddEmployeeModalButton = document.getElementById("open-add-employee-modal");
 const listeEmployes = document.getElementById("liste-employes");
 const employeDemandeSelect = document.getElementById("employe-demande");
 const birthDateEmployeInput = document.getElementById("birth-date-employe");
@@ -620,6 +624,59 @@ const nextWeekButton = document.getElementById("nextWeek");
 const menuOnglets = document.querySelectorAll(".menu-onglet");
 const zonesOnglets = document.querySelectorAll("[data-zone]");
 const boutonsLangue = document.querySelectorAll("[data-langue]");
+
+function ouvrirModal(modalElement) {
+  if (!modalElement) {
+    return;
+  }
+
+  modalElement.hidden = false;
+}
+
+function fermerModal(modalElement) {
+  if (!modalElement) {
+    return;
+  }
+
+  modalElement.hidden = true;
+}
+
+openLeaveRequestModalButton?.addEventListener("click", () => {
+  ouvrirModal(leaveRequestModal);
+});
+
+openAddEmployeeModalButton?.addEventListener("click", () => {
+  ouvrirModal(addEmployeeModal);
+});
+
+document.querySelectorAll("[data-modal-close]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const modal = document.getElementById(button.dataset.modalClose || "");
+    fermerModal(modal);
+  });
+});
+
+document.querySelectorAll("[data-modal-overlay-close]").forEach((overlay) => {
+  overlay.addEventListener("click", () => {
+    const modal = document.getElementById(overlay.dataset.modalOverlayClose || "");
+    fermerModal(modal);
+  });
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") {
+    return;
+  }
+
+  if (leaveRequestModal && !leaveRequestModal.hidden) {
+    fermerModal(leaveRequestModal);
+  }
+
+  if (addEmployeeModal && !addEmployeeModal.hidden) {
+    fermerModal(addEmployeeModal);
+  }
+});
+
 document.addEventListener("click", async (event) => {
   const cell = event.target.closest(".vacation-history");
   if (cell) {
@@ -1962,6 +2019,7 @@ formulaireEmploye.addEventListener("submit", async (event) => {
 
     formulaireEmploye.reset();
     document.getElementById("conges-pris").value = "0";
+    fermerModal(addEmployeeModal);
 
     await rafraichirDonnees();
   } catch (erreur) {
@@ -2059,6 +2117,7 @@ formulaireDemandeConge.addEventListener("submit", async (event) => {
     }
 
     formulaireDemandeConge.reset();
+    fermerModal(leaveRequestModal);
     await rafraichirDonnees();
   } catch (erreur) {
     console.error("Erreur ajout congé :", erreur);
