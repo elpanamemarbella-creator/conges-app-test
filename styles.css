@@ -303,8 +303,12 @@ body {
   gap: 0.9rem;
 }
 
-.modal-action-button {
-  width: fit-content;
+.action-button {
+  width: 100%;
+  display: block;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 10px;
 }
 
 .app-modal {
