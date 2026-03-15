@@ -25,20 +25,28 @@ body {
 }
 
 
-.login-screen {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
+.login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f6f8;
+  z-index: 9999;
   padding: 1rem;
 }
 
 .login-card {
+  width: 320px;
+  padding: 20px;
+  border-radius: 10px;
   background: #fff;
   border: 1px solid var(--bordure);
-  border-radius: 14px;
-  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
-  padding: 1rem;
-  width: min(420px, 100%);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 .login-form {
@@ -139,6 +147,10 @@ body {
   margin: 2.2rem auto;
 }
 
+#app-container {
+  display: none;
+}
+
 .entete-app {
   margin-bottom: 1.35rem;
 }
@@ -149,7 +161,9 @@ body {
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+  padding: 8px 16px;
+  font-size: 18px;
 }
 
 .language-switch {
@@ -191,6 +205,10 @@ body {
 .zone-onglet {
   display: grid;
   gap: 1.15rem;
+}
+
+.dashboard {
+  margin-top: 8px;
 }
 
 .carte {
@@ -1112,25 +1130,30 @@ th {
   font-weight: 600;
 }
 
-.calendar-employee-row {
-  --calendar-name-width: 130px;
+.calendar-header,
+.calendar-row {
   display: grid;
-  grid-template-columns: var(--calendar-name-width) 1fr;
-  gap: 0.4rem;
+  grid-template-columns: 120px repeat(7, 1fr);
   align-items: center;
+  gap: 3px;
   margin-bottom: 0.35rem;
 }
 
-.calendar-employee-row--header {
+.calendar-header {
   margin-bottom: 0.25rem;
 }
 
+.calendar-employee-name {
+  font-weight: 600;
+}
+
 .calendar-squares {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(12px, 1fr);
-  gap: 3px;
-  overflow-x: auto;
+  display: contents;
+}
+
+.calendar-day-header,
+.calendar-square {
+  justify-self: center;
 }
 
 .calendar-square {
@@ -1170,10 +1193,7 @@ th {
     flex-wrap: wrap;
   }
 
-  .calendar-employee-row {
-    --calendar-name-width: 95px;
-  }
-
+  
   .calendar-square {
     width: 10px;
     height: 10px;

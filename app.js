@@ -557,7 +557,7 @@ const CLASSES_EQUIPE = {
 };
 
 const loginScreen = document.getElementById("login-screen");
-const appContainer = document.querySelector("main.conteneur");
+const appContainer = document.getElementById("app-container") || document.querySelector("main.conteneur");
 const loginForm = document.getElementById("loginForm") || document.getElementById("pinLoginForm") || document.getElementById("login-form");
 const loginPinInput = document.getElementById("loginPinInput") || document.getElementById("pinInput");
 const loginEnterButton = document.getElementById("loginEnterButton") || document.getElementById("login-submit");
@@ -709,9 +709,6 @@ function chargerSession() {
     }
   }
 
-  if (!isMobileDevice()) {
-    sessionState = { userRole: "manager", employeeId: "" };
-  }
 }
 
 function isMobileDevice() {
@@ -719,16 +716,7 @@ function isMobileDevice() {
 }
 
 function authentifierDesktopAutomatiquement() {
-  if (isMobileDevice()) {
-    return false;
-  }
-
-  if (sessionState.userRole !== "manager") {
-    sessionState = { userRole: "manager", employeeId: "" };
-    enregistrerSession();
-  }
-
-  return true;
+  return false;
 }
 
 function deconnecter() {
@@ -747,10 +735,12 @@ function appliquerControleAcces() {
 
   if (loginScreen) {
     loginScreen.hidden = isLogged;
+    loginScreen.style.display = isLogged ? "none" : "flex";
   }
 
   if (appContainer) {
     appContainer.hidden = !isLogged;
+    appContainer.style.display = isLogged ? "block" : "none";
   }
 
   if (appHeader) {
@@ -787,14 +777,6 @@ function attachDesktopPinKeypad(inputElement) {
 
 function initialiserConnexion() {
   chargerSession();
-
-  if (isDesktopDevice()) {
-    sessionState = { userRole: "manager", employeeId: "" };
-  }
-
-  if (isDesktopDevice() && loginScreen) {
-    loginScreen.hidden = true;
-  }
 
   if (authentifierDesktopAutomatiquement()) {
     appliquerControleAcces();
@@ -1345,7 +1327,9 @@ nextWeekButton?.addEventListener("click", () => {
 });
 
 function shiftCalendarPeriod(delta) {
-  if (currentCalendarView === "today" || currentCalendarView === "weekly") {
+  if (currentCalendarView === "today") {
+    currentMonthDate.setDate(currentMonthDate.getDate() + delta);
+  } else if (currentCalendarView === "weekly") {
     currentMonthDate.setDate(currentMonthDate.getDate() + (delta * 7));
   } else if (currentCalendarView === "yearly") {
     currentMonthDate = new Date(currentMonthDate.getFullYear() + delta, 0, 1);
@@ -2786,7 +2770,13 @@ function getCoverageByTeamForDate(date) {
 }
 
 function getCalendarDatesForView() {
-  if (currentCalendarView === "today" || currentCalendarView === "weekly") {
+  if (currentCalendarView === "today") {
+    const d = new Date(currentMonthDate);
+    d.setHours(12, 0, 0, 0);
+    return [d];
+  }
+
+  if (currentCalendarView === "weekly") {
     const start = getStartOfWeek(currentMonthDate);
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(start);
@@ -2905,7 +2895,7 @@ function renderCalendarPlanning() {
               return `<div class="calendar-year-month"><span class="calendar-year-month-label">${firstDay.toLocaleDateString(langueCourante, { month: "short" })}</span><div class="calendar-squares">${squares}</div></div>`;
             }).join("");
 
-            return `<div class="calendar-employee-row"><div class="calendar-employee-name">${echapperHtml(emp.nom)}</div><div class="calendar-year-grid">${months}</div></div>`;
+            return `<div class="calendar-row"><div class="calendar-employee-name">${echapperHtml(emp.nom)}</div><div class="calendar-year-grid">${months}</div></div>`;
           })
           .join("")
         : (() => {
@@ -2914,16 +2904,17 @@ function renderCalendarPlanning() {
             .map((d) => `<span class="calendar-day-header">${d.getDate()}</span>`)
             .join("");
 
+          const gridColumns = `120px repeat(${Math.max(dates.length, 1)}, 1fr)`;
           const rows = groupedByTeam[team]
             .map((emp) => {
               const squares = dates
                 .map((d) => `<span class="calendar-square ${getCalendarStatusClass(emp, d)}"></span>`)
                 .join("");
-              return `<div class="calendar-employee-row"><div class="calendar-employee-name">${echapperHtml(emp.nom)}</div><div class="calendar-squares">${squares}</div></div>`;
+              return `<div class="calendar-row" style="grid-template-columns: ${gridColumns};"><div class="calendar-employee-name">${echapperHtml(emp.nom)}</div><div class="calendar-squares">${squares}</div></div>`;
             })
             .join("");
 
-          const headerRow = `<div class="calendar-employee-row calendar-employee-row--header"><div class="calendar-employee-name"></div><div class="calendar-squares">${headers}</div></div>`;
+          const headerRow = `<div class="calendar-header" style="grid-template-columns: ${gridColumns};"><div class="calendar-employee-name"></div><div class="calendar-squares">${headers}</div></div>`;
           return `${headerRow}${rows}`;
         })();
 
