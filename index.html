@@ -3,28 +3,33 @@
 <html lang="fr">
 <head>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-  const supabaseUrl = "https://hpvvlodjjrqblvolbhvs.supabase.co";
-  const supabaseKey = "sb_publishable_MTNpvtfWyJj4ZZJwXoVsJA_poeDnEp9";
+const supabaseUrl = "https://hpvvlodjjrqblvolbhvs.supabase.co";
+const supabaseKey = "sb_publishable_MTNpvtfWyJj4ZZJwXoVsJA_poeDnEp9";
 
-  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  async function checkAuth() {
-    const { data: { session } } = await supabase.auth.getSession();
+// 🔒 cache tout immédiatement
+document.documentElement.style.display = "none";
 
-    if (!session) {
-      window.location.href = "https://teamix.app/login";
-    }
+async function checkAuth() {
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    window.location.href = "https://teamix.app/login";
+  } else {
+    document.documentElement.style.display = "block";
   }
+}
 
-  checkAuth();
+checkAuth();
 
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (!session) {
-      window.location.href = "https://teamix.app/login";
-    }
-  });
+supabase.auth.onAuthStateChange((event, session) => {
+  if (!session) {
+    window.location.href = "https://teamix.app/login";
+  }
+});
+</script>
 </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
