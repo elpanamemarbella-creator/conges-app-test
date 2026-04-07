@@ -16,7 +16,6 @@ async function checkAuth() {
   const { data: { session } } = await supabase.auth.getSession();
 
  if (!session) {
-  window.stop();
   window.location.replace("https://teamix.app/login");
   return;
 }
