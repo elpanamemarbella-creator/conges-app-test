@@ -10,7 +10,6 @@ const supabaseKey = "sb_publishable_MTNpvtfWyJj4ZZJwXoVsJA_poeDnEp9";
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // 🔒 cache tout immédiatement
-document.documentElement.style.display = "none";
 
 async function checkAuth() {
   const { data: { session } } = await supabase.auth.getSession();
@@ -54,7 +53,7 @@ initializeApp(firebaseConfig);
 </script>
 </head>
 <body>
-  <section id="login-screen" class="login-overlay">
+  <section id="login-screen" class="login-overlay" style="display:none;">
     <div class="login-card">
       <h1>Accès à l'application</h1>
       <form id="loginForm" class="login-form">
